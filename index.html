@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مسموع</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            // Light theme
+            'primary': '#f8fafc',
+            'secondary': '#ffffff',
+            'accent': '#f1f5f9',
+            'highlight': '#3b82f6',
+            'text-primary': '#1e293b',
+            'text-secondary': '#64748b',
+            // Dark theme
+            'dark-primary': '#0f172a',
+            'dark-secondary': '#1e293b',
+            'dark-accent': '#334155',
+            'dark-highlight': '#3b82f6', // highlight can be same
+            'dark-text-primary': '#f8fafc',
+            'dark-text-secondary': '#94a3b8',
+          },
+          opacity: {
+            '15': '0.15',
+          }
+        },
+      },
+    }
+  </script>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.1.1/",
+    "react": "https://esm.sh/react@^19.1.1",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.8.0",
+    "recharts": "https://esm.sh/recharts@^3.1.2",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.1/",
+    "@google/genai": "https://esm.sh/@google/genai",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.45.0",
+    "uuid": "https://esm.sh/uuid@^9.0.1"
+  }
+}
+</script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>

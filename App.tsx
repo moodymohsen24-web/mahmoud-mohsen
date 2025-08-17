@@ -1,0 +1,67 @@
+
+import React from 'react';
+import { HashRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import LoginPage from './pages/LoginPage';
+import SignUpPage from './pages/SignUpPage';
+import DashboardPage from './pages/DashboardPage';
+import NotFoundPage from './pages/NotFoundPage';
+import ProtectedRoute from './components/ProtectedRoute';
+import HomePage from './pages/HomePage';
+import ProfilePage from './pages/ProfilePage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import TextCheckPage from './pages/TextCheckPage';
+import DashboardLayout from './layouts/DashboardLayout';
+import DictionaryPage from './pages/DictionaryPage';
+import SettingsPage from './pages/SettingsPage';
+import SubscriptionPage from './pages/SubscriptionPage';
+import AuthModal from './components/AuthModal';
+import CheckoutPage from './pages/CheckoutPage';
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import PaymentCancelledPage from './pages/PaymentCancelledPage';
+import TextToSpeechPage from './pages/TextToSpeechPage';
+import ExperimentalPage from './pages/ExperimentalPage';
+
+const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <HashRouter>
+        <div className="flex flex-col min-h-screen bg-primary dark:bg-dark-primary text-text-primary dark:text-dark-text-primary">
+          <Header />
+          <main className="flex-grow flex flex-col">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignUpPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              
+              <Route element={<ProtectedRoute />}>
+                <Route element={<DashboardLayout />}>
+                  <Route path="dashboard" element={<DashboardPage />} />
+                  <Route path="text-check" element={<TextCheckPage />} />
+                  <Route path="text-to-speech" element={<TextToSpeechPage />} />
+                  <Route path="dictionary" element={<DictionaryPage />} />
+                  <Route path="settings" element={<SettingsPage />} />
+                  <Route path="subscription" element={<SubscriptionPage />} />
+                  <Route path="experimental" element={<ExperimentalPage />} />
+                </Route>
+                <Route path="profile" element={<ProfilePage />} />
+                <Route path="checkout/:planId" element={<CheckoutPage />} />
+                <Route path="payment-success" element={<PaymentSuccessPage />} />
+                <Route path="payment-cancelled" element={<PaymentCancelledPage />} />
+              </Route>
+
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </main>
+          <Footer />
+          <AuthModal />
+        </div>
+      </HashRouter>
+    </AuthProvider>
+  );
+};
+
+export default App;
