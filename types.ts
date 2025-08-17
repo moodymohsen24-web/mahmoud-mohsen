@@ -38,6 +38,8 @@ export interface DashboardData {
     dictionaryWords: number;
     usageLast7Days: { date: string; count: number }[];
     recentActivities: Activity[];
+    totalActiveKeys?: number;
+    totalBalance?: number;
 }
 
 
@@ -77,6 +79,11 @@ export interface Settings {
         clientSecret: string;
       }
     };
+    textToSpeech?: {
+        keys?: {
+            elevenlabs: string[];
+        }
+    }
 }
 
 export type ModalType = 'auth' | null;

@@ -8,7 +8,6 @@ import { BookOpenIcon } from './icons/BookOpenIcon';
 import { Cog6ToothIcon } from './icons/Cog6ToothIcon';
 import { CreditCardIcon } from './icons/CreditCardIcon';
 import { SpeakerWaveIcon } from './icons/SpeakerWaveIcon';
-import { BeakerIcon } from './icons/BeakerIcon';
 
 const Sidebar: React.FC = () => {
     const { t } = useI18n();
@@ -31,13 +30,13 @@ const Sidebar: React.FC = () => {
                     <PencilSquareIcon className="w-6 h-6" />
                     <span>{t('sidebar.textCheck')}</span>
                 </NavLink>
-                <NavLink to="/text-to-speech" className={navLinkClasses}>
-                    <SpeakerWaveIcon className="w-6 h-6" />
-                    <span>{t('sidebar.textToSpeech')}</span>
-                </NavLink>
                  <NavLink to="/dictionary" className={navLinkClasses}>
                     <BookOpenIcon className="w-6 h-6" />
                     <span>{t('sidebar.dictionary')}</span>
+                </NavLink>
+                <NavLink to="/text-to-speech" className={navLinkClasses}>
+                    <SpeakerWaveIcon className="w-6 h-6" />
+                    <span>{t('sidebar.textToSpeech')}</span>
                 </NavLink>
                  <NavLink to="/subscription" className={navLinkClasses}>
                     <CreditCardIcon className="w-6 h-6" />
@@ -46,10 +45,6 @@ const Sidebar: React.FC = () => {
                  <NavLink to="/settings" className={navLinkClasses}>
                     <Cog6ToothIcon className="w-6 h-6" />
                     <span>{t('sidebar.settings')}</span>
-                </NavLink>
-                 <NavLink to="/experimental" className={navLinkClasses}>
-                    <BeakerIcon className="w-6 h-6" />
-                    <span>{t('sidebar.experimental')}</span>
                 </NavLink>
             </nav>
         </div>

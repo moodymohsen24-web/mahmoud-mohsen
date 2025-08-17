@@ -1,5 +1,9 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useI18n } from '../hooks/useI18n';
+import { useAuth } from '../hooks/useAuth';
+import { settingsService } from '../services/settingsService';
+import type { Settings } from '../types';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
@@ -9,10 +13,10 @@ import { StopCircleIcon } from '../components/icons/StopCircleIcon';
 import { TrashIcon } from '../components/icons/TrashIcon';
 import { ClipboardDocumentIcon } from '../components/icons/ClipboardDocumentIcon';
 import { ArrowDownTrayIcon } from '../components/icons/ArrowDownTrayIcon';
-import { InformationCircleIcon } from '../components/icons/InformationCircleIcon';
 import { AdjustmentsHorizontalIcon } from '../components/icons/AdjustmentsHorizontalIcon';
 import { ChevronDownIcon } from '../components/icons/ChevronDownIcon';
 import { ArchiveBoxArrowDownIcon } from '../components/icons/ArchiveBoxArrowDownIcon';
+import { SpeakerWaveIcon } from '../components/icons/SpeakerWaveIcon';
 
 type ConvertedChunk = {
   id: number;
@@ -25,8 +29,10 @@ type ConvertedChunk = {
 
 const ExperimentalPage: React.FC = () => {
   const { t } = useI18n();
+  const { user } = useAuth();
   
   // States
+  const [dbSettings, setDbSettings] = useState<Settings | null>(null);
   const [apiKeys, setApiKeys] = useState<string[]>([]);
   const [newApiKeyInput, setNewApiKeyInput] = useState('');
   const [selectedApiKeys, setSelectedApiKeys] = useState<string[]>([]);
@@ -38,8 +44,9 @@ const ExperimentalPage: React.FC = () => {
   const [currentProcess, setCurrentProcess] = useState<number>(0);
   const [progress, setProgress] = useState<number>(0);
   const [logMessages, setLogMessages] = useState<Array<{message: string, level: string}>>([]);
-  const [settings, setSettings] = useState({
+  const [uiSettings, setUiSettings] = useState({
     voiceId: 'N2lVS1w4EtoT3dr4eOWO', modelId: 'eleven_multilingual_v2', stability: 0.45, similarityBoost: 0.75,
+    speed: 1.0,
     chunkMin: 450, chunkMax: 500, startFrom: 1
   });
   const [toast, setToast] = useState<{message: string, type: 'success' | 'warning' | 'error'} | null>(null);
@@ -50,11 +57,16 @@ const ExperimentalPage: React.FC = () => {
   const [selectedForMerge, setSelectedForMerge] = useState<Set<number>>(new Set());
   const [isMerging, setIsMerging] = useState(false);
   const [invalidKeys, setInvalidKeys] = useState<Set<string>>(new Set());
+  const [isLoading, setIsLoading] = useState(true);
   
   const audioRefs = useRef<Record<number, HTMLAudioElement | null>>({});
   
   const voices = [{ value: "nPczCjzI2devNBz1zQrb", label: "Brian" }, { value: "NFG5qt843uXKj4pFvR7C", label: "Adam Stone" }, { value: "N2lVS1w4EtoT3dr4eOWO", label: "Callum" }];
-  const models = [{ value: "eleven_multilingual_v2", label: "eleven_multilingual_v2" }];
+  const models = [
+    { value: 'eleven_multilingual_v3', label: t('tts.model.eleven_v3_alpha') },
+    { value: 'eleven_multilingual_v2', label: t('tts.model.eleven_multilingual_v2') },
+    { value: 'eleven_turbo_v2', label: t('tts.model.eleven_turbo_v2_5') }
+  ];
   
   const logContainerRef = useRef<HTMLDivElement>(null);
   const runningRef = useRef(isRunning);
@@ -65,7 +77,6 @@ const ExperimentalPage: React.FC = () => {
     if (node) {
         const atBottom = node.scrollHeight - node.scrollTop - node.clientHeight < 10;
         if (!atBottom && !isUserScrolledUp.current) {
-            // It means we added a new message and we were at the bottom
         } else if (atBottom) {
              isUserScrolledUp.current = false;
         }
@@ -94,58 +105,109 @@ const ExperimentalPage: React.FC = () => {
   };
 
   useEffect(() => {
-    const loadData = () => {
-      try {
-        const savedKeys = localStorage.getItem('elevenApiKeys');
-        if (savedKeys) {
-          const keys = JSON.parse(savedKeys);
-          setApiKeys(keys);
-          if (keys.length > 0) checkBalances(keys);
+    const loadData = async () => {
+        if(user) {
+            setIsLoading(true);
+            let settingsFromDb = await settingsService.getSettings(user.id);
+
+            const rawKeys = settingsFromDb.textToSpeech?.keys?.elevenlabs || [];
+            const sanitizedKeys = rawKeys
+              .map((k: any) => (typeof k === 'object' && k !== null && 'key' in k ? k.key : k))
+              .filter((k: any): k is string => typeof k === 'string' && k.trim().length > 0)
+              .map(k => k.trim());
+            const uniqueKeys = [...new Set(sanitizedKeys)];
+
+            if (JSON.stringify(rawKeys) !== JSON.stringify(uniqueKeys)) {
+                log(t('tts.general.log.apiFormatUpdate'), 'info');
+                const updatedSettings: Settings = {
+                    ...settingsFromDb,
+                    textToSpeech: {
+                        ...settingsFromDb.textToSpeech,
+                        keys: {
+                            ...settingsFromDb.textToSpeech?.keys,
+                            elevenlabs: uniqueKeys
+                        }
+                    }
+                };
+                await settingsService.saveSettings(user.id, updatedSettings);
+                settingsFromDb = updatedSettings;
+            }
+
+            setDbSettings(settingsFromDb);
+            setApiKeys(uniqueKeys);
+            if (uniqueKeys.length > 0) checkBalances(uniqueKeys);
+            
+            try {
+                const savedUiSettings = localStorage.getItem('ttsSettings-exp');
+                if (savedUiSettings) setUiSettings(JSON.parse(savedUiSettings));
+            } catch (e) { console.error("Failed to parse local settings", e); }
+            setIsLoading(false);
         }
-        const savedSettings = localStorage.getItem('ttsSettings-exp');
-        if (savedSettings) setSettings(JSON.parse(savedSettings));
-      } catch (e) { console.error("Failed to parse data from localStorage", e); }
     };
     loadData();
-  }, []);
+}, [user, t]);
 
-  const saveApiKeys = (keys: string[]) => localStorage.setItem('elevenApiKeys', JSON.stringify(keys));
-  const saveSettings = () => {
-    localStorage.setItem('ttsSettings-exp', JSON.stringify(settings));
-    log('تم حفظ الإعدادات بنجاح', 'success');
-    showToast('تم حفظ الإعدادات بنجاح');
+  const saveUiSettings = () => {
+    localStorage.setItem('ttsSettings-exp', JSON.stringify(uiSettings));
+    log(t('tts.toast.settingsSaved'), 'success');
+    showToast(t('tts.toast.settingsSaved'));
   };
+  
+  const updateAndSaveKeys = async (newKeys: string[]) => {
+      if (!user || !dbSettings) return;
+
+      const updatedSettings: Settings = {
+          ...dbSettings,
+          textToSpeech: {
+              ...dbSettings.textToSpeech,
+              keys: {
+                  ...dbSettings.textToSpeech?.keys,
+                  elevenlabs: newKeys
+              }
+          }
+      };
+      setApiKeys(newKeys);
+      setDbSettings(updatedSettings);
+
+      try {
+          await settingsService.saveSettings(user.id, updatedSettings);
+      } catch (e) {
+          log(t('tts.error.saveKeysFailed'), 'error');
+          setApiKeys(dbSettings.textToSpeech?.keys?.elevenlabs || []);
+          setDbSettings(dbSettings);
+      }
+  };
+
 
   const log = (message: string, level: 'info' | 'success' | 'warning' | 'error' = 'info') => {
     const timestamp = new Date().toLocaleTimeString();
     setLogMessages(prev => [...prev, { message: `[${timestamp}] ${message}`, level }]);
   };
 
-  const handleAddNewKey = () => {
-    if (!newApiKeyInput.trim()) return showToast('الرجاء إدخال مفتاح API', 'warning');
+  const handleAddNewKey = async () => {
+    if (!newApiKeyInput.trim()) return showToast(t('tts.apiKeyManagement.toast.enterKey'), 'warning');
     const keyToAdd = newApiKeyInput.trim();
-    if (apiKeys.includes(keyToAdd)) return showToast('هذا المفتاح موجود بالفعل!', 'warning');
+    if (apiKeys.includes(keyToAdd)) return showToast(t('tts.apiKeyManagement.toast.keyExists'), 'warning');
     const newKeys = [...apiKeys, keyToAdd];
-    setApiKeys(newKeys);
-    saveApiKeys(newKeys);
-    log(`تم إضافة مفتاح: ${keyToAdd.substring(0, 4)}...`, 'success');
+    await updateAndSaveKeys(newKeys);
+    log(t('tts.apiKeyManagement.log.keyAdded', { key: keyToAdd.substring(0, 4) }), 'success');
     checkBalanceForKey(keyToAdd);
     setNewApiKeyInput('');
   };
 
-  const deleteSelectedKeys = () => {
-    if (selectedApiKeys.length === 0) return showToast('الرجاء تحديد مفتاح واحد على الأقل للحذف', 'warning');
+  const deleteSelectedKeys = async () => {
+    if (selectedApiKeys.length === 0) return showToast(t('tts.apiKeyManagement.toast.selectKeyToDelete'), 'warning');
     const newKeys = apiKeys.filter(k => !selectedApiKeys.includes(k));
-    setApiKeys(newKeys);
-    saveApiKeys(newKeys);
-    log(`تم حذف ${selectedApiKeys.length} مفاتيح.`, 'warning');
+    await updateAndSaveKeys(newKeys);
+    log(t('tts.apiKeyManagement.log.keysDeleted', { count: selectedApiKeys.length }), 'warning');
     setSelectedApiKeys([]);
   };
 
-  const deleteAllKeys = () => {
-    if (window.confirm("هل أنت متأكد من رغبتك في حذف جميع المفاتيح؟ لا يمكن التراجع عن هذا الإجراء.")) {
-        setApiKeys([]); saveApiKeys([]); setSelectedApiKeys([]); setApiKeyBalance({}); setApiKeyStatus({});
-        log('تم حذف جميع المفاتيح.', 'error');
+  const deleteAllKeys = async () => {
+    if (window.confirm(t('tts.apiKeyManagement.toast.confirmDeleteAll'))) {
+        await updateAndSaveKeys([]);
+        setSelectedApiKeys([]); setApiKeyBalance({}); setApiKeyStatus({});
+        log(t('tts.apiKeyManagement.log.allKeysDeleted'), 'error');
     }
   };
 
@@ -159,55 +221,55 @@ const ExperimentalPage: React.FC = () => {
         const data = await response.json();
         const balance = (data.subscription?.character_limit || 0) - (data.subscription?.character_count || 0);
         setApiKeyBalance(prev => ({ ...prev, [apiKey]: balance }));
-        setApiKeyStatus(prev => ({ ...prev, [apiKey]: balance > 0 ? 'نشط' : 'غير نشط' }));
-        log(`✅ مفتاح صالح ${apiKey.substring(0, 4)}...: ${balance.toLocaleString()} حرف متبقي`, 'success');
+        setApiKeyStatus(prev => ({ ...prev, [apiKey]: balance > 0 ? t('tts.apiKeyManagement.status.active') : t('tts.apiKeyManagement.status.inactive') }));
+        log(t('tts.apiKeyManagement.log.validKey', { key: apiKey.substring(0, 4), balance: balance.toLocaleString() }), 'success');
       } else {
         const errorMsg = analyzeApiError(response, apiKey);
-        log(`❌ فشل فحص الرصيد: ${errorMsg}`, 'error');
-        setApiKeyStatus(prev => ({ ...prev, [apiKey]: 'خطأ' }));
+        log(t('tts.apiKeyManagement.log.balanceCheckFailed', { error: errorMsg }), 'error');
+        setApiKeyStatus(prev => ({ ...prev, [apiKey]: t('tts.apiKeyManagement.status.error') }));
         if(response.status === 401) {
              setApiKeyBalance(prev => ({ ...prev, [apiKey]: 0 }));
-             setApiKeyStatus(prev => ({ ...prev, [apiKey]: 'غير نشط' }));
+             setApiKeyStatus(prev => ({ ...prev, [apiKey]: t('tts.apiKeyManagement.status.inactive') }));
         }
       }
-    } catch (error) { log(`❌ خطأ فحص الرصيد ${apiKey.substring(0, 4)}...: ${error}`, 'error'); setApiKeyStatus(prev => ({ ...prev, [apiKey]: 'خطأ' })); }
+    } catch (error) { log(t('tts.apiKeyManagement.log.balanceCheckFailed', { error }), 'error'); setApiKeyStatus(prev => ({ ...prev, [apiKey]: t('tts.apiKeyManagement.status.error') })); }
   };
   
   const checkBalances = async (keys: string[]) => {
-    if (!keys || keys.length === 0) return showToast('لا توجد مفاتيح API لفحصها', 'warning');
+    if (!keys || keys.length === 0) return showToast(t('tts.apiKeyManagement.toast.noKeysToCheck'), 'warning');
     setInvalidKeys(new Set());
     setIsCheckingBalances(true);
-    log('جاري فحص أرصدة المفاتيح...', 'info');
+    log(t('tts.apiKeyManagement.log.checkingBalances'), 'info');
     await Promise.all(keys.map(key => checkBalanceForKey(key)));
     setIsCheckingBalances(false);
   };
 
     const analyzeApiError = (response: Response, apiKey: string): string => {
-      const keyInfo = `المفتاح: ${apiKey.substring(0, 4)}...`;
+      const keyInfo = `Key: ${apiKey.substring(0, 4)}...`;
       switch (response.status) {
-        case 401: return `مفتاح API غير صالح (غير مصرح به). ${keyInfo}`;
-        case 429: return `تم تجاوز حد الطلبات. ${keyInfo}`;
-        case 400: return `بيانات الطلب غير صالحة. ${keyInfo}`;
-        default: return `خطأ API (${response.status}) - ${keyInfo}`;
+        case 401: return `Invalid API key (unauthorized). ${keyInfo}`;
+        case 429: return `Rate limit exceeded. ${keyInfo}`;
+        case 400: return `Invalid request data. ${keyInfo}`;
+        default: return `API Error (${response.status}) - ${keyInfo}`;
       }
     };
 
   const loadKeysFromFile = (file: File) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       const newKeys = (e.target?.result as string).split('\n').map(k => k.trim()).filter(Boolean);
       const addedKeys = newKeys.filter(key => !apiKeys.includes(key));
       if (addedKeys.length > 0) {
         const updatedKeys = [...apiKeys, ...addedKeys];
-        setApiKeys(updatedKeys); saveApiKeys(updatedKeys);
-        log(`تم تحميل ${addedKeys.length} مفاتيح جديدة`, 'success'); checkBalances(addedKeys);
-      } else { showToast('لا توجد مفاتيح جديدة في الملف', 'warning'); }
+        await updateAndSaveKeys(updatedKeys);
+        log(t('tts.apiKeyManagement.log.keysUploaded', { count: addedKeys.length }), 'success'); checkBalances(addedKeys);
+      } else { showToast(t('tts.apiKeyManagement.toast.noNewKeys'), 'warning'); }
     };
     reader.readAsText(file);
   };
 
   const splitText = (text: string): string[] => {
-    const { chunkMin, chunkMax } = settings;
+    const { chunkMin, chunkMax } = uiSettings;
     if (!text) return [];
     text = text.replace(/\s+/g, ' ').trim();
     const sentences = text.split(/(?<=[.؟!])\s+/);
@@ -226,14 +288,14 @@ const ExperimentalPage: React.FC = () => {
   useEffect(() => {
     const newChunks = splitText(fullText);
     setTextChunks(newChunks);
-  }, [fullText, settings.chunkMin, settings.chunkMax]);
+  }, [fullText, uiSettings.chunkMin, uiSettings.chunkMax]);
   
   const selectTextFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const content = e.target?.result as string;
       setFullText(content);
-      log(`تم اختيار ملف النص: ${file.name}`, 'success');
+      log(t('tts.general.log.textSelected', { name: file.name }), 'success');
     };
     reader.readAsText(file);
   };
@@ -243,17 +305,31 @@ const ExperimentalPage: React.FC = () => {
       const availableKeys = sortedKeys.filter(key => (apiKeyBalance[key] || 0) > 0 && !invalidKeys.has(key));
 
       if (availableKeys.length === 0) { 
-          log(`⚠️ لا توجد مفاتيح API صالحة أو ذات رصيد متبقٍ.`, 'warning'); 
+          log(t('tts.general.log.noValidKeys'), 'warning'); 
           return { success: false }; 
       }
   
       for (const key of availableKeys) {
           if (!runningRef.current) return { success: false };
           try {
-              log(`🔑 تجربة المفتاح ${key.substring(0, 4)}... (رصيد: ${(apiKeyBalance[key] || 0).toLocaleString()})`, 'info');
-              const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${settings.voiceId}`, {
+              log(t('tts.general.log.tryingKey', { key: key.substring(0, 4), balance: (apiKeyBalance[key] || 0).toLocaleString() }), 'info');
+
+              const voiceSettings: { stability: number; similarity_boost: number; rate?: number } = {
+                stability: uiSettings.stability,
+                similarity_boost: uiSettings.similarityBoost,
+              };
+        
+              if (uiSettings.modelId !== 'eleven_multilingual_v3') {
+                voiceSettings.rate = uiSettings.speed;
+              }
+
+              const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${uiSettings.voiceId}`, {
                   method: 'POST', headers: { 'Content-Type': 'application/json', 'xi-api-key': key, 'Accept': 'audio/mpeg' },
-                  body: JSON.stringify({ text, model_id: settings.modelId, voice_settings: { stability: settings.stability, similarity_boost: settings.similarityBoost } })
+                  body: JSON.stringify({ 
+                    text, 
+                    model_id: uiSettings.modelId, 
+                    voice_settings: voiceSettings 
+                  })
               });
               
               if (response.ok) {
@@ -261,24 +337,24 @@ const ExperimentalPage: React.FC = () => {
                   const audioUrl = URL.createObjectURL(audioBlob);
                   const newBalance = Math.max(0, (apiKeyBalance[key] || 0) - text.length);
                   setApiKeyBalance(prev => ({ ...prev, [key]: newBalance }));
-                  if(newBalance <= 0) setApiKeyStatus(prev => ({ ...prev, [key]: 'غير نشط' }));
+                  if(newBalance <= 0) setApiKeyStatus(prev => ({ ...prev, [key]: t('tts.apiKeyManagement.status.inactive') }));
                   return { success: true, audioUrl, audioBlob };
               } else {
                   const errorMessage = analyzeApiError(response, key);
-                  log(`❌ فشل API: ${errorMessage}`, 'error');
+                  log(t('tts.general.log.apiFail', { error: errorMessage }), 'error');
                   if (response.status === 401) {
                       setInvalidKeys(prev => new Set(prev).add(key));
-                      log(`🔑 تم تمييز المفتاح ${key.substring(0, 4)}... كغير صالح لهذه الجلسة.`, 'warning');
+                      log(t('tts.general.log.keyMarkedInvalid', { key: key.substring(0, 4) }), 'warning');
                   }
               }
-          } catch (error) { log(`❌ خطأ شبكة: ${error}`, 'error'); }
+          } catch (error) { log(t('tts.general.log.networkError', { error }), 'error'); }
       }
       return { success: false };
   };
     
   const startConversion = async () => {
-    if (!fullText || textChunks.length === 0) return showToast('الرجاء اختيار أو كتابة نص أولاً', 'warning');
-    if (apiKeys.length === 0) return showToast('الرجاء إضافة مفتاح API واحد على الأقل', 'warning');
+    if (!fullText || textChunks.length === 0) return showToast(t('tts.general.toast.selectTextFirst'), 'warning');
+    if (apiKeys.length === 0) return showToast(t('tts.general.toast.addKeyFirst'), 'warning');
 
     setInvalidKeys(new Set());
     setIsRunning(true); runningRef.current = true; setProgress(0); setConvertedChunks([]); setSelectedForMerge(new Set());
@@ -292,28 +368,28 @@ const ExperimentalPage: React.FC = () => {
     for (let i = 0; i < initialChunks.length; i++) {
         if (!runningRef.current) break;
         const chunk = initialChunks[i];
-        if (chunk.id < settings.startFrom) continue;
+        if (chunk.id < uiSettings.startFrom) continue;
         
         setCurrentProcess(chunk.id); setProgress(((i + 1) / textChunks.length) * 100);
         
         setConvertedChunks(prev => prev.map(c => c.id === chunk.id ? { ...c, status: 'converting' } : c));
-        log(`\nجاري تحويل المقطع ${chunk.id} من ${textChunks.length}...`, 'info');
+        log(t('tts.general.log.convertingChunk', { current: chunk.id, total: textChunks.length }), 'info');
 
         const result = await textToSpeech(chunk.originalText);
         if (!runningRef.current) break;
 
         if (result.success && result.audioUrl && result.audioBlob) { 
-            log(`✅ تم تحويل المقطع ${chunk.id} بنجاح`, 'success');
+            log(t('tts.general.log.chunkSuccess', { id: chunk.id }), 'success');
             setConvertedChunks(prev => prev.map(c => c.id === chunk.id ? { ...c, status: 'success', audioUrl: result.audioUrl, blob: result.audioBlob } : c));
             success++;
         }
         else {
-            log(`❌ فشل في تحويل المقطع ${chunk.id}`, 'error');
+            log(t('tts.general.log.chunkFail', { id: chunk.id }), 'error');
             setConvertedChunks(prev => prev.map(c => c.id === chunk.id ? { ...c, status: 'failed' } : c));
             fail++;
         }
     }
-    log(`\nتم الانتهاء. نجاح: ${success} | فشل: ${fail}`, success > fail ? 'success' : 'error');
+    log(t('tts.general.log.conversionComplete', { success, fail }), success > fail ? 'success' : 'error');
     setIsRunning(false); runningRef.current = false;
   };
   
@@ -321,17 +397,17 @@ const ExperimentalPage: React.FC = () => {
     const chunkToRetry = convertedChunks.find(c => c.id === chunkId);
     if (!chunkToRetry || !runningRef) return;
     
-    runningRef.current = true; // Ensure running ref is set for this single operation
-    log(`\nإعادة محاولة المقطع ${chunkId}...`, 'info');
+    runningRef.current = true;
+    log(t('tts.general.log.retryingChunk', { id: chunkId }), 'info');
     setConvertedChunks(prev => prev.map(c => c.id === chunkId ? { ...c, status: 'converting' } : c));
     const result = await textToSpeech(chunkToRetry.editedText);
-    runningRef.current = isRunning; // Revert to global running state
+    runningRef.current = isRunning;
 
     if (result.success && result.audioUrl && result.audioBlob) {
-        log(`✅ نجحت إعادة محاولة المقطع ${chunkId}`, 'success');
+        log(t('tts.general.log.retrySuccess', { id: chunkId }), 'success');
         setConvertedChunks(prev => prev.map(c => c.id === chunkId ? { ...c, status: 'success', audioUrl: result.audioUrl, blob: result.audioBlob } : c));
     } else {
-        log(`❌ فشلت إعادة محاولة المقطع ${chunkId}`, 'error');
+        log(t('tts.general.log.retryFail', { id: chunkId }), 'error');
         setConvertedChunks(prev => prev.map(c => c.id === chunkId ? { ...c, status: 'failed' } : c));
     }
   };
@@ -339,11 +415,7 @@ const ExperimentalPage: React.FC = () => {
   const toggleChunkExpansion = (chunkId: number) => {
     setExpandedChunks(prevSet => {
         const newSet = new Set(prevSet);
-        if (newSet.has(chunkId)) {
-            newSet.delete(chunkId);
-        } else {
-            newSet.add(chunkId);
-        }
+        if (newSet.has(chunkId)) newSet.delete(chunkId); else newSet.add(chunkId);
         return newSet;
     });
   };
@@ -354,9 +426,9 @@ const ExperimentalPage: React.FC = () => {
         .sort((a, b) => a.id - b.id)
         .map(c => c.blob!);
 
-    if (blobsToMerge.length < 1) return showToast("الرجاء تحديد مقطعين على الأقل للدمج", "warning");
+    if (blobsToMerge.length < 1) return showToast(t('tts.toast.selectToMerge'), "warning");
     
-    setIsMerging(true); log("🚀 بدء عملية دمج المقاطع...", "info");
+    setIsMerging(true); log(t('tts.general.log.mergeStart'), "info");
     try {
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
         const decodedBuffers = await Promise.all(blobsToMerge.map(b => b.arrayBuffer().then(ab => audioContext.decodeAudioData(ab))));
@@ -374,20 +446,14 @@ const ExperimentalPage: React.FC = () => {
         const url = URL.createObjectURL(wavBlob);
         const a = document.createElement('a');
         a.href = url; a.download = 'merged_audio.wav'; a.click(); URL.revokeObjectURL(url);
-        log("✅ تم دمج وتنزيل الملف بنجاح!", "success");
+        log(t('tts.general.log.mergeSuccess'), "success");
 
-    } catch(e) { log(`❌ فشلت عملية الدمج: ${e}`, 'error'); }
+    } catch(e: any) { log(t('tts.general.log.mergeFail', { error: e.toString() }), 'error'); }
     setIsMerging(false);
   };
   
-  // Helper to convert AudioBuffer to a WAV Blob
   const audioBufferToWav = (buffer: AudioBuffer): Blob => {
-    const numOfChan = buffer.numberOfChannels,
-          len = buffer.length * numOfChan * 2 + 44,
-          abuffer = new ArrayBuffer(len),
-          view = new DataView(abuffer),
-          channels = [],
-          sampleRate = buffer.sampleRate;
+    const numOfChan = buffer.numberOfChannels, len = buffer.length * numOfChan * 2 + 44, abuffer = new ArrayBuffer(len), view = new DataView(abuffer), channels = [], sampleRate = buffer.sampleRate;
     let offset = 0, pos = 0;
 
     const setUint16 = (data: number) => { view.setUint16(pos, data, true); pos += 2; };
@@ -410,51 +476,62 @@ const ExperimentalPage: React.FC = () => {
     return new Blob([view], { type: 'audio/wav' });
   };
   
-  const stopConversion = () => { setIsRunning(false); runningRef.current = false; log('تم إيقاف التحويل', 'warning'); };
-  const copyLogToClipboard = () => navigator.clipboard.writeText(logMessages.map(msg => msg.message).join('\n')).then(() => showToast('تم نسخ السجل')).catch(err => log(`❌ فشل النسخ: ${err}`, 'error'));
+  const stopConversion = () => { setIsRunning(false); runningRef.current = false; log(t('tts.general.log.conversionStopped'), 'warning'); };
+  const copyLogToClipboard = () => navigator.clipboard.writeText(logMessages.map(msg => msg.message).join('\n')).then(() => showToast(t('tts.toast.logCopied'))).catch(err => log(t('tts.general.log.logCopiedFail', { error: err }), 'error'));
   const exportLogToFile = () => {
     const blob = new Blob([logMessages.map(msg => msg.message).join('\n')], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url; a.download = `log_${new Date().toISOString()}.txt`; a.click(); URL.revokeObjectURL(url);
-    log('📁 تم تصدير السجل', 'success');
+    log(t('tts.general.log.logExported'), 'success');
   };
-  const clearLog = () => { setLogMessages([]); log('🗑️ تم مسح السجل', 'info'); };
+  const clearLog = () => { setLogMessages([]); log(t('tts.general.log.logCleared'), 'info'); };
+
+  const handleResetAdvancedSettings = () => {
+    const defaultAdvanced = { voiceId: 'N2lVS1w4EtoT3dr4eOWO', modelId: 'eleven_multilingual_v2', stability: 0.45, similarityBoost: 0.75, speed: 1.0 };
+    setUiSettings(s => ({ ...s, ...defaultAdvanced }));
+    showToast(t('tts.toast.defaultsRestored'), 'success');
+  };
 
   const totalBalance = Object.values(apiKeyBalance).reduce((sum, bal) => sum + (bal > 0 ? bal : 0), 0);
-
   const successfulChunks = convertedChunks.filter(c => c.status === 'success');
   const isSelectAllForMergeChecked = successfulChunks.length > 0 && selectedForMerge.size === successfulChunks.length;
 
   const handleSelectAllForMerge = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.checked) {
-          const allSuccessfulIds = successfulChunks.map(c => c.id);
-          setSelectedForMerge(new Set(allSuccessfulIds));
-      } else {
-          setSelectedForMerge(new Set());
-      }
+      setSelectedForMerge(e.target.checked ? new Set(successfulChunks.map(c => c.id)) : new Set());
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-[calc(100vh-200px)]">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-highlight dark:border-dark-highlight"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
       {toast && ( <div className={`fixed top-24 end-8 p-4 rounded-lg shadow-lg text-white z-50 ${toast.type === 'success' ? 'bg-green-500' : toast.type === 'warning' ? 'bg-yellow-500' : 'bg-red-500'}`}>{toast.message}</div> )}
-      <h1 className="text-3xl font-bold">🎤 ورشة عمل تحويل النص إلى صوت</h1>
+      
+      <h1 className="text-3xl font-bold flex items-center gap-2">
+        <SpeakerWaveIcon className="w-8 h-8 text-highlight dark:text-dark-highlight" />
+        <span>{t('tts.title')}</span>
+      </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        {/* Left Column */}
         <div className="flex flex-col gap-6">
-          <Card title="🔑 إدارة مفاتيح API">
+          <Card title={t('tts.apiKeyManagement.title')}>
             <div className="space-y-4 mb-4">
                 <div className="flex gap-2">
-                    <input type="password" value={newApiKeyInput} onChange={(e) => setNewApiKeyInput(e.target.value)} placeholder="أدخل مفتاح API الجديد هنا..." className="flex-grow form-input"/>
-                    <button onClick={handleAddNewKey} className="btn-primary">إضافة</button>
+                    <input type="password" value={newApiKeyInput} onChange={(e) => setNewApiKeyInput(e.target.value)} placeholder={t('tts.apiKeyManagement.enterNew')} className="flex-grow form-input"/>
+                    <button onClick={handleAddNewKey} className="btn-primary">{t('tts.apiKeyManagement.add')}</button>
                 </div>
                  <div className="flex flex-wrap gap-2 border-t border-accent dark:border-dark-accent pt-4">
-                    <button onClick={() => checkBalances(apiKeys)} disabled={isCheckingBalances} className="btn-secondary">{isCheckingBalances ? 'جارِ الفحص...' : 'فحص كل المفاتيح'}</button>
-                    <label className="btn-secondary cursor-pointer inline-flex items-center gap-2"> <ArrowUpTrayIcon className="w-5 h-5"/> <span>تحميل ملف</span> <input type="file" accept=".txt" className="hidden" onChange={(e) => e.target.files && loadKeysFromFile(e.target.files[0])} /> </label>
+                    <button onClick={() => checkBalances(apiKeys)} disabled={isCheckingBalances} className="btn-secondary">{isCheckingBalances ? t('tts.apiKeyManagement.checking') : t('tts.apiKeyManagement.checkAll')}</button>
+                    <label className="btn-primary cursor-pointer inline-flex items-center gap-2"> <ArrowUpTrayIcon className="w-5 h-5"/> <span>{t('tts.apiKeyManagement.uploadKeys')}</span> <input type="file" accept=".txt" className="hidden" onChange={(e) => e.target.files && loadKeysFromFile(e.target.files[0])} /> </label>
                     <div className="flex-grow"></div>
-                    <button onClick={deleteSelectedKeys} disabled={selectedApiKeys.length === 0} className="btn-danger-outline flex items-center gap-2"> <TrashIcon className="w-5 h-5"/> <span>{`حذف المحدد (${selectedApiKeys.length})`}</span> </button>
-                    <button onClick={deleteAllKeys} disabled={apiKeys.length === 0} className="btn-danger">حذف الكل</button>
+                    <button onClick={deleteSelectedKeys} disabled={selectedApiKeys.length === 0} className="btn-danger-outline flex items-center gap-2"> <TrashIcon className="w-5 h-5"/> <span>{t('tts.apiKeyManagement.deleteSelected', { count: selectedApiKeys.length })}</span> </button>
+                    <button onClick={deleteAllKeys} disabled={apiKeys.length === 0} className="btn-danger">{t('tts.apiKeyManagement.deleteAll')}</button>
                 </div>
             </div>
             <div className="overflow-x-auto max-h-64">
@@ -463,9 +540,9 @@ const ExperimentalPage: React.FC = () => {
                         <tr>
                             <th className="p-2"><input type="checkbox" onChange={handleSelectAllKeys} checked={apiKeys.length > 0 && selectedApiKeys.length === apiKeys.length} /></th>
                             <th className="p-2">#</th>
-                            <th className="p-2">المفتاح</th>
-                            <th className="p-2">الرصيد</th>
-                            <th className="p-2">الحالة</th>
+                            <th className="p-2">{t('tts.apiKeyManagement.table.key')}</th>
+                            <th className="p-2">{t('tts.apiKeyManagement.table.balance')}</th>
+                            <th className="p-2">{t('tts.apiKeyManagement.table.status')}</th>
                         </tr>
                     </thead>
                     <tbody>{apiKeys.map((key, index) => (
@@ -481,71 +558,65 @@ const ExperimentalPage: React.FC = () => {
             </div>
           </Card>
 
-          <Card title="🚀 ضوابط التحويل">
+          <Card title={t('tts.controls.title')}>
               <div className="space-y-4">
-                <label className="btn-secondary cursor-pointer flex items-center justify-center gap-2 text-center w-full"> <ArrowUpTrayIcon className="w-5 h-5"/> <span>{ "رفع ملف نصي"}</span> <input type="file" accept=".txt" className="hidden" onChange={e => e.target.files && selectTextFile(e.target.files[0])} /> </label>
+                <label className="btn-primary cursor-pointer flex items-center justify-center gap-2 text-center w-full"> <ArrowUpTrayIcon className="w-5 h-5"/> <span>{t('textCheck.button.upload')}</span> <input type="file" accept=".txt" className="hidden" onChange={e => e.target.files && selectTextFile(e.target.files[0])} /> </label>
                 <textarea
                     value={fullText} onChange={(e) => setFullText(e.target.value)}
                     rows={8} className="w-full p-3 bg-accent dark:bg-dark-accent rounded-lg"
-                    placeholder="أو الصق النص الكامل هنا..."
+                    placeholder={t('tts.controls.placeholder')}
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <button onClick={startConversion} disabled={isRunning || !fullText || apiKeys.length === 0} className="btn-primary w-full h-12 flex items-center justify-center gap-2"><PlayCircleIcon className="w-6 h-6"/> بدء</button>
-                    <button onClick={stopConversion} disabled={!isRunning} className="btn-danger w-full h-12 flex items-center justify-center gap-2"><StopCircleIcon className="w-6 h-6"/> إيقاف</button>
+                    <button onClick={startConversion} disabled={isRunning || !fullText || apiKeys.length === 0} className="btn-primary text-xl font-bold bg-green-600 hover:bg-green-700 w-full h-14 flex items-center justify-center gap-3 shadow-lg transform hover:scale-105 transition-transform duration-200"><PlayCircleIcon className="w-8 h-8"/> {t('tts.controls.start')}</button>
+                    <button onClick={stopConversion} disabled={!isRunning} className="btn-danger text-xl font-bold bg-red-600 hover:bg-red-700 w-full h-14 flex items-center justify-center gap-3 shadow-lg transform hover:scale-105 transition-transform duration-200"><StopCircleIcon className="w-8 h-8"/> {t('tts.controls.stop')}</button>
                 </div>
               </div>
           </Card>
           
-          <Card titleIcon={<AdjustmentsHorizontalIcon className="w-6 h-6"/>} title="إعدادات التقطيع والإحصائيات">
+          <Card titleIcon={<AdjustmentsHorizontalIcon className="w-6 h-6"/>} title={t('tts.statsAndSettings.title')}>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center mb-6">
-                <div><dt className="text-sm text-text-secondary">إجمالي الأحرف</dt><dd className="text-lg font-bold">{fullText.length.toLocaleString()}</dd></div>
-                <div><dt className="text-sm text-text-secondary">عدد المقاطع</dt><dd className="text-lg font-bold">{textChunks.length.toLocaleString()}</dd></div>
-                <div><dt className="text-sm text-text-secondary">إجمالي المفاتيح</dt><dd className="text-lg font-bold">{apiKeys.length}</dd></div>
-                <div><dt className="text-sm text-text-secondary">إجمالي الرصيد</dt><dd className="text-lg font-bold">{totalBalance.toLocaleString()}</dd></div>
+                <div><dt className="text-sm text-text-secondary">{t('tts.statsAndSettings.totalChars')}</dt><dd className="text-lg font-bold">{fullText.length.toLocaleString()}</dd></div>
+                <div><dt className="text-sm text-text-secondary">{t('tts.statsAndSettings.chunkCount')}</dt><dd className="text-lg font-bold">{textChunks.length.toLocaleString()}</dd></div>
+                <div><dt className="text-sm text-text-secondary">{t('tts.statsAndSettings.totalKeys')}</dt><dd className="text-lg font-bold">{apiKeys.length}</dd></div>
+                <div><dt className="text-sm text-text-secondary">{t('tts.statsAndSettings.totalBalance')}</dt><dd className="text-lg font-bold">{totalBalance.toLocaleString()}</dd></div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-accent dark:border-dark-accent pt-4">
-              <Input label="أدنى حد للقطعة" type="number" value={settings.chunkMin} onChange={e => setSettings(s => ({...s, chunkMin: parseInt(e.target.value) || 450}))} />
-              <Input label="أقصى حد للقطعة" type="number" value={settings.chunkMax} onChange={e => setSettings(s => ({...s, chunkMax: parseInt(e.target.value) || 500}))} />
-              <Input label="ابدأ من" type="number" value={settings.startFrom} onChange={e => setSettings(s => ({...s, startFrom: parseInt(e.target.value) || 1}))} min="1"/>
+              <Input label={t('tts.statsAndSettings.chunkMin')} type="number" value={uiSettings.chunkMin} onChange={e => setUiSettings(s => ({...s, chunkMin: Math.max(0, parseInt(e.target.value) || 0), chunkMax: Math.max(parseInt(e.target.value) || 0, s.chunkMax)}))} />
+              <Input label={t('tts.statsAndSettings.chunkMax')} type="number" value={uiSettings.chunkMax} onChange={e => setUiSettings(s => ({...s, chunkMax: Math.max(0, parseInt(e.target.value) || 0), chunkMin: Math.min(parseInt(e.target.value) || 0, s.chunkMin)}))} />
+              <Input label={t('tts.statsAndSettings.startFrom')} type="number" value={uiSettings.startFrom} onChange={e => setUiSettings(s => ({...s, startFrom: parseInt(e.target.value) || 1}))} min="1"/>
             </div>
-             <div className="mt-4"><button onClick={() => setIsAdvancedSettingsOpen(!isAdvancedSettingsOpen)} className="w-full flex justify-between items-center p-2 rounded-lg hover:bg-accent dark:hover:bg-dark-accent"> <div className="flex items-center gap-2 font-medium"><span>إعدادات الصوت المتقدمة</span></div> <ChevronDownIcon className={`w-5 h-5 transition-transform ${isAdvancedSettingsOpen ? 'rotate-180' : ''}`} /> </button></div>
+             <div className="mt-4"><button onClick={() => setIsAdvancedSettingsOpen(!isAdvancedSettingsOpen)} className="w-full flex justify-between items-center p-2 rounded-lg hover:bg-accent dark:hover:bg-dark-accent"> <div className="flex items-center gap-2 font-medium"><span>{t('tts.advancedAudio.title')}</span></div> <ChevronDownIcon className={`w-5 h-5 transition-transform ${isAdvancedSettingsOpen ? 'rotate-180' : ''}`} /> </button></div>
              {isAdvancedSettingsOpen && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 p-4 bg-accent dark:bg-dark-accent rounded-lg">
-                    <Select label="الصوت" options={voices} value={settings.voiceId} onChange={e => setSettings(s => ({...s, voiceId: e.target.value}))} />
-                    <Select label="النموذج" options={models} value={settings.modelId} onChange={e => setSettings(s => ({...s, modelId: e.target.value}))} />
-                    <Input containerClassName="sm:col-span-2" label="الاستقرار" type="range" min="0" max="1" step="0.01" value={settings.stability} onChange={e => setSettings(s => ({...s, stability: parseFloat(e.target.value)}))} />
-                    <Input containerClassName="sm:col-span-2" label="تعزيز التشابه" type="range" min="0" max="1" step="0.01" value={settings.similarityBoost} onChange={e => setSettings(s => ({...s, similarityBoost: parseFloat(e.target.value)}))} />
-                    <div className="sm:col-span-2 flex justify-end"><button onClick={saveSettings} className="btn-secondary">حفظ الإعدادات</button></div>
+                    <Select label={t('tts.settings.voice')} options={voices} value={uiSettings.voiceId} onChange={e => setUiSettings(s => ({...s, voiceId: e.target.value}))} />
+                    <Select label={t('tts.settings.model')} options={models} value={uiSettings.modelId} onChange={e => setUiSettings(s => ({...s, modelId: e.target.value}))} />
+                    <Input containerClassName="sm:col-span-2" label={t('tts.voiceTuning.stability')} type="range" min="0" max="1" step="0.01" value={uiSettings.stability} onChange={e => setUiSettings(s => ({...s, stability: parseFloat(e.target.value)}))} title={String(uiSettings.stability)} />
+                    <Input containerClassName="sm:col-span-2" label={t('tts.voiceTuning.similarityBoost')} type="range" min="0" max="1" step="0.01" value={uiSettings.similarityBoost} onChange={e => setUiSettings(s => ({...s, similarityBoost: parseFloat(e.target.value)}))} title={String(uiSettings.similarityBoost)} />
+                    <Input containerClassName="sm:col-span-2" label={t('tts.advancedAudio.speed')} type="range" min="0.5" max="2.0" step="0.05" value={uiSettings.speed} onChange={e => setUiSettings(s => ({...s, speed: parseFloat(e.target.value)}))} title={`${uiSettings.speed.toFixed(2)}x`} />
+                    <div className="sm:col-span-2 flex justify-end gap-2">
+                        <button type="button" onClick={handleResetAdvancedSettings} className="btn-secondary">{t('tts.advancedAudio.resetDefaults')}</button>
+                        <button onClick={saveUiSettings} className="btn-secondary">{t('tts.advancedAudio.saveSettings')}</button>
+                    </div>
                 </div>
             )}
           </Card>
         </div>
 
-        {/* Right Column */}
         <div className="flex flex-col gap-6">
-            <Card title="📊 تقدم العملية">
+            <Card title={t('tts.progress.title')}>
                 <div className="w-full bg-accent dark:bg-dark-accent rounded-full h-4"><div className="bg-highlight h-4 rounded-full" style={{ width: `${progress}%`, transition: 'width 0.5s' }}></div></div>
-                <div className="text-center mt-2 text-sm">المقطع الحالي: {currentProcess} / {textChunks.length}</div>
+                <div className="text-center mt-2 text-sm">{t('tts.progress.currentChunk', { current: currentProcess, total: textChunks.length })}</div>
             </Card>
 
-            <Card title="🎧 المقاطع المحولة" className="flex-grow flex flex-col">
+            <Card title={t('tts.convertedChunks.title')} className="flex-grow flex flex-col">
                 <div className="flex justify-between items-center mb-4">
                     <div className="flex items-center gap-2">
-                        <input
-                            type="checkbox"
-                            id="selectAllForMerge"
-                            checked={isSelectAllForMergeChecked}
-                            onChange={handleSelectAllForMerge}
-                            disabled={successfulChunks.length === 0}
-                            className="h-4 w-4 rounded border-gray-300 text-highlight focus:ring-highlight disabled:opacity-50"
-                        />
-                        <label htmlFor="selectAllForMerge" className="text-sm font-medium text-text-secondary dark:text-dark-text-secondary">
-                            تحديد الكل
-                        </label>
+                        <input type="checkbox" id="selectAllForMerge" checked={isSelectAllForMergeChecked} onChange={handleSelectAllForMerge} disabled={successfulChunks.length === 0} className="h-4 w-4 rounded border-gray-300 text-highlight focus:ring-highlight disabled:opacity-50" />
+                        <label htmlFor="selectAllForMerge" className="text-sm font-medium text-text-secondary dark:text-dark-text-secondary">{t('tts.convertedChunks.selectAll')}</label>
                     </div>
                     <button onClick={handleMergeAndDownload} disabled={selectedForMerge.size < 1 || isMerging} className="btn-primary flex items-center gap-2">
                         <ArchiveBoxArrowDownIcon className="w-5 h-5"/>
-                        {isMerging ? 'جارِ الدمج...' : `دمج وتنزيل (${selectedForMerge.size})`}
+                        {isMerging ? t('tts.convertedChunks.merging') : t('tts.convertedChunks.mergeAndDownload', { count: selectedForMerge.size })}
                     </button>
                 </div>
               <div className="space-y-2 overflow-y-auto max-h-[500px] p-1">
@@ -553,13 +624,8 @@ const ExperimentalPage: React.FC = () => {
                   <div key={chunk.id} className="bg-accent dark:bg-dark-accent rounded-lg p-3">
                     <button onClick={() => toggleChunkExpansion(chunk.id)} className="w-full flex items-center justify-between font-bold text-start">
                       <div className="flex items-center gap-3">
-                        {chunk.status === 'success' && <input type="checkbox" checked={selectedForMerge.has(chunk.id)} onChange={e => {
-                          e.stopPropagation();
-                          const newSet = new Set(selectedForMerge);
-                          e.target.checked ? newSet.add(chunk.id) : newSet.delete(chunk.id);
-                          setSelectedForMerge(newSet);
-                        }}  onClick={e => e.stopPropagation()} />}
-                        <span>المقطع #{chunk.id}</span>
+                        {chunk.status === 'success' && <input type="checkbox" checked={selectedForMerge.has(chunk.id)} onChange={e => { e.stopPropagation(); const newSet = new Set(selectedForMerge); e.target.checked ? newSet.add(chunk.id) : newSet.delete(chunk.id); setSelectedForMerge(newSet); }}  onClick={e => e.stopPropagation()} />}
+                        <span>{t('tts.convertedChunks.chunk', { id: chunk.id })}</span>
                       </div>
                       <span className={`text-xs font-medium px-2 py-1 rounded-full ${chunk.status === 'success' ? 'bg-green-200 text-green-800' : chunk.status === 'failed' ? 'bg-red-200 text-red-800' : 'bg-blue-200 text-blue-800'}`}>{chunk.status}</span>
                     </button>
@@ -568,21 +634,21 @@ const ExperimentalPage: React.FC = () => {
                         <textarea value={chunk.editedText} onChange={e => setConvertedChunks(prev => prev.map(c => c.id === chunk.id ? {...c, editedText: e.target.value} : c))} rows={5} className="w-full p-2 bg-secondary dark:bg-dark-secondary rounded-md" />
                         {chunk.audioUrl && <audio ref={el => { audioRefs.current[chunk.id] = el; }} src={chunk.audioUrl} controls className="w-full h-10" />}
                         <div className="flex justify-end gap-2">
-                           <button onClick={() => handleRetryChunk(chunk.id)} className="btn-secondary text-sm">إعادة المحاولة</button>
-                           {chunk.audioUrl && <a href={chunk.audioUrl} download={`${chunk.id}.mp3`} className="btn-secondary text-sm">تحميل</a>}
+                           <button onClick={() => handleRetryChunk(chunk.id)} className="btn-secondary text-sm">{t('tts.convertedChunks.retry')}</button>
+                           {chunk.audioUrl && <a href={chunk.audioUrl} download={`${chunk.id}.mp3`} className="btn-secondary text-sm">{t('tts.convertedChunks.download')}</a>}
                         </div>
                       </div>
                     )}
                   </div>
-                )) : <p className="text-center py-10 text-text-secondary">ستظهر المقاطع هنا بعد التحويل.</p>}
+                )) : <p className="text-center py-10 text-text-secondary">{t('tts.convertedChunks.placeholder')}</p>}
               </div>
             </Card>
             
-            <Card title="📝 سجل العمليات" className="flex flex-col h-[400px]">
+            <Card title={t('tts.logs.title')} className="flex flex-col h-[400px]">
                  <div className="flex flex-wrap gap-2 mb-4">
-                    <button onClick={copyLogToClipboard} className="btn-secondary flex items-center gap-1"><ClipboardDocumentIcon className="w-4 h-4"/> نسخ</button>
-                    <button onClick={exportLogToFile} className="btn-secondary flex items-center gap-1"><ArrowDownTrayIcon className="w-4 h-4"/> تصدير</button>
-                    <button onClick={clearLog} className="btn-secondary flex items-center gap-1"><TrashIcon className="w-4 h-4"/> مسح</button>
+                    <button onClick={copyLogToClipboard} className="btn-secondary flex items-center gap-1"><ClipboardDocumentIcon className="w-4 h-4"/>{t('tts.logs.copy')}</button>
+                    <button onClick={exportLogToFile} className="btn-secondary flex items-center gap-1"><ArrowDownTrayIcon className="w-4 h-4"/>{t('tts.logs.export')}</button>
+                    <button onClick={clearLog} className="btn-secondary flex items-center gap-1"><TrashIcon className="w-4 h-4"/>{t('tts.logs.clear')}</button>
                 </div>
                 <div ref={logContainerRef} onScroll={handleLogScroll} className="flex-grow bg-primary dark:bg-dark-primary p-2 rounded-md overflow-y-auto text-sm font-mono">
                     {logMessages.map((msg, index) => <div key={index} className={`mb-1 ${msg.level === 'success' ? 'text-green-500' : msg.level === 'error' ? 'text-red-500' : ''}`}>{msg.message}</div>)}

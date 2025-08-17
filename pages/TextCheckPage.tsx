@@ -6,6 +6,7 @@ import TextDiffViewer from '../components/TextDiffViewer';
 import { useAuth } from '../hooks/useAuth';
 import { ClipboardDocumentIcon } from '../components/icons/ClipboardDocumentIcon';
 import { ArrowDownTrayIcon } from '../components/icons/ArrowDownTrayIcon';
+import { ArrowUpTrayIcon } from '../components/icons/ArrowUpTrayIcon';
 import type { AnalysisResponse, Settings } from '../types';
 
 const Stepper: React.FC<{ currentStep: number }> = ({ currentStep }) => {
@@ -206,8 +207,9 @@ const TextCheckPage: React.FC = () => {
                                     {currentStep === 0 && (
                                         <>
                                             <input type="file" accept=".txt" onChange={handleFileImport} ref={fileInputRef} className="hidden" id="text-file-upload" />
-                                            <label htmlFor="text-file-upload" className="cursor-pointer text-sm font-medium text-highlight hover:underline">
-                                                {t('textCheck.button.upload')}
+                                            <label htmlFor="text-file-upload" className="flex items-center gap-2 cursor-pointer bg-highlight text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                                                <ArrowUpTrayIcon className="w-5 h-5" />
+                                                <span>{t('textCheck.button.upload')}</span>
                                             </label>
                                         </>
                                     )}

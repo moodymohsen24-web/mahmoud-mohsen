@@ -1,3 +1,4 @@
+
 {
     "header.brand": "مسموع",
     "header.welcome": "أهلاً، {{name}}",
@@ -16,11 +17,12 @@
 
     "sidebar.dashboard": "لوحة التحكم",
     "sidebar.textCheck": "فحص النص",
-    "sidebar.textToSpeech": "تحويل النص إلى كلام",
+    "sidebar.textToSpeech": "تحويل النص إلى صوت",
     "sidebar.dictionary": "القاموس",
     "sidebar.settings": "الإعدادات",
     "sidebar.subscription": "الاشتراك",
-    "sidebar.experimental": "تجريبي",
+    
+    "experimental.uploadKeys": "تحميل ملف مفاتيح",
 
     "footer.copyright": "مسموع. جميع الحقوق محفوظة.",
 
@@ -211,31 +213,98 @@
     "settings.payment.paypal.clientId": "معرف العميل (Client ID) لـ PayPal",
     "settings.payment.paypal.clientSecret": "المفتاح السري (Client Secret) لـ PayPal",
 
-    "tts.title": "محول النص إلى كلام",
+    "quickAccess.title": "اختصارات الوصول السريع",
+
+    "tts.title": "تحويل النص إلى صوت",
     "tts.subtitle": "حول نصوصك إلى صوت عالي الجودة، مقطعًا تلو الآخر.",
-    "tts.upload.cta": "رفع ملف",
-    "tts.upload.dragDrop": "أو اسحب وأفلت",
-    "tts.upload.description": "ملف .TXT حتى 5 ميجابايت",
-    "tts.inputText": "أدخل النص",
-    "tts.inputText.placeholder": "اكتب أو الصق نصك هنا... تأكد من أن الجمل تنتهي بـ '.' أو '!' أو '؟' لتقسيم دقيق.",
-    "tts.stats.charCount": "إجمالي الأحرف: <span class=\"font-medium text-secondary-700 dark:text-dark-text-primary\">{{count}}</span>",
-    "tts.stats.sentenceCount": "الجمل المكتشفة: <span class=\"font-medium text-secondary-700 dark:text-dark-text-primary\">{{count}}</span>",
-    "tts.stats.sentenceCount.none": "لم يتم الكشف عن أي جمل كاملة.",
-    "tts.advancedOptions.title": "خيارات تقسيم النص المتقدمة",
-    "tts.advancedOptions.targetSegment": "المقطع المستهدف #",
-    "tts.advancedOptions.targetSegment.placeholder": "الافتراضي: التالي (مقطع {{count}})",
-    "tts.advancedOptions.targetSegment.description": "أدخل رقم المقطع للمعالجة أو إعادة المعالجة. اتركه فارغًا للمقطع التالي بالتسلسل.",
-    "tts.advancedOptions.targetSegment.end": "من المرجح أنه تم الوصول إلى نهاية النص",
-    "tts.advancedOptions.maxChars": "الحد الأقصى للأحرف (اختياري)",
-    "tts.advancedOptions.minChars": "الحد الأدنى للأحرف (اختياري)",
-    "tts.segmentPreview.title": "معاينة نص المقطع ({{count}} جملة)",
-    "tts.segmentPreview.info": "معاينة للمقطع رقم {{segment}}: الطول {{length}} حرفًا. (بداية الجملة الأصلية: #{{start}})",
-    "tts.segmentPreview.error.invalidNumber": "رقم المقطع المستهدف غير صالح.",
-    "tts.segmentPreview.error.minChars": "المقطع ({{length}} حرف) < الحد الأدنى للأحرف ({{min}}).",
-    "tts.segmentPreview.error.sentenceTooLong": "الجملة للمقطع #{{segment}} (الأصلية: {{original}}) طويلة جدًا ({{length}} حرف) بالنسبة للحد الأقصى للأحرف ({{max}}).",
-    "tts.segmentPreview.error.segmentNotFound": "المقطع المستهدف #{{segment}} غير موجود. انتهى النص أو أدت المعلمات إلى {{found}} مقطع (مقاطع) فقط.",
+    "tts.apiKeyManagement.title": "إدارة مفاتيح API",
+    "tts.apiKeyManagement.enterNew": "أدخل مفتاح API الجديد هنا...",
+    "tts.apiKeyManagement.add": "إضافة",
+    "tts.apiKeyManagement.checkAll": "فحص كل المفاتيح",
+    "tts.apiKeyManagement.checking": "جارِ الفحص...",
+    "tts.apiKeyManagement.uploadKeys": "تحميل المفاتيح",
+    "tts.apiKeyManagement.deleteSelected": "حذف المحدد ({{count}})",
+    "tts.apiKeyManagement.deleteAll": "حذف الكل",
+    "tts.apiKeyManagement.table.select": "تحديد",
+    "tts.apiKeyManagement.table.key": "المفتاح",
+    "tts.apiKeyManagement.table.balance": "الرصيد",
+    "tts.apiKeyManagement.table.status": "الحالة",
+    "tts.apiKeyManagement.status.active": "نشط",
+    "tts.apiKeyManagement.status.inactive": "غير نشط",
+    "tts.apiKeyManagement.status.error": "خطأ",
+    "tts.apiKeyManagement.toast.enterKey": "الرجاء إدخال مفتاح API",
+    "tts.apiKeyManagement.toast.keyExists": "هذا المفتاح موجود بالفعل!",
+    "tts.apiKeyManagement.toast.selectKeyToDelete": "الرجاء تحديد مفتاح واحد على الأقل للحذف",
+    "tts.apiKeyManagement.toast.confirmDeleteAll": "هل أنت متأكد من رغبتك في حذف جميع المفاتيح؟ لا يمكن التراجع عن هذا الإجراء.",
+    "tts.apiKeyManagement.log.keyAdded": "تم إضافة مفتاح: {{key}}...",
+    "tts.apiKeyManagement.log.keysDeleted": "تم حذف {{count}} مفاتيح.",
+    "tts.apiKeyManagement.log.allKeysDeleted": "تم حذف جميع المفاتيح.",
+    "tts.apiKeyManagement.log.checkingBalances": "جاري فحص أرصدة المفاتيح...",
+    "tts.apiKeyManagement.log.validKey": "✅ مفتاح صالح {{key}}...: {{balance}} حرف متبقي",
+    "tts.apiKeyManagement.log.balanceCheckFailed": "❌ فشل فحص الرصيد: {{error}}",
+    "tts.apiKeyManagement.log.keysUploaded": "تم تحميل {{count}} مفاتيح جديدة",
+    "tts.apiKeyManagement.toast.noNewKeys": "لا توجد مفاتيح جديدة في الملف",
+    "tts.apiKeyManagement.toast.noKeysToCheck": "لا توجد مفاتيح API لفحصها",
+    "tts.controls.title": "ضوابط التحويل",
+    "tts.controls.start": "بدء",
+    "tts.controls.stop": "إيقاف",
+    "tts.controls.placeholder": "أو الصق النص الكامل هنا...",
+    "tts.statsAndSettings.title": "إعدادات التقطيع والإحصائيات",
+    "tts.statsAndSettings.totalChars": "إجمالي الأحرف",
+    "tts.statsAndSettings.chunkCount": "عدد المقاطع",
+    "tts.statsAndSettings.totalKeys": "إجمالي المفاتيح",
+    "tts.statsAndSettings.totalBalance": "إجمالي الرصيد",
+    "tts.statsAndSettings.chunkMin": "أدنى حد للقطعة",
+    "tts.statsAndSettings.chunkMax": "أقصى حد للقطعة",
+    "tts.statsAndSettings.startFrom": "ابدأ من",
+    "tts.advancedAudio.title": "إعدادات الصوت المتقدمة",
+    "tts.advancedAudio.resetDefaults": "استعادة الافتراضيات",
+    "tts.advancedAudio.saveSettings": "حفظ الإعدادات",
+    "tts.advancedAudio.speed": "السرعة",
+    "tts.toast.settingsSaved": "تم حفظ الإعدادات بنجاح",
+    "tts.toast.defaultsRestored": "تمت استعادة الإعدادات الافتراضية للصوت",
+    "tts.progress.title": "تقدم العملية",
+    "tts.progress.currentChunk": "المقطع الحالي: {{current}} / {{total}}",
+    "tts.convertedChunks.title": "المقاطع المحولة",
+    "tts.convertedChunks.selectAll": "تحديد الكل",
+    "tts.convertedChunks.mergeAndDownload": "دمج وتنزيل ({{count}})",
+    "tts.convertedChunks.merging": "جارِ الدمج...",
+    "tts.convertedChunks.chunk": "المقطع #{{id}}",
+    "tts.convertedChunks.retry": "إعادة المحاولة",
+    "tts.convertedChunks.download": "تحميل",
+    "tts.convertedChunks.placeholder": "ستظهر المقاطع هنا بعد التحويل.",
+    "tts.toast.selectToMerge": "الرجاء تحديد مقطع واحد على الأقل للدمج",
+    "tts.logs.title": "سجل العمليات",
+    "tts.logs.copy": "نسخ",
+    "tts.logs.export": "تصدير",
+    "tts.logs.clear": "مسح",
+    "tts.toast.logCopied": "تم نسخ السجل",
+    "tts.general.toast.selectTextFirst": "الرجاء اختيار أو كتابة نص أولاً",
+    "tts.general.toast.addKeyFirst": "الرجاء إضافة مفتاح API واحد على الأقل",
+    "tts.general.log.apiFormatUpdate": "تحديث تنسيق مفتاح API تلقائيًا.",
+    "tts.general.log.textSelected": "تم اختيار ملف النص: {{name}}",
+    "tts.general.log.noValidKeys": "⚠️ لا توجد مفاتيح API صالحة أو ذات رصيد متبقٍ.",
+    "tts.general.log.tryingKey": "🔑 تجربة المفتاح {{key}}... (رصيد: {{balance}})",
+    "tts.general.log.apiFail": "❌ فشل API: {{error}}",
+    "tts.general.log.keyMarkedInvalid": "🔑 تم تمييز المفتاح {{key}}... كغير صالح لهذه الجلسة.",
+    "tts.general.log.networkError": "❌ خطأ شبكة: {{error}}",
+    "tts.general.log.convertingChunk": "\nجاري تحويل المقطع {{current}} من {{total}}...",
+    "tts.general.log.chunkSuccess": "✅ تم تحويل المقطع {{id}} بنجاح",
+    "tts.general.log.chunkFail": "❌ فشل في تحويل المقطع {{id}}",
+    "tts.general.log.conversionComplete": "\nتم الانتهاء. نجاح: {{success}} | فشل: {{fail}}",
+    "tts.general.log.retryingChunk": "\nإعادة محاولة المقطع {{id}}...",
+    "tts.general.log.retrySuccess": "✅ نجحت إعادة محاولة المقطع {{id}}",
+    "tts.general.log.retryFail": "❌ فشلت إعادة محاولة المقطع {{id}}",
+    "tts.general.log.mergeStart": "🚀 بدء عملية دمج المقاطع...",
+    "tts.general.log.mergeSuccess": "✅ تم دمج وتنزيل الملف بنجاح!",
+    "tts.general.log.mergeFail": "❌ فشلت عملية الدمج: {{error}}",
+    "tts.general.log.conversionStopped": "تم إيقاف التحويل من قبل المستخدم.",
+    "tts.general.log.logCopiedFail": "❌ فشل النسخ: {{error}}",
+    "tts.general.log.logExported": "📁 تم تصدير السجل.",
+    "tts.general.log.logCleared": "🗑️ تم مسح السجل.",
+
     "tts.settings.voice": "الصوت",
-    "tts.settings.model": "النموذج",
+    "tts.settings.model": "موديل",
     "tts.settings.outputFormat": "تنسيق الإخراج",
     "tts.voiceTuning.title": "ضبط دقيق للصوت (ElevenLabs API)",
     "tts.voiceTuning.stability": "استقرار الصوت",
@@ -246,9 +315,9 @@
     "tts.voiceTuning.styleExaggeration.description": "يوصى بالقيم الأعلى ما لم تكن تحاول إعادة إنتاج أسلوب معين للمتحدث. (الافتراضي: 0.0)",
     "tts.voiceTuning.speakerBoost": "تحسين السماعة",
     "tts.voiceTuning.speakerBoost.description": "يعزز تشابه الكلام المركب مع الصوت الأصلي. (الافتراضي: تشغيل)",
-    "tts.model.eleven_multilingual_v2": "Eleven Multilingual v2 (متوازن)",
-    "tts.model.eleven_multilingual_v3": "Eleven Multilingual v3 (معبّر)",
-    "tts.model.eleven_turbo_v2": "Eleven Turbo v2 (سريع)",
+    "tts.model.eleven_multilingual_v2": "Eleven Multilingual v2",
+    "tts.model.eleven_v3_alpha": "Eleven v3 Alpha",
+    "tts.model.eleven_turbo_v2_5": "Eleven Turbo v2.5",
     "tts.output.mp3_64": "MP3 64 kbps",
     "tts.output.mp3_128": "MP3 128 kbps (قياسي)",
     "tts.output.mp3_192": "MP3 192 kbps (جودة عالية)",

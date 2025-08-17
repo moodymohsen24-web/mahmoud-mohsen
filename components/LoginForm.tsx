@@ -3,11 +3,7 @@ import { Link } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { useI18n } from '../hooks/useI18n';
 
-interface LoginFormProps {
-  onLoginSuccess?: () => void;
-}
-
-const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
+const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -22,9 +18,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
     try {
       await authService.login(email, password);
       // AuthContext listener will handle the global state update and redirection.
-      if (onLoginSuccess) {
-        onLoginSuccess();
-      }
     } catch (err: any) {
       if (err instanceof Error) {
         if (err.message.toLowerCase().includes('email not confirmed')) {

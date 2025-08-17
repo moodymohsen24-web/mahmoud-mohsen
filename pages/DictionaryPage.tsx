@@ -129,7 +129,7 @@ const DictionaryPage: React.FC = () => {
             <h2 className="text-xl font-bold text-text-primary dark:text-dark-text-primary mb-4">{t('dictionary.import.title')}</h2>
             <p className="text-sm text-text-secondary dark:text-dark-text-secondary mb-4">{t('dictionary.import.description')}</p>
             <input type="file" accept=".txt,.csv" onChange={handleFileImport} ref={fileInputRef} className="hidden" id="file-upload" disabled={isMutating} />
-            <label htmlFor="file-upload" className={`w-full text-center cursor-pointer block bg-highlight/10 text-highlight font-bold py-2 px-4 rounded-lg hover:bg-highlight/20 transition-colors ${isMutating ? 'opacity-50 cursor-not-allowed' : ''}`}>
+            <label htmlFor="file-upload" className={`w-full text-center cursor-pointer block bg-highlight text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors ${isMutating ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 {isMutating ? t('dictionary.import.processing') : t('dictionary.import.button')}
             </label>
         </div>

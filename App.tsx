@@ -22,7 +22,6 @@ import CheckoutPage from './pages/CheckoutPage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import PaymentCancelledPage from './pages/PaymentCancelledPage';
 import TextToSpeechPage from './pages/TextToSpeechPage';
-import ExperimentalPage from './pages/ExperimentalPage';
 
 const App: React.FC = () => {
   return (
@@ -41,11 +40,10 @@ const App: React.FC = () => {
                 <Route element={<DashboardLayout />}>
                   <Route path="dashboard" element={<DashboardPage />} />
                   <Route path="text-check" element={<TextCheckPage />} />
-                  <Route path="text-to-speech" element={<TextToSpeechPage />} />
                   <Route path="dictionary" element={<DictionaryPage />} />
-                  <Route path="settings" element={<SettingsPage />} />
+                  <Route path="text-to-speech" element={<TextToSpeechPage />} />
                   <Route path="subscription" element={<SubscriptionPage />} />
-                  <Route path="experimental" element={<ExperimentalPage />} />
+                  <Route path="settings" element={<SettingsPage />} />
                 </Route>
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="checkout/:planId" element={<CheckoutPage />} />

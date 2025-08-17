@@ -1,3 +1,4 @@
+
 import { supabase } from '../supabaseClient';
 import type { Settings } from '../types';
 
@@ -14,6 +15,11 @@ const defaultSettings: Settings = {
     paypal: {
       clientId: '',
       clientSecret: '',
+    }
+  },
+  textToSpeech: {
+    keys: {
+        elevenlabs: []
     }
   }
 };
@@ -52,6 +58,14 @@ export const settingsService = {
                 paypal: {
                     ...defaultSettings.paymentGateways.paypal,
                     ...(userSettings.paymentGateways?.paypal || {})
+                }
+            },
+            textToSpeech: {
+                ...defaultSettings.textToSpeech,
+                ...(userSettings.textToSpeech || {}),
+                keys: {
+                    ...defaultSettings.textToSpeech?.keys,
+                    ...(userSettings.textToSpeech?.keys || {})
                 }
             }
         };

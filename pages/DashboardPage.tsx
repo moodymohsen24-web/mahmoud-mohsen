@@ -11,6 +11,9 @@ import { SparklesIcon } from '../components/icons/SparklesIcon';
 import { BookOpenIcon } from '../components/icons/BookOpenIcon';
 import { CreditCardIcon } from '../components/icons/CreditCardIcon';
 import UsageChart from '../components/UsageChart';
+import { KeyIcon } from '../components/icons/KeyIcon';
+import { WalletIcon } from '../components/icons/WalletIcon';
+import QuickAccessPanel from '../components/QuickAccessPanel';
 
 const DashboardPage: React.FC = () => {
   const { user } = useAuth();
@@ -51,6 +54,13 @@ const DashboardPage: React.FC = () => {
         <StatCard title={t('dashboard.statCards.currentPlan')} value={user.subscription_plans?.name || 'N/A'} icon={<CreditCardIcon className="w-8 h-8 text-highlight dark:text-dark-highlight"/>} />
       </div>
 
+      {(data.totalActiveKeys !== undefined && data.totalBalance !== undefined) && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+          <StatCard title={'المفاتيح النشطة'} value={data.totalActiveKeys.toLocaleString()} icon={<KeyIcon className="w-8 h-8 text-highlight dark:text-dark-highlight"/>} />
+          <StatCard title={'إجمالي الرصيد المتاح'} value={data.totalBalance.toLocaleString()} icon={<WalletIcon className="w-8 h-8 text-highlight dark:text-dark-highlight"/>} />
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
         <div className="lg:col-span-2">
             <UsageChart data={data.usageLast7Days} />
@@ -59,6 +69,9 @@ const DashboardPage: React.FC = () => {
             <RecentActivity activities={data.recentActivities} />
         </div>
       </div>
+
+      <QuickAccessPanel />
+
     </div>
   );
 };

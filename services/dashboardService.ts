@@ -1,6 +1,7 @@
 
 import { supabase } from '../supabaseClient';
 import type { DashboardData, Activity } from '../types';
+import { textToSpeechService } from './textToSpeechService';
 
 export const dashboardService = {
   async getDashboardData(userId: string): Promise<DashboardData> {
@@ -84,6 +85,29 @@ export const dashboardService = {
         usageLast7Days = (rpcData as unknown as { date: string; count: number }[]) || [];
     }
 
+    // 6. Get TTS Key stats
+    let totalActiveKeys = 0;
+    let totalBalance = 0;
+    try {
+      const keys = await textToSpeechService.getElevenLabsKeys(userId);
+      if (keys.length > 0) {
+        const validationPromises = keys.map(key => textToSpeechService.validateKey(key));
+        const results = await Promise.all(validationPromises);
+        
+        results.forEach(result => {
+          if (result.success && result.status === 'active' && result.data?.character_limit) {
+            totalActiveKeys++;
+            const balance = result.data.character_limit - result.data.character_count;
+            if (balance > 0) {
+              totalBalance += balance;
+            }
+          }
+        });
+      }
+    } catch (e) {
+      console.error("Could not fetch TTS key stats for dashboard:", e);
+    }
+
 
     return {
       checksThisMonth: checksThisMonth || 0,
@@ -91,6 +115,8 @@ export const dashboardService = {
       dictionaryWords: dictionaryWords || 0,
       usageLast7Days: usageLast7Days,
       recentActivities: (recentActivities as unknown as Activity[]) || [],
+      totalActiveKeys,
+      totalBalance,
     };
   },
 };

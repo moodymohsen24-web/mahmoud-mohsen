@@ -1,5 +1,7 @@
+
 import { supabase } from '../supabaseClient';
-import type { TTSGenerationSettings } from '../types';
+import type { TTSGenerationSettings, Settings } from '../types';
+import { settingsService } from './settingsService';
 
 export interface ElevenLabsVoice {
     voice_id: string;
@@ -10,13 +12,73 @@ export interface ElevenLabsVoice {
 export interface KeyValidationResult {
     success: boolean;
     status: 'active' | 'invalid' | 'depleted' | 'error';
-    data?: any;
+    data?: {
+      character_count: number;
+      character_limit: number;
+    } | null;
     message?: string;
 }
 
 
 export const textToSpeechService = {
   
+  async getElevenLabsKeys(userId: string): Promise<string[]> {
+    try {
+      const settings = await settingsService.getSettings(userId);
+      const rawKeys = settings.textToSpeech?.keys?.elevenlabs || [];
+      // Sanitize keys to handle potential legacy object format {key: string, status: string}
+      const sanitizedKeys = rawKeys.map((k: any) => 
+        (typeof k === 'object' && k !== null && 'key' in k) ? k.key : k
+      ).filter((k: any): k is string => typeof k === 'string' && k.trim().length > 0)
+      .map(k => k.trim());
+      
+      const uniqueKeys = [...new Set(sanitizedKeys)];
+      return uniqueKeys;
+    } catch (e) {
+      console.error("Failed to fetch keys from settings", e);
+      return [];
+    }
+  },
+
+  async validateKey(apiKey: string): Promise<KeyValidationResult> {
+    if (!apiKey) {
+        return { success: false, status: 'invalid', message: 'API key is missing.' };
+    }
+
+    try {
+        const response = await fetch('https://api.elevenlabs.io/v1/user', {
+            headers: { 'xi-api-key': apiKey }
+        });
+
+        const data = await response.json();
+
+        if (response.status === 401) {
+            return { success: false, status: 'invalid', message: data.detail?.message || "Invalid API Key." };
+        }
+
+        if (!response.ok) {
+            const errorMessage = data.detail?.message || `ElevenLabs API Error (${response.status})`;
+            return { success: false, status: 'error', message: errorMessage };
+        }
+
+        const sub = data?.subscription;
+        if (sub && typeof sub.character_limit === 'number' && typeof sub.character_count === 'number') {
+            const balanceData = {
+                character_count: sub.character_count,
+                character_limit: sub.character_limit,
+            };
+            const isDepleted = balanceData.character_count >= balanceData.character_limit;
+            const status = isDepleted ? 'depleted' : 'active';
+            return { success: true, status, data: balanceData };
+        }
+
+        return { success: true, status: 'active', data: null };
+    } catch (error: any) {
+        console.error("Critical error in validateKey:", error);
+        return { success: false, status: 'error', message: error.message || 'An unexpected error occurred.' };
+    }
+  },
+
   /**
    * Fetches available voices for the ElevenLabs API via a secure Supabase Edge Function
    * to avoid exposing the API key on the client-side.

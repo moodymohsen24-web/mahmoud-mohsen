@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useModal } from '../hooks/useModal';
 import { useI18n } from '../hooks/useI18n';
 import LoginForm from './LoginForm';
@@ -10,13 +11,15 @@ const AuthModal: React.FC = () => {
   const { t } = useI18n();
   const { isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Automatically close the modal if the user becomes authenticated
+    // Automatically close the modal and redirect if the user becomes authenticated
     if (isAuthenticated && modal === 'auth') {
       closeModal();
+      navigate('/dashboard');
     }
-  }, [isAuthenticated, modal, closeModal]);
+  }, [isAuthenticated, modal, closeModal, navigate]);
   
   if (modal !== 'auth') {
     return null;
@@ -63,7 +66,7 @@ const AuthModal: React.FC = () => {
         
         <div className="p-8">
             {activeTab === 'login' 
-                ? <LoginForm onLoginSuccess={handleClose} /> 
+                ? <LoginForm /> 
                 : <SignUpForm onSignUpSuccess={() => setActiveTab('login')} />
             }
         </div>
