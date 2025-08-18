@@ -8,6 +8,8 @@ import { ClipboardDocumentIcon } from '../components/icons/ClipboardDocumentIcon
 import { ArrowDownTrayIcon } from '../components/icons/ArrowDownTrayIcon';
 import { ArrowUpTrayIcon } from '../components/icons/ArrowUpTrayIcon';
 import type { AnalysisResponse, Settings } from '../types';
+import { useNavigate } from 'react-router-dom';
+import { SpeakerWaveIcon } from '../components/icons/SpeakerWaveIcon';
 
 const Stepper: React.FC<{ currentStep: number }> = ({ currentStep }) => {
     const { t } = useI18n();
@@ -48,6 +50,7 @@ const Stepper: React.FC<{ currentStep: number }> = ({ currentStep }) => {
 const TextCheckPage: React.FC = () => {
     const { t } = useI18n();
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [settings, setSettings] = useState<Settings | null>(null);
     const [currentStep, setCurrentStep] = useState(0);
     const [originalText, setOriginalText] = useState('');
@@ -170,6 +173,10 @@ const TextCheckPage: React.FC = () => {
         link.click();
         document.body.removeChild(link);
     };
+
+    const handleConvertToSpeech = () => {
+        navigate('/text-to-speech', { state: { textToConvert: finalProcessedText } });
+    };
     
     const titles = [t('textCheck.step1.title'), t('textCheck.step2.title'), t('textCheck.step3.title')];
     const descriptions = [t('textCheck.step1.description'), t('textCheck.step2.description'), t('textCheck.step3.description')];
@@ -287,6 +294,10 @@ const TextCheckPage: React.FC = () => {
                             <button onClick={handleDownload} className="flex items-center gap-2 py-2 px-4 rounded-md text-text-primary dark:text-dark-text-primary bg-accent dark:bg-dark-accent hover:bg-gray-200 dark:hover:bg-dark-accent/80 transition-colors">
                                 <ArrowDownTrayIcon className="w-5 h-5" />
                                 {t('textCheck.button.download')}
+                            </button>
+                            <button onClick={handleConvertToSpeech} className="flex items-center gap-2 py-2 px-4 rounded-md text-text-primary dark:text-dark-text-primary bg-accent dark:bg-dark-accent hover:bg-gray-200 dark:hover:bg-dark-accent/80 transition-colors">
+                                <SpeakerWaveIcon className="w-5 h-5" />
+                                {t('textCheck.button.tts')}
                             </button>
                             <button onClick={handleReset} className="py-2 px-4 rounded-md text-highlight border border-highlight hover:bg-highlight/10 transition-colors">
                                 {t('textCheck.button.startOver')}

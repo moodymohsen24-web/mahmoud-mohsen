@@ -1,8 +1,9 @@
-
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useI18n } from '../hooks/useI18n';
 import { useAuth } from '../hooks/useAuth';
 import { settingsService } from '../services/settingsService';
+import { dictionaryService } from '../services/dictionaryService';
 import type { Settings } from '../types';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
@@ -17,6 +18,7 @@ import { AdjustmentsHorizontalIcon } from '../components/icons/AdjustmentsHorizo
 import { ChevronDownIcon } from '../components/icons/ChevronDownIcon';
 import { ArchiveBoxArrowDownIcon } from '../components/icons/ArchiveBoxArrowDownIcon';
 import { SpeakerWaveIcon } from '../components/icons/SpeakerWaveIcon';
+import { BookOpenIcon } from '../components/icons/BookOpenIcon';
 
 type ConvertedChunk = {
   id: number;
@@ -30,6 +32,7 @@ type ConvertedChunk = {
 const TextToSpeechPage: React.FC = () => {
   const { t } = useI18n();
   const { user } = useAuth();
+  const location = useLocation();
   
   // States
   const [dbSettings, setDbSettings] = useState<Settings | null>(null);
@@ -58,19 +61,30 @@ const TextToSpeechPage: React.FC = () => {
   const [isMerging, setIsMerging] = useState(false);
   const [invalidKeys, setInvalidKeys] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
+  const [showMultilingualWarning, setShowMultilingualWarning] = useState(false);
+  
+  const [selection, setSelection] = useState<{ text: string; chunkId: number } | null>(null);
+  const [isDictModalOpen, setIsDictModalOpen] = useState(false);
+  const [dictReplacement, setDictReplacement] = useState('');
   
   const audioRefs = useRef<Record<number, HTMLAudioElement | null>>({});
+  const isDictModalOpenRef = useRef(isDictModalOpen);
   
   const voices = [{ value: "nPczCjzI2devNBz1zQrb", label: "Brian" }, { value: "NFG5qt843uXKj4pFvR7C", label: "Adam Stone" }, { value: "N2lVS1w4EtoT3dr4eOWO", label: "Callum" }];
   const models = [
     { value: 'eleven_multilingual_v3', label: t('tts.model.eleven_v3_alpha') },
     { value: 'eleven_multilingual_v2', label: t('tts.model.eleven_multilingual_v2') },
-    { value: 'eleven_turbo_v2', label: t('tts.model.eleven_turbo_v2_5') }
+    { value: 'eleven_turbo_v2_5', label: t('tts.model.eleven_turbo_v2_5') },
+    { value: 'eleven_flash_v2_5', label: t('tts.model.eleven_flash_v2_5') }
   ];
   
   const logContainerRef = useRef<HTMLDivElement>(null);
   const runningRef = useRef(isRunning);
   const isUserScrolledUp = useRef(false);
+
+  useEffect(() => {
+    isDictModalOpenRef.current = isDictModalOpen;
+  }, [isDictModalOpen]);
 
   useEffect(() => {
     const node = logContainerRef.current;
@@ -103,6 +117,11 @@ const TextToSpeechPage: React.FC = () => {
       setToast({ message, type });
       setTimeout(() => setToast(null), 3000);
   };
+
+  const log = useCallback((message: string, level: 'info' | 'success' | 'warning' | 'error' = 'info') => {
+    const timestamp = new Date().toLocaleTimeString();
+    setLogMessages(prev => [...prev, { message: `[${timestamp}] ${message}`, level }]);
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -145,7 +164,21 @@ const TextToSpeechPage: React.FC = () => {
         }
     };
     loadData();
-}, [user, t]);
+}, [user, t, log]);
+
+  useEffect(() => {
+    if (location.state?.textToConvert) {
+      setFullText(location.state.textToConvert);
+      log(t('tts.general.log.textLoadedFromCheck'), 'success');
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, t, log]);
+  
+  useEffect(() => {
+    setShowMultilingualWarning(
+        !uiSettings.modelId.includes('multilingual')
+    );
+  }, [uiSettings.modelId]);
 
   const saveUiSettings = () => {
     localStorage.setItem('ttsSettings-exp', JSON.stringify(uiSettings));
@@ -178,11 +211,6 @@ const TextToSpeechPage: React.FC = () => {
       }
   };
 
-
-  const log = (message: string, level: 'info' | 'success' | 'warning' | 'error' = 'info') => {
-    const timestamp = new Date().toLocaleTimeString();
-    setLogMessages(prev => [...prev, { message: `[${timestamp}] ${message}`, level }]);
-  };
 
   const handleAddNewKey = async () => {
     if (!newApiKeyInput.trim()) return showToast(t('tts.apiKeyManagement.toast.enterKey'), 'warning');
@@ -314,22 +342,25 @@ const TextToSpeechPage: React.FC = () => {
           try {
               log(t('tts.general.log.tryingKey', { key: key.substring(0, 4), balance: (apiKeyBalance[key] || 0).toLocaleString() }), 'info');
 
-              const voiceSettings: { stability: number; similarity_boost: number; rate?: number } = {
-                stability: uiSettings.stability,
-                similarity_boost: uiSettings.similarityBoost,
+              const requestBody: any = {
+                text,
+                model_id: uiSettings.modelId,
               };
-        
-              if (uiSettings.modelId !== 'eleven_multilingual_v3') {
-                voiceSettings.rate = uiSettings.speed;
+
+              if (uiSettings.modelId === 'eleven_multilingual_v2') {
+                  requestBody.voice_settings = {
+                      stability: uiSettings.stability,
+                      similarity_boost: uiSettings.similarityBoost,
+                  };
+              }
+              
+              if (uiSettings.modelId === 'eleven_multilingual_v3') {
+                requestBody.speed = uiSettings.speed;
               }
 
               const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${uiSettings.voiceId}`, {
                   method: 'POST', headers: { 'Content-Type': 'application/json', 'xi-api-key': key, 'Accept': 'audio/mpeg' },
-                  body: JSON.stringify({ 
-                    text, 
-                    model_id: uiSettings.modelId, 
-                    voice_settings: voiceSettings 
-                  })
+                  body: JSON.stringify(requestBody)
               });
               
               if (response.ok) {
@@ -501,6 +532,52 @@ const TextToSpeechPage: React.FC = () => {
       setSelectedForMerge(e.target.checked ? new Set(successfulChunks.map(c => c.id)) : new Set());
   };
 
+  const areVoiceSettingsSupported = uiSettings.modelId === 'eleven_multilingual_v2';
+
+  const handleTextSelection = (e: React.SyntheticEvent<HTMLTextAreaElement>, chunkId: number) => {
+    const textarea = e.currentTarget;
+    const selectedText = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd).trim();
+    if (selectedText && selectedText.length > 0 && selectedText.length < 100) {
+        setSelection({ text: selectedText, chunkId });
+    }
+  };
+
+  const handleTextareaBlur = (chunkId: number) => {
+    setTimeout(() => {
+        // Use the ref here to get the latest state inside the timeout closure
+        if (selection?.chunkId === chunkId && !isDictModalOpenRef.current) {
+            setSelection(null);
+        }
+    }, 200); // A small delay to allow click events to register
+  };
+  
+  const handleOpenDictModal = () => {
+    if (selection) {
+        setIsDictModalOpen(true);
+    }
+  };
+
+  const handleCloseDictModal = () => {
+    setIsDictModalOpen(false);
+    setSelection(null);
+    setDictReplacement('');
+  };
+
+  const handleAddToDictionary = async () => {
+    if (!user || !selection || !dictReplacement.trim()) return;
+    try {
+        await dictionaryService.addWord(user.id, selection.text, dictReplacement.trim());
+        showToast(t('tts.addToDictionary.success'), 'success');
+        log(t('tts.addToDictionary.log', { original: selection.text, replacement: dictReplacement.trim() }), 'success');
+        handleCloseDictModal();
+    } catch (e) {
+        const error = e as Error;
+        log(t('tts.addToDictionary.error') + `: ${error.message}`, 'error');
+        showToast(t('tts.addToDictionary.error'), 'error');
+    }
+  };
+
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-[calc(100vh-200px)]">
@@ -513,6 +590,28 @@ const TextToSpeechPage: React.FC = () => {
     <div className="space-y-4">
       {toast && ( <div className={`fixed top-24 end-8 p-4 rounded-lg shadow-lg text-white z-50 ${toast.type === 'success' ? 'bg-green-500' : toast.type === 'warning' ? 'bg-yellow-500' : 'bg-red-500'}`}>{toast.message}</div> )}
       
+      {isDictModalOpen && selection && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 animate-fade-in" onClick={handleCloseDictModal}>
+            <div className="bg-secondary dark:bg-dark-secondary rounded-lg shadow-xl w-full max-w-md p-6 animate-fade-in-up" onClick={e => e.stopPropagation()}>
+                <h3 className="text-lg font-bold mb-4">{t('tts.addToDictionary.title')}</h3>
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-bold mb-1">{t('dictionary.add.original')}</label>
+                        <input type="text" value={selection.text} readOnly className="w-full p-2 bg-accent dark:bg-dark-accent rounded-md cursor-not-allowed opacity-70" />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold mb-1" htmlFor="dict-replacement">{t('dictionary.add.replacement')}</label>
+                        <input id="dict-replacement" type="text" value={dictReplacement} onChange={e => setDictReplacement(e.target.value)} className="w-full p-2 bg-accent dark:bg-dark-accent rounded-lg focus:outline-none focus:ring-2 focus:ring-highlight" autoFocus />
+                    </div>
+                </div>
+                <div className="flex justify-end gap-4 mt-6">
+                    <button onClick={handleCloseDictModal} className="btn-secondary">{t('planManagement.cancel')}</button>
+                    <button onClick={handleAddToDictionary} disabled={!dictReplacement.trim()} className="btn-primary">{t('dictionary.add.button')}</button>
+                </div>
+            </div>
+        </div>
+      )}
+
       <h1 className="text-3xl font-bold flex items-center gap-2">
         <SpeakerWaveIcon className="w-8 h-8 text-highlight dark:text-dark-highlight" />
         <span>{t('tts.title')}</span>
@@ -588,11 +687,45 @@ const TextToSpeechPage: React.FC = () => {
              <div className="mt-4"><button onClick={() => setIsAdvancedSettingsOpen(!isAdvancedSettingsOpen)} className="w-full flex justify-between items-center p-2 rounded-lg hover:bg-accent dark:hover:bg-dark-accent"> <div className="flex items-center gap-2 font-medium"><span>{t('tts.advancedAudio.title')}</span></div> <ChevronDownIcon className={`w-5 h-5 transition-transform ${isAdvancedSettingsOpen ? 'rotate-180' : ''}`} /> </button></div>
              {isAdvancedSettingsOpen && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 p-4 bg-accent dark:bg-dark-accent rounded-lg">
-                    <Select label={t('tts.settings.voice')} options={voices} value={uiSettings.voiceId} onChange={e => setUiSettings(s => ({...s, voiceId: e.target.value}))} />
-                    <Select label={t('tts.settings.model')} options={models} value={uiSettings.modelId} onChange={e => setUiSettings(s => ({...s, modelId: e.target.value}))} />
-                    <Input containerClassName="sm:col-span-2" label={t('tts.voiceTuning.stability')} type="range" min="0" max="1" step="0.01" value={uiSettings.stability} onChange={e => setUiSettings(s => ({...s, stability: parseFloat(e.target.value)}))} title={String(uiSettings.stability)} />
-                    <Input containerClassName="sm:col-span-2" label={t('tts.voiceTuning.similarityBoost')} type="range" min="0" max="1" step="0.01" value={uiSettings.similarityBoost} onChange={e => setUiSettings(s => ({...s, similarityBoost: parseFloat(e.target.value)}))} title={String(uiSettings.similarityBoost)} />
-                    <Input containerClassName="sm:col-span-2" label={t('tts.advancedAudio.speed')} type="range" min="0.5" max="2.0" step="0.05" value={uiSettings.speed} onChange={e => setUiSettings(s => ({...s, speed: parseFloat(e.target.value)}))} title={`${uiSettings.speed.toFixed(2)}x`} />
+                    <div className="sm:col-span-2">
+                        <Select label={t('tts.settings.voice')} options={voices} value={uiSettings.voiceId} onChange={e => setUiSettings(s => ({...s, voiceId: e.target.value}))} />
+                    </div>
+                    <div className="sm:col-span-2">
+                        <Select label={t('tts.settings.model')} options={models} value={uiSettings.modelId} onChange={e => setUiSettings(s => ({...s, modelId: e.target.value}))} />
+                        {showMultilingualWarning && (
+                            <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1 px-1">
+                                {t('tts.model.nonMultilingualWarning')}
+                            </p>
+                        )}
+                    </div>
+                    <Input
+                        containerClassName="sm:col-span-2"
+                        label={t('tts.voiceTuning.stability')}
+                        type="range" min="0" max="1" step="0.01"
+                        value={uiSettings.stability}
+                        onChange={e => setUiSettings(s => ({...s, stability: parseFloat(e.target.value)}))}
+                        title={areVoiceSettingsSupported ? String(uiSettings.stability) : t('tts.voiceTuning.unavailable')}
+                        disabled={!areVoiceSettingsSupported}
+                    />
+                    <Input
+                        containerClassName="sm:col-span-2"
+                        label={t('tts.voiceTuning.similarityBoost')}
+                        type="range" min="0" max="1" step="0.01"
+                        value={uiSettings.similarityBoost}
+                        onChange={e => setUiSettings(s => ({...s, similarityBoost: parseFloat(e.target.value)}))}
+                        title={areVoiceSettingsSupported ? String(uiSettings.similarityBoost) : t('tts.voiceTuning.unavailable')}
+                        disabled={!areVoiceSettingsSupported}
+                    />
+                    <Input
+                        containerClassName="sm:col-span-2"
+                        label={t('tts.advancedAudio.speed')}
+                        type="range"
+                        min="0.5" max="2.0" step="0.05"
+                        value={uiSettings.speed}
+                        onChange={e => setUiSettings(s => ({...s, speed: parseFloat(e.target.value)}))}
+                        title={uiSettings.modelId === 'eleven_multilingual_v3' ? `${uiSettings.speed.toFixed(2)}x` : t('tts.advancedAudio.speed.unavailable')}
+                        disabled={uiSettings.modelId !== 'eleven_multilingual_v3'}
+                    />
                     <div className="sm:col-span-2 flex justify-end gap-2">
                         <button type="button" onClick={handleResetAdvancedSettings} className="btn-secondary">{t('tts.advancedAudio.resetDefaults')}</button>
                         <button onClick={saveUiSettings} className="btn-secondary">{t('tts.advancedAudio.saveSettings')}</button>
@@ -631,9 +764,18 @@ const TextToSpeechPage: React.FC = () => {
                     </button>
                     {expandedChunks.has(chunk.id) && (
                       <div className="mt-3 space-y-3">
-                        <textarea value={chunk.editedText} onChange={e => setConvertedChunks(prev => prev.map(c => c.id === chunk.id ? {...c, editedText: e.target.value} : c))} rows={5} className="w-full p-2 bg-secondary dark:bg-dark-secondary rounded-md" />
+                        <textarea value={chunk.editedText} onChange={e => setConvertedChunks(prev => prev.map(c => c.id === chunk.id ? {...c, editedText: e.target.value} : c))} rows={5} className="w-full p-2 bg-secondary dark:bg-dark-secondary rounded-md" 
+                          onSelect={(e) => handleTextSelection(e, chunk.id)}
+                          onBlur={() => handleTextareaBlur(chunk.id)}
+                        />
                         {chunk.audioUrl && <audio ref={el => { audioRefs.current[chunk.id] = el; }} src={chunk.audioUrl} controls className="w-full h-10" />}
-                        <div className="flex justify-end gap-2">
+                        <div className="flex justify-end items-center gap-2">
+                           {selection && selection.chunkId === chunk.id && (
+                                <button onClick={handleOpenDictModal} className="btn-secondary text-sm flex items-center gap-1">
+                                    <BookOpenIcon className="w-4 h-4" />
+                                    {t('tts.addToDictionary.button')}
+                                </button>
+                           )}
                            <button onClick={() => handleRetryChunk(chunk.id)} className="btn-secondary text-sm">{t('tts.convertedChunks.retry')}</button>
                            {chunk.audioUrl && <a href={chunk.audioUrl} download={`${chunk.id}.mp3`} className="btn-secondary text-sm">{t('tts.convertedChunks.download')}</a>}
                         </div>

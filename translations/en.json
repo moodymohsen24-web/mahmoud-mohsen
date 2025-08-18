@@ -1,4 +1,3 @@
-
 {
     "header.brand": "Masmoo",
     "header.welcome": "Welcome, {{name}}",
@@ -171,6 +170,7 @@
     "textCheck.button.upload": "Upload .txt file",
     "textCheck.error.fileRead": "Failed to read the file.",
     "textCheck.error.fileType": "Please upload a valid .txt file.",
+    "textCheck.button.tts": "Convert to Speech",
 
     "dictionary.title": "Custom Dictionary",
     "dictionary.subtitle": "Manage the words that will be automatically replaced in the final step of the text check.",
@@ -266,6 +266,7 @@
     "tts.advancedAudio.resetDefaults": "Reset Defaults",
     "tts.advancedAudio.saveSettings": "Save Settings",
     "tts.advancedAudio.speed": "Speed",
+    "tts.advancedAudio.speed.unavailable": "Speed control is only available for the v3 model.",
     "tts.toast.settingsSaved": "Settings saved successfully",
     "tts.toast.defaultsRestored": "Audio defaults restored",
     "tts.progress.title": "Process Progress",
@@ -307,6 +308,7 @@
     "tts.general.log.logCopiedFail": "❌ Copy failed: {{error}}",
     "tts.general.log.logExported": "📁 Log exported.",
     "tts.general.log.logCleared": "🗑️ Log cleared.",
+    "tts.general.log.textLoadedFromCheck": "✅ Text loaded successfully from the Text Check tool.",
 
     "tts.settings.voice": "Voice",
     "tts.settings.model": "Model",
@@ -320,9 +322,12 @@
     "tts.voiceTuning.styleExaggeration.description": "Higher values are recommended unless you are trying to reproduce a specific style of the speaker. (Default: 0.0)",
     "tts.voiceTuning.speakerBoost": "Speaker Boost",
     "tts.voiceTuning.speakerBoost.description": "Boost the similarity of the synthesized speech to the original voice. (Default: On)",
+    "tts.voiceTuning.unavailable": "This setting is not available for the selected model.",
     "tts.model.eleven_multilingual_v2": "Eleven Multilingual v2",
     "tts.model.eleven_v3_alpha": "Eleven v3 Alpha",
     "tts.model.eleven_turbo_v2_5": "Eleven Turbo v2.5",
+    "tts.model.eleven_flash_v2_5": "Flash v2.5",
+    "tts.model.nonMultilingualWarning": "Warning: This model may not support non-English languages and could result in an error.",
     "tts.output.mp3_64": "MP3 64 kbps",
     "tts.output.mp3_128": "MP3 128 kbps (Standard)",
     "tts.output.mp3_192": "MP3 192 kbps (High Quality)",
@@ -339,6 +344,11 @@
     "tts.error.apiError": "Conversion failed with an API error: {{message}}",
     "tts.error.segmentEmpty": "Cannot generate audio: Calculated segment is empty.",
     "tts.error.minCharsTailOverride": "MinChars validation overridden for tail segment.",
+    "tts.addToDictionary.button": "Add to Dictionary",
+    "tts.addToDictionary.title": "Add Word to Dictionary",
+    "tts.addToDictionary.success": "Word added to dictionary.",
+    "tts.addToDictionary.error": "Failed to add word.",
+    "tts.addToDictionary.log": "Added '{{original}}' -> '{{replacement}}' to dictionary.",
 
     "planManagement.title": "Subscription Plan Management",
     "planManagement.subtitle": "Create, edit, and delete subscription plans for your users.",

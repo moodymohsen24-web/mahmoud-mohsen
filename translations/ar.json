@@ -1,4 +1,3 @@
-
 {
     "header.brand": "مسموع",
     "header.welcome": "أهلاً، {{name}}",
@@ -171,6 +170,7 @@
     "textCheck.button.upload": "رفع ملف txt.",
     "textCheck.error.fileRead": "فشل في قراءة الملف.",
     "textCheck.error.fileType": "يرجى رفع ملف txt. صالح.",
+    "textCheck.button.tts": "تحويل النص إلى صوت",
 
     "dictionary.title": "القاموس المخصص",
     "dictionary.subtitle": "إدارة الكلمات التي سيتم استبدالها تلقائياً في الخطوة الأخيرة من فحص النص.",
@@ -261,6 +261,7 @@
     "tts.advancedAudio.resetDefaults": "استعادة الافتراضيات",
     "tts.advancedAudio.saveSettings": "حفظ الإعدادات",
     "tts.advancedAudio.speed": "السرعة",
+    "tts.advancedAudio.speed.unavailable": "التحكم بالسرعة متوفر فقط لموديل v3.",
     "tts.toast.settingsSaved": "تم حفظ الإعدادات بنجاح",
     "tts.toast.defaultsRestored": "تمت استعادة الإعدادات الافتراضية للصوت",
     "tts.progress.title": "تقدم العملية",
@@ -302,6 +303,13 @@
     "tts.general.log.logCopiedFail": "❌ فشل النسخ: {{error}}",
     "tts.general.log.logExported": "📁 تم تصدير السجل.",
     "tts.general.log.logCleared": "🗑️ تم مسح السجل.",
+    "tts.general.log.textLoadedFromCheck": "✅ تم تحميل النص بنجاح من أداة فحص النص.",
+    
+    "tts.addToDictionary.button": "إضافة إلى القاموس",
+    "tts.addToDictionary.title": "إضافة كلمة إلى القاموس",
+    "tts.addToDictionary.success": "تمت إضافة الكلمة إلى القاموس.",
+    "tts.addToDictionary.error": "فشل في إضافة الكلمة.",
+    "tts.addToDictionary.log": "تمت إضافة '{{original}}' -> '{{replacement}}' إلى القاموس.",
 
     "tts.settings.voice": "الصوت",
     "tts.settings.model": "موديل",
@@ -315,9 +323,12 @@
     "tts.voiceTuning.styleExaggeration.description": "يوصى بالقيم الأعلى ما لم تكن تحاول إعادة إنتاج أسلوب معين للمتحدث. (الافتراضي: 0.0)",
     "tts.voiceTuning.speakerBoost": "تحسين السماعة",
     "tts.voiceTuning.speakerBoost.description": "يعزز تشابه الكلام المركب مع الصوت الأصلي. (الافتراضي: تشغيل)",
+    "tts.voiceTuning.unavailable": "هذا الإعداد غير متوفر للنموذج المختار.",
     "tts.model.eleven_multilingual_v2": "Eleven Multilingual v2",
     "tts.model.eleven_v3_alpha": "Eleven v3 Alpha",
     "tts.model.eleven_turbo_v2_5": "Eleven Turbo v2.5",
+    "tts.model.eleven_flash_v2_5": "Flash v2.5",
+    "tts.model.nonMultilingualWarning": "تنبيه: هذا النموذج قد لا يدعم اللغات غير الإنجليزية وقد يؤدي إلى حدوث خطأ.",
     "tts.output.mp3_64": "MP3 64 kbps",
     "tts.output.mp3_128": "MP3 128 kbps (قياسي)",
     "tts.output.mp3_192": "MP3 192 kbps (جودة عالية)",
