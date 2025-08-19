@@ -189,6 +189,7 @@
     "dictionary.table.actions": "الإجراءات",
     "dictionary.delete": "حذف",
     "dictionary.empty": "قاموسك فارغ. أضف كلمة للبدء.",
+    "dictionary.error.alreadyExists": "هذه الكلمة موجودة بالفعل في قاموسك.",
 
     "settings.title": "الإعدادات",
     "settings.subtitle": "إدارة إعدادات التطبيق والإعدادات الإدارية.",

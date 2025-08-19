@@ -189,6 +189,7 @@
     "dictionary.table.actions": "Actions",
     "dictionary.delete": "Delete",
     "dictionary.empty": "Your dictionary is empty. Add a word to get started.",
+    "dictionary.error.alreadyExists": "This word already exists in your dictionary.",
 
     "settings.title": "Settings",
     "settings.subtitle": "Manage application and administrative settings.",

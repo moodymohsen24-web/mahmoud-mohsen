@@ -15,6 +15,7 @@ const DictionaryPage: React.FC = () => {
   const [isMutating, setIsMutating] = useState(false);
   const [importStatus, setImportStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [addWordError, setAddWordError] = useState('');
 
   const loadDictionary = useCallback(async () => {
     if (user) {
@@ -35,9 +36,21 @@ const DictionaryPage: React.FC = () => {
 
   const handleAddWord = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (user && originalWord && replacementWord && !isMutating) {
+    setAddWordError('');
+    const trimmedOriginal = originalWord.trim();
+
+    if (!trimmedOriginal || !replacementWord.trim()) {
+      return;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(dictionary, trimmedOriginal)) {
+      setAddWordError(t('dictionary.error.alreadyExists'));
+      return;
+    }
+
+    if (user && !isMutating) {
       setIsMutating(true);
-      await dictionaryService.addWord(user.id, originalWord.trim(), replacementWord.trim());
+      await dictionaryService.addWord(user.id, trimmedOriginal, replacementWord.trim());
       setOriginalWord('');
       setReplacementWord('');
       await loadDictionary();
@@ -110,9 +123,10 @@ const DictionaryPage: React.FC = () => {
         <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-lg shadow-lg">
             <h2 className="text-xl font-bold text-text-primary dark:text-dark-text-primary mb-4">{t('dictionary.add.title')}</h2>
             <form onSubmit={handleAddWord} className="space-y-4">
+            {addWordError && <div className="bg-red-500/10 text-red-500 text-sm p-3 rounded text-center border border-red-500/20">{addWordError}</div>}
             <div>
                 <label className="block text-sm font-bold mb-2" htmlFor="originalWord">{t('dictionary.add.original')}</label>
-                <input id="originalWord" type="text" value={originalWord} onChange={(e) => setOriginalWord(e.target.value)}
+                <input id="originalWord" type="text" value={originalWord} onChange={(e) => { setOriginalWord(e.target.value); if(addWordError) setAddWordError(''); }}
                 className="w-full p-2 bg-accent dark:bg-dark-accent rounded-lg focus:outline-none focus:ring-2 focus:ring-highlight"/>
             </div>
             <div>
