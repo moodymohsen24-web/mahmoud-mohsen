@@ -47,6 +47,21 @@ const Stepper: React.FC<{ currentStep: number }> = ({ currentStep }) => {
     );
 };
 
+// A small component for stats display
+const TextStatsDisplay: React.FC<{ text: string }> = ({ text }) => {
+    const { t } = useI18n();
+    const characters = text.length;
+    const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+
+    return (
+        <div className="text-end text-sm text-text-secondary dark:text-dark-text-secondary mt-2 px-2">
+            <span>{t('textCheck.stats.words')}: {words.toLocaleString()}</span>
+            <span className="mx-2">|</span>
+            <span>{t('textCheck.stats.characters')}: {characters.toLocaleString()}</span>
+        </div>
+    );
+};
+
 
 const TextCheckPage: React.FC = () => {
     const { t } = useI18n();
@@ -230,18 +245,20 @@ const TextCheckPage: React.FC = () => {
                                     readOnly={currentStep > 0}
                                     placeholder={currentStep === 0 ? 'اكتب أو الصق النص هنا...' : ''}
                                 />
+                                <TextStatsDisplay text={sourceText} />
                             </div>
                             <div>
                                 <label className="block text-sm font-bold mb-2 text-text-secondary dark:text-dark-text-secondary">
                                     {t('textCheck.outputText')}
                                 </label>
-                                <div className="w-full h-full min-h-[290px] bg-accent dark:bg-dark-accent rounded-lg text-text-primary dark:text-dark-text-primary overflow-y-auto">
+                                <div className="w-full min-h-[290px] bg-accent dark:bg-dark-accent rounded-lg text-text-primary dark:text-dark-text-primary overflow-y-auto">
                                     {isLoading ? (
                                         <ProgressLoader />
                                     ) : isStepCompleted ? (
                                         <TextDiffViewer markedText={currentResult.processedText} />
                                     ) : null}
                                 </div>
+                                {isStepCompleted && <TextStatsDisplay text={stripHighlightTags(currentResult.processedText)} />}
                             </div>
                         </div>
 
@@ -284,8 +301,11 @@ const TextCheckPage: React.FC = () => {
                 {analysisResults[2] && (
                     <div className="text-center">
                         <h3 className="text-xl font-semibold text-text-primary dark:text-dark-text-primary mb-4">{t('textCheck.finalResult')}</h3>
-                         <div className="w-full p-4 bg-accent dark:bg-dark-accent rounded-lg text-text-primary dark:text-dark-text-primary text-start overflow-y-auto max-h-80 mb-6">
+                         <div className="w-full p-4 bg-accent dark:bg-dark-accent rounded-lg text-text-primary dark:text-dark-text-primary text-start overflow-y-auto max-h-80">
                             <p className="whitespace-pre-wrap">{finalProcessedText}</p>
+                        </div>
+                        <div className="my-4">
+                            <TextStatsDisplay text={finalProcessedText} />
                         </div>
                         <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
                             <button onClick={handleCopy} className="flex items-center gap-2 py-2 px-4 rounded-md text-text-primary dark:text-dark-text-primary bg-accent dark:bg-dark-accent hover:bg-gray-200 dark:hover:bg-dark-accent/80 transition-colors">

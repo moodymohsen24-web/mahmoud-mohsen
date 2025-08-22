@@ -172,6 +172,8 @@
     "textCheck.error.fileRead": "فشل في قراءة الملف.",
     "textCheck.error.fileType": "يرجى رفع ملف txt. صالح.",
     "textCheck.button.tts": "تحويل النص إلى صوت",
+    "textCheck.stats.words": "الكلمات",
+    "textCheck.stats.characters": "الأحرف",
 
     "dictionary.title": "القاموس المخصص",
     "dictionary.subtitle": "إدارة الكلمات التي سيتم استبدالها تلقائياً في الخطوة الأخيرة من فحص النص.",
@@ -220,7 +222,20 @@
     "quickAccess.title": "اختصارات الوصول السريع",
 
     "tts.title": "تحويل النص إلى صوت",
-    "tts.subtitle": "حول نصوصك إلى صوت عالي الجودة، مقطعًا تلو الآخر.",
+    "tts.subtitle": "حوّل نصوصك إلى صوت عالي الجودة، مقطعًا تلو الآخر.",
+    "tts.configuration.title": "تهيئة",
+    "tts.configuration.enhanceWithAI": "تحسين النص بالذكاء الاصطناعي",
+    "tts.session.clear": "مسح الجلسة",
+    "tts.session.cleared": "تم مسح الجلسة.",
+    "tts.tabs.audioSettings": "إعدادات الصوت",
+    "tts.tabs.chunking": "التقطيع",
+    "tts.tabs.apiKeys": "مفاتيح API",
+    "tts.tabs.results": "النتائج",
+    "tts.tabs.log": "السجل",
+    "tts.voice.preview": "معاينة",
+    "tts.voice.previewing": "...",
+    "tts.error.voicePreviewFailed": "فشلت معاينة الصوت.",
+    "tts.results.title": "النتائج",
     "tts.apiKeyManagement.title": "إدارة مفاتيح API",
     "tts.apiKeyManagement.enterNew": "أدخل مفتاح API الجديد هنا...",
     "tts.apiKeyManagement.add": "إضافة",
@@ -309,6 +324,12 @@
     "tts.general.log.logCleared": "🗑️ تم مسح السجل.",
     "tts.general.log.textLoadedFromCheck": "✅ تم تحميل النص بنجاح من أداة فحص النص.",
     
+    "tts.enhance.enhancing": "جارِ التحسين...",
+    "tts.enhance.success": "تم تحسين النص بنجاح.",
+    "tts.enhance.error": "فشل تحسين النص.",
+    "tts.enhance.log.start": "جارِ تحسين النص بالذكاء الاصطناعي...",
+    "tts.enhance.log.success": "نجح تحسين النص.",
+
     "tts.addToDictionary.button": "إضافة إلى القاموس",
     "tts.addToDictionary.title": "إضافة كلمة إلى القاموس",
     "tts.addToDictionary.success": "تمت إضافة الكلمة إلى القاموس.",

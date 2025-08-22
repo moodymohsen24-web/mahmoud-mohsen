@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useEffect, useCallback, useMemo } from 'react';
 
 // --- Embedded Translations ---
 const enTranslations = {
@@ -154,6 +154,8 @@ const enTranslations = {
     "textCheck.error.fileRead": "Failed to read the file.",
     "textCheck.error.fileType": "Please upload a valid .txt file.",
     "textCheck.button.tts": "Convert to Speech",
+    "textCheck.stats.words": "Words",
+    "textCheck.stats.characters": "Characters",
     "dictionary.title": "Custom Dictionary",
     "dictionary.subtitle": "Manage the words that will be automatically replaced in the final step of the text check.",
     "dictionary.add.title": "Add New Word",
@@ -199,6 +201,19 @@ const enTranslations = {
     "quickAccess.title": "Quick Access",
     "tts.title": "Text-to-Speech Converter",
     "tts.subtitle": "Convert your text into high-quality audio, segment by segment.",
+    "tts.configuration.title": "Configuration",
+    "tts.configuration.enhanceWithAI": "Enhance Text with AI",
+    "tts.session.clear": "Clear Session",
+    "tts.session.cleared": "Session cleared.",
+    "tts.tabs.audioSettings": "Audio Settings",
+    "tts.tabs.chunking": "Chunking",
+    "tts.tabs.apiKeys": "API Keys",
+    "tts.tabs.results": "Results",
+    "tts.tabs.log": "Log",
+    "tts.voice.preview": "Preview",
+    "tts.voice.previewing": "...",
+    "tts.error.voicePreviewFailed": "Failed to generate voice preview.",
+    "tts.results.title": "Results",
     "tts.upload.cta": "Upload a file",
     "tts.upload.dragDrop": "or drag and drop",
     "tts.upload.description": ".TXT up to 5MB",
@@ -330,6 +345,11 @@ const enTranslations = {
     "tts.addToDictionary.success": "Word added to dictionary.",
     "tts.addToDictionary.error": "Failed to add word.",
     "tts.addToDictionary.log": "Added '{{original}}' -> '{{replacement}}' to dictionary.",
+    "tts.enhance.enhancing": "Enhancing...",
+    "tts.enhance.success": "Text enhanced successfully.",
+    "tts.enhance.error": "Enhancement failed.",
+    "tts.enhance.log.start": "Enhancing text with AI...",
+    "tts.enhance.log.success": "Text enhancement successful.",
     "planManagement.title": "Subscription Plan Management",
     "planManagement.subtitle": "Create, edit, and delete subscription plans for your users.",
     "planManagement.addPlan": "Add New Plan",
@@ -526,6 +546,8 @@ const arTranslations = {
     "textCheck.error.fileRead": "فشل في قراءة الملف.",
     "textCheck.error.fileType": "يرجى رفع ملف txt. صالح.",
     "textCheck.button.tts": "تحويل النص إلى صوت",
+    "textCheck.stats.words": "الكلمات",
+    "textCheck.stats.characters": "الأحرف",
     "dictionary.title": "القاموس المخصص",
     "dictionary.subtitle": "إدارة الكلمات التي سيتم استبدالها تلقائياً في الخطوة الأخيرة من فحص النص.",
     "dictionary.add.title": "إضافة كلمة جديدة",
@@ -570,7 +592,20 @@ const arTranslations = {
     "settings.payment.paypal.clientSecret": "المفتاح السري (Client Secret) لـ PayPal",
     "quickAccess.title": "اختصارات الوصول السريع",
     "tts.title": "تحويل النص إلى صوت",
-    "tts.subtitle": "حول نصوصك إلى صوت عالي الجودة، مقطعًا تلو الآخر.",
+    "tts.subtitle": "حوّل نصوصك إلى صوت عالي الجودة، مقطعًا تلو الآخر.",
+    "tts.configuration.title": "تهيئة",
+    "tts.configuration.enhanceWithAI": "تحسين النص بالذكاء الاصطناعي",
+    "tts.session.clear": "مسح الجلسة",
+    "tts.session.cleared": "تم مسح الجلسة.",
+    "tts.tabs.audioSettings": "إعدادات الصوت",
+    "tts.tabs.chunking": "التقطيع",
+    "tts.tabs.apiKeys": "مفاتيح API",
+    "tts.tabs.results": "النتائج",
+    "tts.tabs.log": "السجل",
+    "tts.voice.preview": "معاينة",
+    "tts.voice.previewing": "...",
+    "tts.error.voicePreviewFailed": "فشلت معاينة الصوت.",
+    "tts.results.title": "النتائج",
     "tts.apiKeyManagement.title": "إدارة مفاتيح API",
     "tts.apiKeyManagement.enterNew": "أدخل مفتاح API الجديد هنا...",
     "tts.apiKeyManagement.add": "إضافة",
@@ -658,11 +693,19 @@ const arTranslations = {
     "tts.general.log.logExported": "📁 تم تصدير السجل.",
     "tts.general.log.logCleared": "🗑️ تم مسح السجل.",
     "tts.general.log.textLoadedFromCheck": "✅ تم تحميل النص بنجاح من أداة فحص النص.",
+    
+    "tts.enhance.enhancing": "جارِ التحسين...",
+    "tts.enhance.success": "تم تحسين النص بنجاح.",
+    "tts.enhance.error": "فشل تحسين النص.",
+    "tts.enhance.log.start": "جارِ تحسين النص بالذكاء الاصطناعي...",
+    "tts.enhance.log.success": "نجح تحسين النص.",
+    
     "tts.addToDictionary.button": "إضافة إلى القاموس",
     "tts.addToDictionary.title": "إضافة كلمة إلى القاموس",
     "tts.addToDictionary.success": "تمت إضافة الكلمة إلى القاموس.",
     "tts.addToDictionary.error": "فشل في إضافة الكلمة.",
     "tts.addToDictionary.log": "تمت إضافة '{{original}}' -> '{{replacement}}' إلى القاموس.",
+
     "tts.settings.voice": "الصوت",
     "tts.settings.model": "موديل",
     "tts.settings.outputFormat": "تنسيق الإخراج",
@@ -697,6 +740,7 @@ const arTranslations = {
     "tts.error.apiError": "فشل التحويل بسبب خطأ في الواجهة البرمجية: {{message}}",
     "tts.error.segmentEmpty": "لا يمكن إنشاء الصوت: المقطع المحسوب فارغ.",
     "tts.error.minCharsTailOverride": "تم تجاوز التحقق من الحد الأدنى للأحرف للمقطع الأخير.",
+
     "planManagement.title": "إدارة خطط الاشتراك",
     "planManagement.subtitle": "إنشاء وتعديل وحذف خطط الاشتراك لمستخدميك.",
     "planManagement.addPlan": "إضافة خطة جديدة",
@@ -720,12 +764,14 @@ const arTranslations = {
     "planManagement.success.delete": "تم حذف الخطة بنجاح.",
     "planManagement.error.fetch": "فشل في جلب الخطط.",
     "planManagement.error.mutate": "فشل في حفظ الخطة.",
+
     "subscriptionPage.title": "خطط الاشتراك",
     "subscriptionPage.subtitle": "اختر الخطة المناسبة لك.",
     "subscriptionPage.currentPlan": "الخطة الحالية",
     "subscriptionPage.upgrade": "ترقية",
     "subscriptionPage.getStarted": "ابدأ الآن",
     "subscriptionPage.price.month": "/شهرياً",
+
     "checkoutPage.title": "أكمل عملية الشراء",
     "checkoutPage.orderSummary": "ملخص الطلب",
     "checkoutPage.plan": "الخطة",
@@ -733,64 +779,68 @@ const arTranslations = {
     "checkoutPage.payWithPayPal": "الدفع بواسطة PayPal",
     "checkoutPage.processing": "جارِ المعالجة...",
     "checkoutPage.error": "فشل في إنشاء طلب الدفع. يرجى المحاولة مرة أخرى.",
+
     "paymentSuccess.title": "تم الدفع بنجاح!",
     "paymentSuccess.message": "شكراً لشرائك. تم ترقية اشتراكك.",
     "paymentSuccess.backToDashboard": "العودة إلى لوحة التحكم",
+
     "paymentCancelled.title": "تم إلغاء الدفع",
     "paymentCancelled.message": "تم إلغاء عملية الدفع الخاصة بك. يمكنك المحاولة مرة أخرى من صفحة الاشتراكات.",
     "paymentCancelled.backToSubscription": "العودة إلى خطط الاشتراك"
 };
-// --- End Embedded Translations ---
 
 type Language = 'en' | 'ar';
-type Translations = Record<string, string>;
 
 interface I18nContextType {
   language: Language;
   setLanguage: (language: Language) => void;
-  t: (key: string, params?: Record<string, string | number>) => string;
+  t: (key: string, replacements?: Record<string, string | number>) => string;
 }
 
 export const I18nContext = createContext<I18nContextType | null>(null);
 
-declare global {
-    interface Window {
-        translations: Record<Language, Translations>;
-    }
-}
-
-const loadedTranslations = { en: enTranslations, ar: arTranslations };
-window.translations = loadedTranslations;
-
-
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(() => {
-    const savedLang = localStorage.getItem('language');
-    return (savedLang === 'ar' || savedLang === 'en') ? savedLang : 'en';
+    const savedLanguage = localStorage.getItem('language');
+    // Ensure the saved language is one of the allowed types
+    if (savedLanguage === 'en' || savedLanguage === 'ar') {
+      return savedLanguage;
+    }
+    // Default to English if no valid language is saved
+    return 'en';
   });
+
+  const setLanguage = useCallback((lang: Language) => {
+    localStorage.setItem('language', lang);
+    setLanguageState(lang);
+  }, []);
 
   useEffect(() => {
     document.documentElement.lang = language;
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
-    localStorage.setItem('language', language);
   }, [language]);
 
-  const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
-  };
-  
-  const t = useCallback((key: string, params?: Record<string, string | number>): string => {
-    let translation = loadedTranslations[language][key as keyof typeof loadedTranslations.en] || key;
-    if (params) {
-      Object.keys(params).forEach(paramKey => {
-        translation = translation.replace(`{{${paramKey}}}`, String(params[paramKey]));
+  const t = useCallback((key: string, replacements?: Record<string, string | number>): string => {
+    const translations = language === 'ar' ? arTranslations : enTranslations;
+    let translation = translations[key as keyof typeof translations] || key;
+
+    if (replacements) {
+      Object.keys(replacements).forEach(placeholder => {
+        translation = translation.replace(
+          new RegExp(`{{${placeholder}}}`, 'g'),
+          String(replacements[placeholder])
+        );
       });
     }
+
     return translation;
   }, [language]);
 
-
-  const value = { language, setLanguage, t };
+  const value = useMemo(() => ({
+    language,
+    setLanguage,
+    t
+  }), [language, setLanguage, t]);
 
   return (
     <I18nContext.Provider value={value}>

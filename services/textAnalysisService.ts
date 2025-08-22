@@ -4,7 +4,7 @@ import { dictionaryService } from './dictionaryService';
 import { supabase } from '../supabaseClient';
 
 /**
- * A centralized function to interact with the Gemini API using a provided key.
+ * A centralized function to interact with the Gemini API for JSON responses.
  * @param prompt The prompt to send to the model.
  * @param apiKey The user-provided API key.
  * @returns A promise that resolves to an AnalysisResponse.
@@ -36,6 +36,30 @@ const processWithGemini = async (prompt: string, apiKey: string): Promise<Analys
       const cleanedJsonString = jsonString.replace(/^```json\s*|```\s*$/g, '');
       return JSON.parse(cleanedJsonString) as AnalysisResponse;
 
+    } catch (error) {
+      console.error(`Error with Gemini model:`, error);
+      throw new Error("Failed to process text with Gemini. Please check the API key and console for details.");
+    }
+};
+
+/**
+ * A centralized function to interact with the Gemini API for simple text responses.
+ * @param prompt The prompt to send to the model.
+ * @param apiKey The user-provided API key.
+ * @returns A promise that resolves to the processed text string.
+ */
+const processWithGeminiSimple = async (prompt: string, apiKey: string): Promise<string> => {
+    if (!apiKey) {
+        throw new Error("API key is missing.");
+    }
+    const ai = new GoogleGenAI({ apiKey });
+
+    try {
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+      });
+      return response.text.trim();
     } catch (error) {
       console.error(`Error with Gemini model:`, error);
       throw new Error("Failed to process text with Gemini. Please check the API key and console for details.");
@@ -121,6 +145,14 @@ Text: "${text}"`;
     const processedText = processedParts.join('');
     
     return { processedText, correctionsCount };
+  },
+
+  async enhanceText(text: string, apiKey: string): Promise<string> {
+    const prompt = `You are an expert Arabic editor. Enhance the following text for clarity, flow, and impact. Correct any subtle grammatical errors or awkward phrasing to make it more professional and engaging for a general audience. Return ONLY the enhanced text, with no extra explanations or formatting.
+
+Original Text:
+"${text}"`;
+    return processWithGeminiSimple(prompt, apiKey);
   },
 
   async testApiKey(model: AiModel, apiKey: string): Promise<boolean> {
