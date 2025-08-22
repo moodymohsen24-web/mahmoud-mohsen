@@ -49,11 +49,12 @@ export const textAnalysisService = {
   async correctAndClean(text: string, apiKey: string): Promise<AnalysisResponse> {
     const prompt = `You are an expert Arabic text processor. I will provide you with a raw text. Your task is to perform the following operations:
 1. Correct all spelling and grammatical mistakes.
-2. Remove all meaningless symbols, including but not limited to (), "", :, -, _, etc.
+2. Remove all meaningless symbols, including but not limited to (), "", :, -, _, etc. VERY IMPORTANT: Do NOT remove periods (.) or commas (,). They are essential for sentence structure and must be preserved exactly where they are.
 3. Convert all numerical digits into their Arabic word equivalents (e.g., 10 becomes عشرة).
 4. Replace the '%' symbol with the phrase 'في المائة'.
-5. Wrap every single change (correction, number conversion, symbol removal replacement) inside <ch> tags. For example, if 'مرحبا' is corrected to 'أهلاً', the output should contain '<ch>أهلاً</ch>'.
-6. Count the total number of changes made (the number of <ch> tags).
+5. If a line or sentence does not end with any punctuation, automatically add a period (.) at the end of it.
+6. Wrap every single change (correction, number conversion, symbol removal replacement, added punctuation) inside <ch> tags. For example, if 'مرحبا' is corrected to 'أهلاً', the output should contain '<ch>أهلاً</ch>'.
+7. Count the total number of changes made (the number of <ch> tags).
 
 Return a single JSON object with this exact structure: { "processedText": "The full text with changes wrapped in <ch> tags", "correctionsCount": total_number_of_changes }
 
@@ -67,6 +68,7 @@ Raw Text:
 
   async addSelectiveDiacritics(text: string, apiKey: string): Promise<AnalysisResponse> {
     const prompt = `You are an expert in Arabic linguistics. I will provide a text. Your task is to add diacritics (Tashkeel) ONLY to words that are essential for correct pronunciation and avoiding ambiguity. Do not add diacritics to common, easily understood words.
+**CRITICAL RULE: You MUST NOT change, replace, add, or delete any words from the original text. The output text must be identical to the input text, with the only difference being the addition of Tashkeel and the wrapping <ch> tags.**
 1. Wrap every word that you add diacritics to inside <ch> tags.
 2. Count the total number of words you modified.
 
@@ -88,12 +90,21 @@ Text: "${text}"`;
     }
     
     let processedText = text;
+
+    const escapeRegExp = (string: string) => {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
     for (const [original, replacement] of Object.entries(customDictionary)) {
-      // Use a regex that matches whole words only to avoid replacing parts of words.
-      const regex = new RegExp(`\\b${original}\\b`, 'g');
-      if (regex.test(processedText)) {
-        const matches = processedText.match(regex);
-        if(matches) correctionsCount += matches.length;
+      const escapedOriginal = escapeRegExp(original);
+      // The original regex `\b${original}\b` does not work for Arabic text.
+      // This new regex uses Unicode property escapes (`\p{L}` for any letter) and negative lookarounds
+      // to correctly match whole words in any language, including Arabic. The 'u' flag is for unicode support.
+      const regex = new RegExp(`(?<!\\p{L})${escapedOriginal}(?!\\p{L})`, 'gu');
+      
+      const matches = processedText.match(regex);
+      if (matches) {
+        correctionsCount += matches.length;
         processedText = processedText.replace(regex, `<ch>${replacement}</ch>`);
       }
     }

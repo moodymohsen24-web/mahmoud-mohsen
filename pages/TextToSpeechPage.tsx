@@ -50,7 +50,7 @@ const TextToSpeechPage: React.FC = () => {
   const [uiSettings, setUiSettings] = useState({
     voiceId: 'N2lVS1w4EtoT3dr4eOWO', modelId: 'eleven_multilingual_v2', stability: 0.45, similarityBoost: 0.75,
     speed: 1.0,
-    chunkMin: 450, chunkMax: 500, startFrom: 1
+    chunkMin: 450 as number | string, chunkMax: 500 as number | string, startFrom: 1
   });
   const [toast, setToast] = useState<{message: string, type: 'success' | 'warning' | 'error'} | null>(null);
   const [isAdvancedSettingsOpen, setIsAdvancedSettingsOpen] = useState(false);
@@ -297,20 +297,62 @@ const TextToSpeechPage: React.FC = () => {
   };
 
   const splitText = (text: string): string[] => {
-    const { chunkMin, chunkMax } = uiSettings;
-    if (!text) return [];
-    text = text.replace(/\s+/g, ' ').trim();
-    const sentences = text.split(/(?<=[.؟!])\s+/);
-    const chunks: string[] = []; let chunk = "";
-    for (const sentence of sentences) {
-      if (chunk.length + sentence.length <= chunkMax) chunk += sentence + " ";
-      else {
-        if (chunk.length >= chunkMin) { chunks.push(chunk.trim()); chunk = sentence + " "; }
-        else chunk += sentence + " ";
-      }
+    const min = parseInt(String(uiSettings.chunkMin)) || 450;
+    const max = parseInt(String(uiSettings.chunkMax)) || 500;
+    
+    if (!text || text.trim().length === 0) return [];
+
+    if (min >= max || min <= 0) {
+        // Silently return the whole text as one chunk during intermediate invalid states while typing.
+        // The `onBlur` handler will eventually correct the values and trigger a proper split.
+        return [text];
     }
-    if (chunk.trim()) chunks.push(chunk.trim());
-    return chunks;
+
+    const chunks: string[] = [];
+    let remainingText = text.trim();
+
+    while (remainingText.length > 0) {
+        if (remainingText.length <= max) {
+            chunks.push(remainingText);
+            break;
+        }
+
+        let splitPos = -1;
+
+        for (let i = Math.min(max, remainingText.length - 1); i >= min; i--) {
+            if (/[.؟!؟]/.test(remainingText[i])) {
+                splitPos = i + 1;
+                break;
+            }
+        }
+
+        if (splitPos === -1) {
+            const lastSpace = remainingText.lastIndexOf(' ', max);
+            if (lastSpace !== -1 && lastSpace >= min) {
+                splitPos = lastSpace + 1;
+            }
+        }
+
+        if (splitPos === -1) {
+            splitPos = max;
+        }
+
+        chunks.push(remainingText.substring(0, splitPos).trim());
+        remainingText = remainingText.substring(splitPos).trim();
+    }
+
+    if (chunks.length > 1) {
+        const lastChunk = chunks[chunks.length - 1];
+        if (lastChunk.length > 0 && lastChunk.length < min) {
+            const secondLastChunk = chunks[chunks.length - 2];
+            if ((secondLastChunk.length + lastChunk.length) < (max * 1.5)) {
+                chunks[chunks.length - 2] = secondLastChunk + ' ' + lastChunk;
+                chunks.pop();
+            }
+        }
+    }
+
+    return chunks.filter(chunk => chunk.length > 0);
   };
 
   useEffect(() => {
@@ -318,6 +360,43 @@ const TextToSpeechPage: React.FC = () => {
     setTextChunks(newChunks);
   }, [fullText, uiSettings.chunkMin, uiSettings.chunkMax]);
   
+  const handleChunkSizeChange = (field: 'min' | 'max', value: string) => {
+    // Allow the state to hold an empty string temporarily while the user is typing
+    setUiSettings(prev => ({
+      ...prev,
+      [field === 'min' ? 'chunkMin' : 'chunkMax']: value
+    }));
+  };
+
+  const handleChunkSizeBlur = (field: 'min' | 'max') => {
+    setUiSettings(prev => {
+      let numMin = parseInt(String(prev.chunkMin), 10);
+      let numMax = parseInt(String(prev.chunkMax), 10);
+
+      // Provide safe defaults if input is empty or invalid
+      if (isNaN(numMin)) numMin = 450;
+      if (isNaN(numMax)) numMax = 500;
+
+      // Ensure min is at least 1
+      numMin = Math.max(1, numMin);
+      
+      if (numMax <= numMin) {
+        if (field === 'max') {
+          // User just edited max, so it's the source of truth. Adjust min.
+          numMin = Math.max(1, numMax - 1);
+        } else { // field === 'min'
+          // User just edited min. Adjust max.
+          numMax = numMin + 1;
+        }
+      }
+      
+      // Final check
+      if (numMax <= numMin) numMax = numMin + 1;
+      
+      return { ...prev, chunkMin: numMin, chunkMax: numMax };
+    });
+  };
+
   const selectTextFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -680,8 +759,20 @@ const TextToSpeechPage: React.FC = () => {
                 <div><dt className="text-sm text-text-secondary">{t('tts.statsAndSettings.totalBalance')}</dt><dd className="text-lg font-bold">{totalBalance.toLocaleString()}</dd></div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-accent dark:border-dark-accent pt-4">
-              <Input label={t('tts.statsAndSettings.chunkMin')} type="number" value={uiSettings.chunkMin} onChange={e => setUiSettings(s => ({...s, chunkMin: Math.max(0, parseInt(e.target.value) || 0), chunkMax: Math.max(parseInt(e.target.value) || 0, s.chunkMax)}))} />
-              <Input label={t('tts.statsAndSettings.chunkMax')} type="number" value={uiSettings.chunkMax} onChange={e => setUiSettings(s => ({...s, chunkMax: Math.max(0, parseInt(e.target.value) || 0), chunkMin: Math.min(parseInt(e.target.value) || 0, s.chunkMin)}))} />
+              <Input 
+                label={t('tts.statsAndSettings.chunkMin')} 
+                type="number" 
+                value={uiSettings.chunkMin} 
+                onChange={e => handleChunkSizeChange('min', e.target.value)}
+                onBlur={() => handleChunkSizeBlur('min')}
+              />
+              <Input 
+                label={t('tts.statsAndSettings.chunkMax')} 
+                type="number" 
+                value={uiSettings.chunkMax} 
+                onChange={e => handleChunkSizeChange('max', e.target.value)}
+                onBlur={() => handleChunkSizeBlur('max')}
+              />
               <Input label={t('tts.statsAndSettings.startFrom')} type="number" value={uiSettings.startFrom} onChange={e => setUiSettings(s => ({...s, startFrom: parseInt(e.target.value) || 1}))} min="1"/>
             </div>
              <div className="mt-4"><button onClick={() => setIsAdvancedSettingsOpen(!isAdvancedSettingsOpen)} className="w-full flex justify-between items-center p-2 rounded-lg hover:bg-accent dark:hover:bg-dark-accent"> <div className="flex items-center gap-2 font-medium"><span>{t('tts.advancedAudio.title')}</span></div> <ChevronDownIcon className={`w-5 h-5 transition-transform ${isAdvancedSettingsOpen ? 'rotate-180' : ''}`} /> </button></div>
