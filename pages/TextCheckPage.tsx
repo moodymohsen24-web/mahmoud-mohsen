@@ -10,6 +10,7 @@ import { ArrowUpTrayIcon } from '../components/icons/ArrowUpTrayIcon';
 import type { AnalysisResponse, Settings } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { SpeakerWaveIcon } from '../components/icons/SpeakerWaveIcon';
+import ProgressLoader from '../components/ProgressLoader';
 
 const Stepper: React.FC<{ currentStep: number }> = ({ currentStep }) => {
     const { t } = useI18n();
@@ -234,9 +235,9 @@ const TextCheckPage: React.FC = () => {
                                 <label className="block text-sm font-bold mb-2 text-text-secondary dark:text-dark-text-secondary">
                                     {t('textCheck.outputText')}
                                 </label>
-                                <div className="w-full p-3 h-full min-h-[290px] bg-accent dark:bg-dark-accent rounded-lg text-text-primary dark:text-dark-text-primary overflow-y-auto">
+                                <div className="w-full h-full min-h-[290px] bg-accent dark:bg-dark-accent rounded-lg text-text-primary dark:text-dark-text-primary overflow-y-auto">
                                     {isLoading ? (
-                                        <div className="flex justify-center items-center h-full text-text-secondary">{t('textCheck.button.processing')}</div>
+                                        <ProgressLoader />
                                     ) : isStepCompleted ? (
                                         <TextDiffViewer markedText={currentResult.processedText} />
                                     ) : null}
