@@ -268,7 +268,13 @@ const TextToSpeechPage: React.FC = () => {
     setInvalidKeys(new Set());
     setIsCheckingBalances(true);
     log(t('tts.apiKeyManagement.log.checkingBalances'), 'info');
-    await Promise.all(keys.map(key => checkBalanceForKey(key)));
+    
+    // Process keys sequentially with a small delay to avoid rate-limiting issues.
+    for (const key of keys) {
+      await checkBalanceForKey(key);
+      await new Promise(resolve => setTimeout(resolve, 1100)); // ~1 second delay between API calls to avoid rate limiting.
+    }
+
     setIsCheckingBalances(false);
   };
 
