@@ -164,6 +164,7 @@
     "textCheck.finalResult": "النتيجة النهائية",
     "textCheck.stats": "تم إجراء {{count}} تغييرات",
     "textCheck.noCorrections": "لم تكن هناك حاجة لأي تغييرات في هذه الخطوة.",
+    "textCheck.step3.noMatches": "لم يتم العثور على أي كلمات من قاموسك في النص.",
     "textCheck.copySuccess": "تم نسخ النص إلى الحافظة!",
     "textCheck.button.copy": "نسخ النص",
     "textCheck.button.download": "تنزيل ملف txt.",
@@ -188,6 +189,8 @@
     "dictionary.table.replacement": "البديلة",
     "dictionary.table.actions": "الإجراءات",
     "dictionary.delete": "حذف",
+    "dictionary.edit": "تعديل",
+    "dictionary.save": "حفظ",
     "dictionary.empty": "قاموسك فارغ. أضف كلمة للبدء.",
     "dictionary.error.alreadyExists": "هذه الكلمة موجودة بالفعل في قاموسك.",
 

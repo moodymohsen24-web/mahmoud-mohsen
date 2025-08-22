@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface TextDiffViewerProps {
@@ -10,15 +9,26 @@ const TextDiffViewer: React.FC<TextDiffViewerProps> = ({ markedText }) => {
     return null;
   }
 
-  // This regex splits the text by the <ch> and </ch> tags, keeping the delimiters.
-  const parts = markedText.split(/(<ch>.*?<\/ch>)/g);
+  // This regex splits the text by the <ch> tags (with or without attributes), keeping the delimiters.
+  const parts = markedText.split(/(<ch.*?>.*?<\/ch>)/g);
 
   const diff = parts.map((part, index) => {
-    if (part.startsWith('<ch>') && part.endsWith('</ch>')) {
-      // This is a changed part. Extract the content between the tags.
-      const content = part.substring(4, part.length - 5);
+    if (part.startsWith('<ch') && part.endsWith('</ch>')) {
+      const originalMatch = part.match(/data-original="(.*?)"/);
+      // Decode the HTML attribute
+      const originalWord = originalMatch ? originalMatch[1].replace(/&quot;/g, '"') : null;
+
+      const contentMatch = part.match(/<ch.*?>(.*?)<\/ch>/);
+      const content = contentMatch ? contentMatch[1] : '';
+      
+      const tooltipText = originalWord ? `${originalWord} → ${content}` : null;
+
       return (
-        <span key={index} className="bg-green-500/20 text-green-800 dark:text-green-300 rounded px-1">
+        <span 
+            key={index} 
+            className="bg-green-500/20 text-green-800 dark:text-green-300 rounded px-1 cursor-help"
+            title={tooltipText || undefined}
+        >
           {content}
         </span>
       );
@@ -27,7 +37,7 @@ const TextDiffViewer: React.FC<TextDiffViewerProps> = ({ markedText }) => {
     return <span key={index}>{part}</span>;
   });
 
-  return <p className="whitespace-pre-wrap">{diff}</p>;
+  return <p className="whitespace-pre-wrap p-3">{diff}</p>;
 };
 
 export default TextDiffViewer;

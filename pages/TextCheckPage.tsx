@@ -102,7 +102,7 @@ const TextCheckPage: React.FC = () => {
     
     // Function to strip <ch> tags for the next processing step
     const stripHighlightTags = (text: string) => {
-        return text.replace(/<ch>/g, '').replace(/<\/ch>/g, '');
+        return text.replace(/<ch.*?>/g, '').replace(/<\/ch>/g, '');
     };
 
     const handleProcess = async () => {
@@ -246,10 +246,10 @@ const TextCheckPage: React.FC = () => {
                         </div>
 
                         {isStepCompleted && (
-                            <div className="mt-4 text-center text-sm font-medium text-green-600">
+                            <div className={`mt-4 text-center text-sm font-medium ${correctionsCount && correctionsCount > 0 ? 'text-green-600' : 'text-text-secondary dark:text-dark-text-secondary'}`}>
                                 {typeof correctionsCount === 'number' && correctionsCount > 0 
                                     ? t('textCheck.stats', { count: correctionsCount }) 
-                                    : t('textCheck.noCorrections')}
+                                    : (currentStep === 2 ? t('textCheck.step3.noMatches') : t('textCheck.noCorrections'))}
                             </div>
                         )}
 

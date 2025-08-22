@@ -2,6 +2,10 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useI18n } from '../hooks/useI18n';
 import { useAuth } from '../hooks/useAuth';
 import { dictionaryService } from '../services/dictionaryService';
+import { PencilIcon } from '../components/icons/PencilIcon';
+import { TrashIcon } from '../components/icons/TrashIcon';
+import { CheckIcon } from '../components/icons/CheckIcon';
+import { XMarkIcon } from '../components/icons/XMarkIcon';
 
 type Dictionary = Record<string, string>;
 
@@ -16,6 +20,9 @@ const DictionaryPage: React.FC = () => {
   const [importStatus, setImportStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [addWordError, setAddWordError] = useState('');
+  
+  const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [editData, setEditData] = useState({ original: '', replacement: '' });
 
   const loadDictionary = useCallback(async () => {
     if (user) {
@@ -59,11 +66,42 @@ const DictionaryPage: React.FC = () => {
   };
 
   const handleDeleteWord = async (word: string) => {
-    if (user && !isMutating) {
+    if (user && !isMutating && window.confirm(`Are you sure you want to delete "${word}"?`)) {
       setIsMutating(true);
       await dictionaryService.deleteWord(user.id, word);
       await loadDictionary();
       setIsMutating(false);
+    }
+  };
+
+  const handleEditStart = (original: string, replacement: string) => {
+    setEditingKey(original);
+    setEditData({ original, replacement });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!user || !editingKey || !editData.original.trim() || !editData.replacement.trim()) return;
+    
+    // Check if the new original word already exists (and it's not the same as the one being edited)
+    if (editData.original.trim() !== editingKey && Object.prototype.hasOwnProperty.call(dictionary, editData.original.trim())) {
+        alert(t('dictionary.error.alreadyExists'));
+        return;
+    }
+
+    setIsMutating(true);
+    try {
+        // If the original word (the key) has changed, we must delete the old entry and add a new one.
+        if (editingKey !== editData.original.trim()) {
+            await dictionaryService.deleteWord(user.id, editingKey);
+        }
+        // Use addWord (which upserts) for both creating the new entry and updating an existing one.
+        await dictionaryService.addWord(user.id, editData.original.trim(), editData.replacement.trim());
+        setEditingKey(null);
+        await loadDictionary();
+    } catch(err) {
+        console.error("Failed to save edit:", err);
+    } finally {
+        setIsMutating(false);
     }
   };
   
@@ -166,13 +204,37 @@ const DictionaryPage: React.FC = () => {
                     <tbody>
                         {Object.entries(dictionary).map(([original, replacement]) => (
                             <tr key={original} className="border-b border-accent dark:border-dark-accent">
-                                <td className="px-6 py-4 font-medium">{original}</td>
-                                <td className="px-6 py-4">{replacement}</td>
-                                <td className="px-6 py-4 text-end">
-                                    <button onClick={() => handleDeleteWord(original)} disabled={isMutating} className="font-medium text-red-500 hover:underline disabled:opacity-50">
-                                        {t('dictionary.delete')}
-                                    </button>
-                                </td>
+                                {editingKey === original ? (
+                                    <>
+                                        <td className="px-6 py-2">
+                                            <input type="text" value={editData.original} onChange={(e) => setEditData({...editData, original: e.target.value})} className="w-full p-2 bg-accent dark:bg-dark-accent rounded-md"/>
+                                        </td>
+                                        <td className="px-6 py-2">
+                                            <input type="text" value={editData.replacement} onChange={(e) => setEditData({...editData, replacement: e.target.value})} className="w-full p-2 bg-accent dark:bg-dark-accent rounded-md"/>
+                                        </td>
+                                        <td className="px-6 py-2 text-end">
+                                            <div className="flex justify-end items-center gap-2">
+                                                <button onClick={handleSaveEdit} disabled={isMutating} title={t('dictionary.save')} className="p-2 text-green-500 hover:bg-green-500/10 rounded-full"><CheckIcon className="w-5 h-5"/></button>
+                                                <button onClick={() => setEditingKey(null)} disabled={isMutating} title={t('planManagement.cancel')} className="p-2 text-text-secondary hover:bg-gray-500/10 rounded-full"><XMarkIcon className="w-5 h-5"/></button>
+                                            </div>
+                                        </td>
+                                    </>
+                                ) : (
+                                    <>
+                                        <td className="px-6 py-4 font-medium">{original}</td>
+                                        <td className="px-6 py-4">{replacement}</td>
+                                        <td className="px-6 py-4 text-end">
+                                            <div className="flex justify-end items-center gap-2">
+                                                <button onClick={() => handleEditStart(original, replacement)} disabled={isMutating} title={t('dictionary.edit')} className="p-2 text-highlight hover:bg-highlight/10 rounded-full">
+                                                    <PencilIcon className="w-5 h-5" />
+                                                </button>
+                                                <button onClick={() => handleDeleteWord(original)} disabled={isMutating} title={t('dictionary.delete')} className="p-2 text-red-500 hover:bg-red-500/10 rounded-full">
+                                                    <TrashIcon className="w-5 h-5"/>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </>
+                                )}
                             </tr>
                         ))}
                     </tbody>

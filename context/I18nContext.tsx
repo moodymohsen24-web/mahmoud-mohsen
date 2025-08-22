@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 
 // --- Embedded Translations ---
@@ -147,6 +146,7 @@ const enTranslations = {
     "textCheck.finalResult": "Final Result",
     "textCheck.stats": "{{count}} changes made",
     "textCheck.noCorrections": "No changes were needed in this step.",
+    "textCheck.step3.noMatches": "No words from your dictionary were found in the text.",
     "textCheck.copySuccess": "Text copied to clipboard!",
     "textCheck.button.copy": "Copy Text",
     "textCheck.button.download": "Download .txt",
@@ -170,6 +170,8 @@ const enTranslations = {
     "dictionary.table.replacement": "Replacement",
     "dictionary.table.actions": "Actions",
     "dictionary.delete": "Delete",
+    "dictionary.edit": "Edit",
+    "dictionary.save": "Save",
     "dictionary.empty": "Your dictionary is empty. Add a word to get started.",
     "dictionary.error.alreadyExists": "This word already exists in your dictionary.",
     "settings.title": "Settings",
@@ -516,6 +518,7 @@ const arTranslations = {
     "textCheck.finalResult": "النتيجة النهائية",
     "textCheck.stats": "تم إجراء {{count}} تغييرات",
     "textCheck.noCorrections": "لم تكن هناك حاجة لأي تغييرات في هذه الخطوة.",
+    "textCheck.step3.noMatches": "لم يتم العثور على أي كلمات من قاموسك في النص.",
     "textCheck.copySuccess": "تم نسخ النص إلى الحافظة!",
     "textCheck.button.copy": "نسخ النص",
     "textCheck.button.download": "تنزيل ملف txt.",
@@ -539,6 +542,8 @@ const arTranslations = {
     "dictionary.table.replacement": "البديلة",
     "dictionary.table.actions": "الإجراءات",
     "dictionary.delete": "حذف",
+    "dictionary.edit": "تعديل",
+    "dictionary.save": "حفظ",
     "dictionary.empty": "قاموسك فارغ. أضف كلمة للبدء.",
     "dictionary.error.alreadyExists": "هذه الكلمة موجودة بالفعل في قاموسك.",
     "settings.title": "الإعدادات",

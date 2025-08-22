@@ -164,6 +164,7 @@
     "textCheck.finalResult": "Final Result",
     "textCheck.stats": "{{count}} changes made",
     "textCheck.noCorrections": "No changes were needed in this step.",
+    "textCheck.step3.noMatches": "No words from your dictionary were found in the text.",
     "textCheck.copySuccess": "Text copied to clipboard!",
     "textCheck.button.copy": "Copy Text",
     "textCheck.button.download": "Download .txt",
@@ -188,6 +189,8 @@
     "dictionary.table.replacement": "Replacement",
     "dictionary.table.actions": "Actions",
     "dictionary.delete": "Delete",
+    "dictionary.edit": "Edit",
+    "dictionary.save": "Save",
     "dictionary.empty": "Your dictionary is empty. Add a word to get started.",
     "dictionary.error.alreadyExists": "This word already exists in your dictionary.",
 

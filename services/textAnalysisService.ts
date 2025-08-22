@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type } from '@google/genai';
 import type { AnalysisResponse, AiModel } from '../types';
 import { dictionaryService } from './dictionaryService';
@@ -89,25 +88,38 @@ Text: "${text}"`;
       return { processedText: text, correctionsCount: 0 };
     }
     
-    let processedText = text;
+    const removeDiacritics = (str: string) => {
+        // This regex removes Arabic diacritical marks.
+        return str.replace(/[\u064B-\u0652]/g, '');
+    };
 
-    const escapeRegExp = (string: string) => {
-        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
+    // Split the text by spaces and common punctuation, keeping the delimiters.
+    // This allows us to process words individually while preserving structure.
+    const parts = text.split(/(\s+|[.,!?:;،ـ'"()])/);
 
-    for (const [original, replacement] of Object.entries(customDictionary)) {
-      const escapedOriginal = escapeRegExp(original);
-      // The original regex `\b${original}\b` does not work for Arabic text.
-      // This new regex uses Unicode property escapes (`\p{L}` for any letter) and negative lookarounds
-      // to correctly match whole words in any language, including Arabic. The 'u' flag is for unicode support.
-      const regex = new RegExp(`(?<!\\p{L})${escapedOriginal}(?!\\p{L})`, 'gu');
-      
-      const matches = processedText.match(regex);
-      if (matches) {
-        correctionsCount += matches.length;
-        processedText = processedText.replace(regex, `<ch>${replacement}</ch>`);
-      }
-    }
+    const processedParts = parts.map(part => {
+        // If the part is whitespace or punctuation, return it unchanged.
+        if (/^\s*$|^[.,!?:;،ـ'"()]$/.test(part)) {
+            return part;
+        }
+
+        const baseWord = removeDiacritics(part);
+        
+        // Check if the base (diacritic-free) version of the word exists in the dictionary.
+        if (Object.prototype.hasOwnProperty.call(customDictionary, baseWord)) {
+            correctionsCount++;
+            const replacement = customDictionary[baseWord];
+            // Store the original word (with diacritics) for the tooltip.
+            const safeOriginal = part.replace(/"/g, '&quot;');
+            return `<ch data-original="${safeOriginal}">${replacement}</ch>`;
+        }
+        
+        // If no match is found, return the original part (word).
+        return part;
+    });
+
+    const processedText = processedParts.join('');
+    
     return { processedText, correctionsCount };
   },
 
