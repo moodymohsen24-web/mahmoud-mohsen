@@ -23,6 +23,73 @@ import { SparklesIcon } from '../components/icons/SparklesIcon';
 import { PlayIcon } from '../components/icons/PlayIcon';
 import { InformationCircleIcon } from '../components/icons/InformationCircleIcon';
 
+const DB_NAME = 'masmoo-tts-cache';
+const STORE_NAME = 'audio-chunks';
+const DB_VERSION = 1;
+
+let dbPromise: Promise<IDBDatabase> | null = null;
+
+const getDb = (): Promise<IDBDatabase> => {
+    if (!dbPromise) {
+        dbPromise = new Promise((resolve, reject) => {
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => resolve(request.result);
+            request.onupgradeneeded = (event) => {
+                const db = (event.target as IDBOpenDBRequest).result;
+                if (!db.objectStoreNames.contains(STORE_NAME)) {
+                    db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                }
+            };
+        });
+    }
+    return dbPromise;
+};
+
+const saveChunkToDb = async (userId: string, chunkId: number, blob: Blob): Promise<void> => {
+    const db = await getDb();
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    const key = `${userId}-${chunkId}`;
+    store.put({ id: key, blob });
+    return new Promise((resolve, reject) => {
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+    });
+};
+
+const getChunkFromDb = async (userId: string, chunkId: number): Promise<Blob | null> => {
+    const db = await getDb();
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const key = `${userId}-${chunkId}`;
+    const request = store.get(key);
+    return new Promise((resolve, reject) => {
+        request.onsuccess = () => resolve(request.result ? request.result.blob : null);
+        request.onerror = () => reject(request.error);
+    });
+};
+
+const clearAllUserChunksFromDb = async (userId: string): Promise<void> => {
+    const db = await getDb();
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    const request = store.openCursor();
+    return new Promise((resolve, reject) => {
+        request.onsuccess = (event) => {
+            const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
+            if (cursor) {
+                if (String(cursor.key).startsWith(`${userId}-`)) {
+                    cursor.delete();
+                }
+                cursor.continue();
+            }
+        };
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+    });
+};
+
 type ConvertedChunk = {
   id: number;
   originalText: string;
@@ -139,8 +206,22 @@ const TextToSpeechPage: React.FC = () => {
                     setFullText(savedState.fullText || '');
                     setUiSettings(savedState.uiSettings || uiSettings);
                     setLogMessages(savedState.logMessages || []);
-                    const chunksFromStorage = (savedState.convertedChunks || []).map((c: ConvertedChunk) => ({ ...c, audioUrl: undefined, blob: undefined, status: c.status === 'success' ? 'pending' : c.status }));
-                    setConvertedChunks(chunksFromStorage);
+                    const chunksFromStorage: ConvertedChunk[] = (savedState.convertedChunks || []);
+                    if (chunksFromStorage.length > 0) {
+                        // FIX: Add an explicit return type `Promise<ConvertedChunk>` to the async map function to correct a TypeScript type inference issue.
+                        Promise.all(chunksFromStorage.map(async (chunk: ConvertedChunk): Promise<ConvertedChunk> => {
+                            if (chunk.status === 'success' && user?.id) {
+                                const blob = await getChunkFromDb(user.id, chunk.id);
+                                if (blob) {
+                                    return { ...chunk, blob, audioUrl: URL.createObjectURL(blob) };
+                                }
+                                return { ...chunk, status: 'pending', blob: undefined, audioUrl: undefined };
+                            }
+                            return chunk;
+                        })).then(updatedChunks => setConvertedChunks(updatedChunks));
+                    } else {
+                        setConvertedChunks([]);
+                    }
                 } catch (e) { console.error("Failed to parse saved session", e); }
             }
             
@@ -148,7 +229,7 @@ const TextToSpeechPage: React.FC = () => {
         }
     };
     loadData();
-  }, [user]);
+  }, [user, LOCAL_STORAGE_KEY]);
 
   // Save session to local storage on changes
   useEffect(() => {
@@ -161,17 +242,20 @@ const TextToSpeechPage: React.FC = () => {
           };
           localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stateToSave));
       }
-  }, [fullText, uiSettings, logMessages, convertedChunks, user, isLoading]);
+  }, [fullText, uiSettings, logMessages, convertedChunks, user, isLoading, LOCAL_STORAGE_KEY]);
   
-  const handleClearSession = () => {
+  const handleClearSession = useCallback(async () => {
     localStorage.removeItem(LOCAL_STORAGE_KEY);
+    if (user) {
+        await clearAllUserChunksFromDb(user.id);
+    }
     setFullText('');
     setLogMessages([]);
     setConvertedChunks([]);
     setProgress(0);
     setCurrentProcess(0);
     showToast(t('tts.session.cleared'));
-  };
+  }, [user, t, LOCAL_STORAGE_KEY]);
 
   useEffect(() => {
     if (location.state?.textToConvert) {
@@ -180,7 +264,7 @@ const TextToSpeechPage: React.FC = () => {
       log(t('tts.general.log.textLoadedFromCheck'), 'success');
       window.history.replaceState({}, document.title);
     }
-  }, [location.state, t, log]);
+  }, [location.state, t, log, handleClearSession]);
   
   useEffect(() => {
     setShowMultilingualWarning(!uiSettings.modelId.includes('multilingual'));
@@ -449,6 +533,9 @@ const TextToSpeechPage: React.FC = () => {
 
         if (result.success && result.audioUrl && result.audioBlob) { 
             log(t('tts.general.log.chunkSuccess', { id: chunk.id }), 'success');
+            if (user) {
+                await saveChunkToDb(user.id, chunk.id, result.audioBlob);
+            }
             setConvertedChunks(prev => prev.map(c => c.id === chunk.id ? { ...c, status: 'success', audioUrl: result.audioUrl, blob: result.audioBlob } : c));
             success++;
         }
@@ -464,7 +551,7 @@ const TextToSpeechPage: React.FC = () => {
   
   const handleRetryChunk = async (chunkId: number) => {
     const chunkToRetry = convertedChunks.find(c => c.id === chunkId);
-    if (!chunkToRetry) return;
+    if (!chunkToRetry || !user) return;
     runningRef.current = true;
     log(t('tts.general.log.retryingChunk', { id: chunkId }), 'info');
     setConvertedChunks(prev => prev.map(c => c.id === chunkId ? { ...c, status: 'converting' } : c));
@@ -472,6 +559,7 @@ const TextToSpeechPage: React.FC = () => {
     runningRef.current = isRunning;
     if (result.success && result.audioUrl && result.audioBlob) {
         log(t('tts.general.log.retrySuccess', { id: chunkId }), 'success');
+        await saveChunkToDb(user.id, chunkId, result.audioBlob);
         setConvertedChunks(prev => prev.map(c => c.id === chunkId ? { ...c, status: 'success', audioUrl: result.audioUrl, blob: result.audioBlob } : c));
     } else {
         log(t('tts.general.log.retryFail', { id: chunkId }), 'error');
