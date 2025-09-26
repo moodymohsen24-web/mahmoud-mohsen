@@ -395,6 +395,7 @@
     "tts.error.apiError": "فشل التحويل بسبب خطأ في الواجهة البرمجية: {{message}}",
     "tts.error.segmentEmpty": "لا يمكن إنشاء الصوت: المقطع المحسوب فارغ.",
     "tts.error.minCharsTailOverride": "تم تجاوز التحقق من الحد الأدنى للأحرف للمقطع الأخير.",
+    "tts.ssmlGuideLink": "هل تحتاج إلى مزيد من التحكم؟ تحقق من دليل SSML الخاص بنا.",
 
     "planManagement.title": "إدارة خطط الاشتراك",
     "planManagement.subtitle": "إنشاء وتعديل وحذف خطط الاشتراك لمستخدميك.",
@@ -441,5 +442,29 @@
 
     "paymentCancelled.title": "تم إلغاء الدفع",
     "paymentCancelled.message": "تم إلغاء عملية الدفع الخاصة بك. يمكنك المحاولة مرة أخرى من صفحة الاشتراكات.",
-    "paymentCancelled.backToSubscription": "العودة إلى خطط الاشتراك"
+    "paymentCancelled.backToSubscription": "العودة إلى خطط الاشتراك",
+
+    "ssmlGuide.title": "دليل SSML: التحكم الصوتي الاحترافي",
+    "ssmlGuide.subtitle": "تعلم كيفية استخدام لغة توصيف تركيب الكلام (SSML) لضبط إخراج الصوت بدقة.",
+    "ssmlGuide.whatIs.title": "ما هي SSML؟",
+    "ssmlGuide.whatIs.description": "لغة SSML تشبه HTML، ولكن للصوت. هي لغة توصيف تتيح لك التحكم في جوانب تركيب الكلام مثل النطق، مستوى الصوت، طبقة الصوت، والسرعة. بدلاً من الاعتماد فقط على تفسير الذكاء الاصطناعي، أنت تصبح المخرج الصوتي.",
+    "ssmlGuide.examples.title": "أمثلة عملية",
+    "ssmlGuide.example.plain": "نص عادي",
+    "ssmlGuide.example.ssml": "مع SSML",
+    "ssmlGuide.break.title": "التحكم في الوقفات",
+    "ssmlGuide.break.description": "استخدم وسم <break> لإضافة وقفات. يمكنك تحديد المدة بالثواني (s) أو أجزاء من الثانية (ms).",
+    "ssmlGuide.break.plain": "الاجتماع في الساعة 10 صباحًا تمامًا.",
+    "ssmlGuide.break.ssml": "الاجتماع في الساعة <break time=\"500ms\"/> 10 صباحًا تمامًا.",
+    "ssmlGuide.emphasis.title": "إضافة التشديد",
+    "ssmlGuide.emphasis.description": "استخدم وسم <emphasis> لإبراز الكلمات. يمكن أن يكون 'level' (المستوى) 'strong' (قوي)، 'moderate' (متوسط)، أو 'reduced' (مخفف).",
+    "ssmlGuide.emphasis.plain": "هذه فرصة هائلة.",
+    "ssmlGuide.emphasis.ssml": "هذه فرصة <emphasis level=\"strong\">هائلة</emphasis>.",
+    "ssmlGuide.sayAs.title": "تفسير النص",
+    "ssmlGuide.sayAs.description": "استخدم <say-as> لتوضيح كيفية قراءة الأرقام، التواريخ، أو الاختصارات. يمكن أن تكون 'interpret-as' (تفسير كـ) 'cardinal' (عدد أصلي)، 'ordinal' (عدد ترتيبي)، 'date' (تاريخ)، إلخ.",
+    "ssmlGuide.sayAs.plain": "النتيجة النهائية كانت 10-0 في 1/5/2023.",
+    "ssmlGuide.sayAs.ssml": "النتيجة النهائية كانت <say-as interpret-as=\"cardinal\">10</say-as> مقابل <say-as interpret-as=\"cardinal\">0</say-as> في <say-as interpret-as=\"date\" format=\"mdy\">1/5/2023</say-as>.",
+    "ssmlGuide.prosody.title": "ضبط خصائص الصوت",
+    "ssmlGuide.prosody.description": "وسم <prosody> قوي جدًا. يتيح لك التحكم في 'rate' (السرعة)، 'pitch' (طبقة الصوت)، و 'volume' (مستوى الصوت) للكلام.",
+    "ssmlGuide.prosody.plain": "يمكن قراءة هذه الجملة بطرق مختلفة.",
+    "ssmlGuide.prosody.ssml": "<prosody rate=\"slow\" pitch=\"-10%\">يمكن قراءة هذه الجملة ببطء وبطبقة صوت منخفضة.</prosody> <prosody rate=\"120%\" volume=\"loud\">أو يمكن أن تكون سريعة وبصوت عالٍ!</prosody>"
 }

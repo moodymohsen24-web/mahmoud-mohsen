@@ -399,6 +399,7 @@
     "tts.addToDictionary.success": "Word added to dictionary.",
     "tts.addToDictionary.error": "Failed to add word.",
     "tts.addToDictionary.log": "Added '{{original}}' -> '{{replacement}}' to dictionary.",
+    "tts.ssmlGuideLink": "Need more control? Check out our SSML Guide.",
 
     "planManagement.title": "Subscription Plan Management",
     "planManagement.subtitle": "Create, edit, and delete subscription plans for your users.",
@@ -445,5 +446,29 @@
 
     "paymentCancelled.title": "Payment Cancelled",
     "paymentCancelled.message": "Your payment process was cancelled. You can try again from the subscription page.",
-    "paymentCancelled.backToSubscription": "Back to Subscription Plans"
+    "paymentCancelled.backToSubscription": "Back to Subscription Plans",
+
+    "ssmlGuide.title": "SSML Guide: Professional Voice Control",
+    "ssmlGuide.subtitle": "Learn how to use Speech Synthesis Markup Language (SSML) to fine-tune your audio output.",
+    "ssmlGuide.whatIs.title": "What is SSML?",
+    "ssmlGuide.whatIs.description": "SSML is like HTML, but for audio. It's a markup language that allows you to control aspects of speech synthesis such as pronunciation, volume, pitch, and rate. Instead of just relying on the AI's interpretation, you become the voice director.",
+    "ssmlGuide.examples.title": "Practical Examples",
+    "ssmlGuide.example.plain": "Plain Text",
+    "ssmlGuide.example.ssml": "With SSML",
+    "ssmlGuide.break.title": "Controlling Pauses",
+    "ssmlGuide.break.description": "Use the <break> tag to add pauses. You can specify the duration in seconds (s) or milliseconds (ms).",
+    "ssmlGuide.break.plain": "The meeting is at 10 AM sharp.",
+    "ssmlGuide.break.ssml": "The meeting is at <break time=\"500ms\"/> 10 AM sharp.",
+    "ssmlGuide.emphasis.title": "Adding Emphasis",
+    "ssmlGuide.emphasis.description": "Use the <emphasis> tag to make words stand out. The 'level' can be 'strong', 'moderate', or 'reduced'.",
+    "ssmlGuide.emphasis.plain": "This is a huge opportunity.",
+    "ssmlGuide.emphasis.ssml": "This is a <emphasis level=\"strong\">huge</emphasis> opportunity.",
+    "ssmlGuide.sayAs.title": "Interpreting Text",
+    "ssmlGuide.sayAs.description": "Use <say-as> to clarify how to read numbers, dates, or acronyms. 'interpret-as' can be 'cardinal', 'ordinal', 'date', etc.",
+    "ssmlGuide.sayAs.plain": "The final score was 10-0 on 1/5/2023.",
+    "ssmlGuide.sayAs.ssml": "The final score was <say-as interpret-as=\"cardinal\">10</say-as> to <say-as interpret-as=\"cardinal\">0</say-as> on <say-as interpret-as=\"date\" format=\"mdy\">1/5/2023</say-as>.",
+    "ssmlGuide.prosody.title": "Adjusting Voice Characteristics",
+    "ssmlGuide.prosody.description": "The <prosody> tag is powerful. It lets you control the 'rate' (speed), 'pitch' (high/low), and 'volume' of the speech.",
+    "ssmlGuide.prosody.plain": "This sentence can be read in different ways.",
+    "ssmlGuide.prosody.ssml": "<prosody rate=\"slow\" pitch=\"-10%\">This sentence can be read slowly and in a lower pitch.</prosody> <prosody rate=\"120%\" volume=\"loud\">Or it can be fast and loud!</prosody>"
 }

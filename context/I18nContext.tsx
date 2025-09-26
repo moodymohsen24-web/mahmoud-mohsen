@@ -368,6 +368,7 @@ const enTranslations = {
     "tts.addToDictionary.success": "Word added to dictionary.",
     "tts.addToDictionary.error": "Failed to add word.",
     "tts.addToDictionary.log": "Added '{{original}}' -> '{{replacement}}' to dictionary.",
+    "tts.ssmlGuideLink": "Need more control? Check out our SSML Guide.",
     "tts.enhance.enhancing": "Enhancing...",
     "tts.enhance.success": "Text enhanced successfully.",
     "tts.enhance.error": "Enhancement failed.",
@@ -414,7 +415,30 @@ const enTranslations = {
     "paymentSuccess.backToDashboard": "Back to Dashboard",
     "paymentCancelled.title": "Payment Cancelled",
     "paymentCancelled.message": "Your payment process was cancelled. You can try again from the subscription page.",
-    "paymentCancelled.backToSubscription": "Back to Subscription Plans"
+    "paymentCancelled.backToSubscription": "Back to Subscription Plans",
+    "ssmlGuide.title": "SSML Guide: Professional Voice Control",
+    "ssmlGuide.subtitle": "Learn how to use Speech Synthesis Markup Language (SSML) to fine-tune your audio output.",
+    "ssmlGuide.whatIs.title": "What is SSML?",
+    "ssmlGuide.whatIs.description": "SSML is like HTML, but for audio. It's a markup language that allows you to control aspects of speech synthesis such as pronunciation, volume, pitch, and rate. Instead of just relying on the AI's interpretation, you become the voice director.",
+    "ssmlGuide.examples.title": "Practical Examples",
+    "ssmlGuide.example.plain": "Plain Text",
+    "ssmlGuide.example.ssml": "With SSML",
+    "ssmlGuide.break.title": "Controlling Pauses",
+    "ssmlGuide.break.description": "Use the <break> tag to add pauses. You can specify the duration in seconds (s) or milliseconds (ms).",
+    "ssmlGuide.break.plain": "The meeting is at 10 AM sharp.",
+    "ssmlGuide.break.ssml": "The meeting is at <break time=\"500ms\"/> 10 AM sharp.",
+    "ssmlGuide.emphasis.title": "Adding Emphasis",
+    "ssmlGuide.emphasis.description": "Use the <emphasis> tag to make words stand out. The 'level' can be 'strong', 'moderate', or 'reduced'.",
+    "ssmlGuide.emphasis.plain": "This is a huge opportunity.",
+    "ssmlGuide.emphasis.ssml": "This is a <emphasis level=\"strong\">huge</emphasis> opportunity.",
+    "ssmlGuide.sayAs.title": "Interpreting Text",
+    "ssmlGuide.sayAs.description": "Use <say-as> to clarify how to read numbers, dates, or acronyms. 'interpret-as' can be 'cardinal', 'ordinal', 'date', etc.",
+    "ssmlGuide.sayAs.plain": "The final score was 10-0 on 1/5/2023.",
+    "ssmlGuide.sayAs.ssml": "The final score was <say-as interpret-as=\"cardinal\">10</say-as> to <say-as interpret-as=\"cardinal\">0</say-as> on <say-as interpret-as=\"date\" format=\"mdy\">1/5/2023</say-as>.",
+    "ssmlGuide.prosody.title": "Adjusting Voice Characteristics",
+    "ssmlGuide.prosody.description": "The <prosody> tag is powerful. It lets you control the 'rate' (speed), 'pitch' (high/low), and 'volume' of the speech.",
+    "ssmlGuide.prosody.plain": "This sentence can be read in different ways.",
+    "ssmlGuide.prosody.ssml": "<prosody rate=\"slow\" pitch=\"-10%\">This sentence can be read slowly and in a lower pitch.</prosody> <prosody rate=\"120%\" volume=\"loud\">Or it can be fast and loud!</prosody>"
 };
 const arTranslations = {
     "header.brand": "مسموع",
@@ -786,6 +810,7 @@ const arTranslations = {
     "tts.error.apiError": "فشل التحويل بسبب خطأ في الواجهة البرمجية: {{message}}",
     "tts.error.segmentEmpty": "لا يمكن إنشاء الصوت: المقطع المحسوب فارغ.",
     "tts.error.minCharsTailOverride": "تم تجاوز التحقق من الحد الأدنى للأحرف للمقطع الأخير.",
+    "tts.ssmlGuideLink": "هل تحتاج إلى مزيد من التحكم؟ تحقق من دليل SSML الخاص بنا.",
 
     "planManagement.title": "إدارة خطط الاشتراك",
     "planManagement.subtitle": "إنشاء وتعديل وحذف خطط الاشتراك لمستخدميك.",
@@ -832,61 +857,78 @@ const arTranslations = {
 
     "paymentCancelled.title": "تم إلغاء الدفع",
     "paymentCancelled.message": "تم إلغاء عملية الدفع الخاصة بك. يمكنك المحاولة مرة أخرى من صفحة الاشتراكات.",
-    "paymentCancelled.backToSubscription": "العودة إلى خطط الاشتراك"
-};
+    "paymentCancelled.backToSubscription": "العودة إلى خطط الاشتراك",
 
-type Language = 'en' | 'ar';
+    "ssmlGuide.title": "دليل SSML: التحكم الصوتي الاحترافي",
+    "ssmlGuide.subtitle": "تعلم كيفية استخدام لغة توصيف تركيب الكلام (SSML) لضبط إخراج الصوت بدقة.",
+    "ssmlGuide.whatIs.title": "ما هي SSML؟",
+    "ssmlGuide.whatIs.description": "لغة SSML تشبه HTML، ولكن للصوت. هي لغة توصيف تتيح لك التحكم في جوانب تركيب الكلام مثل النطق، مستوى الصوت، طبقة الصوت، والسرعة. بدلاً من الاعتماد فقط على تفسير الذكاء الاصطناعي، أنت تصبح المخرج الصوتي.",
+    "ssmlGuide.examples.title": "أمثلة عملية",
+    "ssmlGuide.example.plain": "نص عادي",
+    "ssmlGuide.example.ssml": "مع SSML",
+    "ssmlGuide.break.title": "التحكم في الوقفات",
+    "ssmlGuide.break.description": "استخدم وسم <break> لإضافة وقفات. يمكنك تحديد المدة بالثواني (s) أو أجزاء من الثانية (ms).",
+    "ssmlGuide.break.plain": "الاجتماع في الساعة 10 صباحًا تمامًا.",
+    "ssmlGuide.break.ssml": "الاجتماع في الساعة <break time=\"500ms\"/> 10 صباحًا تمامًا.",
+    "ssmlGuide.emphasis.title": "إضافة التشديد",
+    "ssmlGuide.emphasis.description": "استخدم وسم <emphasis> لإبراز الكلمات. يمكن أن يكون 'level' (المستوى) 'strong' (قوي)، 'moderate' (متوسط)، أو 'reduced' (مخفف).",
+    "ssmlGuide.emphasis.plain": "هذه فرصة هائلة.",
+    "ssmlGuide.emphasis.ssml": "هذه فرصة <emphasis level=\"strong\">هائلة</emphasis>.",
+    "ssmlGuide.sayAs.title": "تفسير النص",
+    "ssmlGuide.sayAs.description": "استخدم <say-as> لتوضيح كيفية قراءة الأرقام، التواريخ، أو الاختصارات. يمكن أن تكون 'interpret-as' (تفسير كـ) 'cardinal' (عدد أصلي)، 'ordinal' (عدد ترتيبي)، 'date' (تاريخ)، إلخ.",
+    "ssmlGuide.sayAs.plain": "النتيجة النهائية كانت 10-0 في 1/5/2023.",
+    "ssmlGuide.sayAs.ssml": "النتيجة النهائية كانت <say-as interpret-as=\"cardinal\">10</say-as> مقابل <say-as interpret-as=\"cardinal\">0</say-as> في <say-as interpret-as=\"date\" format=\"mdy\">1/5/2023</say-as>.",
+    "ssmlGuide.prosody.title": "ضبط خصائص الصوت",
+    "ssmlGuide.prosody.description": "وسم <prosody> قوي جدًا. يتيح لك التحكم في 'rate' (السرعة)، 'pitch' (طبقة الصوت)، و 'volume' (مستوى الصوت) للكلام.",
+    "ssmlGuide.prosody.plain": "يمكن قراءة هذه الجملة بطرق مختلفة.",
+    "ssmlGuide.prosody.ssml": "<prosody rate=\"slow\" pitch=\"-10%\">يمكن قراءة هذه الجملة ببطء وبطبقة صوت منخفضة.</prosody> <prosody rate=\"120%\" volume=\"loud\">أو يمكن أن تكون سريعة وبصوت عالٍ!</prosody>"
+}
 
+// FIX: Add missing provider and context exports
 interface I18nContextType {
-  language: Language;
-  setLanguage: (language: Language) => void;
-  t: (key: string, replacements?: Record<string, string | number>) => string;
+  language: 'en' | 'ar';
+  setLanguage: (lang: 'en' | 'ar') => void;
+  t: (key: string, params?: Record<string, string | number>) => string;
 }
 
 export const I18nContext = createContext<I18nContextType | null>(null);
 
+const translations: Record<string, typeof enTranslations | typeof arTranslations> = {
+  en: enTranslations,
+  ar: arTranslations,
+};
+
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguageState] = useState<Language>(() => {
-    const savedLanguage = localStorage.getItem('language');
-    // Ensure the saved language is one of the allowed types
-    if (savedLanguage === 'en' || savedLanguage === 'ar') {
-      return savedLanguage;
+  const [language, setLanguageState] = useState<'en' | 'ar'>(() => {
+    const savedLang = localStorage.getItem('language');
+    if (savedLang === 'en' || savedLang === 'ar') {
+      return savedLang;
     }
-    // Default to English if no valid language is saved
-    return 'en';
+    return 'ar';
   });
 
-  const setLanguage = useCallback((lang: Language) => {
-    localStorage.setItem('language', lang);
-    setLanguageState(lang);
-  }, []);
-
   useEffect(() => {
+    localStorage.setItem('language', language);
     document.documentElement.lang = language;
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
   }, [language]);
 
-  const t = useCallback((key: string, replacements?: Record<string, string | number>): string => {
-    const translations = language === 'ar' ? arTranslations : enTranslations;
-    let translation = translations[key as keyof typeof translations] || key;
+  const setLanguage = (lang: 'en' | 'ar') => {
+    setLanguageState(lang);
+  };
 
-    if (replacements) {
-      Object.keys(replacements).forEach(placeholder => {
-        translation = translation.replace(
-          new RegExp(`{{${placeholder}}}`, 'g'),
-          String(replacements[placeholder])
-        );
+  const t = useCallback((key: string, params?: Record<string, string | number>) => {
+    const langTranslations = translations[language] as Record<string, string>;
+    let translation = langTranslations[key] || key;
+    if (params) {
+      Object.keys(params).forEach(paramKey => {
+        translation = translation.replace(new RegExp(`{{${paramKey}}}`, 'g'), String(params[paramKey]));
       });
     }
-
     return translation;
   }, [language]);
 
-  const value = useMemo(() => ({
-    language,
-    setLanguage,
-    t
-  }), [language, setLanguage, t]);
+  const value = useMemo(() => ({ language, setLanguage, t }), [language, t]);
 
   return (
     <I18nContext.Provider value={value}>

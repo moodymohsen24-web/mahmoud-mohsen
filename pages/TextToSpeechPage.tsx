@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { useI18n } from '../hooks/useI18n';
 import { useAuth } from '../hooks/useAuth';
 import { settingsService } from '../services/settingsService';
@@ -620,14 +620,9 @@ const TextToSpeechPage: React.FC = () => {
 
   // --- Render-related calculations ---
 
-  // FIX: Operator '+' cannot be applied to types 'unknown' and 'number'.
-  // Safely reduce the apiKeyBalance by ensuring all values are treated as numbers.
-  const totalBalance = Object.values(apiKeyBalance).reduce((sum, bal) => {
-    // Explicitly handle non-numeric or invalid values from the balance record.
-    if (typeof bal !== 'number' || isNaN(bal)) {
-      return sum;
-    }
-    return sum + Math.max(0, bal);
+  const totalBalance = Object.values(apiKeyBalance).reduce((sum: number, bal: unknown) => {
+    const numericBal = Number(bal);
+    return sum + (isNaN(numericBal) ? 0 : Math.max(0, numericBal));
   }, 0);
   const successfulChunks = convertedChunks.filter(c => c.status === 'success');
   const isSelectAllForMergeChecked = successfulChunks.length > 0 && selectedForMerge.size === successfulChunks.length;
@@ -685,7 +680,13 @@ const TextToSpeechPage: React.FC = () => {
                         <Input containerClassName="sm:col-span-2" label={t('tts.voiceTuning.stability')} type="range" min="0" max="1" step="0.01" value={uiSettings.stability} onChange={e => setUiSettings(s => ({...s, stability: parseFloat(e.target.value)}))} title={areVoiceSettingsSupported ? String(uiSettings.stability) : t('tts.voiceTuning.unavailable')} disabled={!areVoiceSettingsSupported}/>
                         <Input containerClassName="sm:col-span-2" label={t('tts.voiceTuning.similarityBoost')} type="range" min="0" max="1" step="0.01" value={uiSettings.similarityBoost} onChange={e => setUiSettings(s => ({...s, similarityBoost: parseFloat(e.target.value)}))} title={areVoiceSettingsSupported ? String(uiSettings.similarityBoost) : t('tts.voiceTuning.unavailable')} disabled={!areVoiceSettingsSupported}/>
                         <Input containerClassName="sm:col-span-2" label={t('tts.advancedAudio.speed')} type="range" min="0.5" max="2.0" step="0.05" value={uiSettings.speed} onChange={e => setUiSettings(s => ({...s, speed: parseFloat(e.target.value)}))} title={uiSettings.modelId === 'eleven_multilingual_v3' ? `${uiSettings.speed.toFixed(2)}x` : t('tts.advancedAudio.speed.unavailable')} disabled={uiSettings.modelId !== 'eleven_multilingual_v3'}/>
-                        <div className="sm:col-span-2 flex justify-end gap-2"><button type="button" onClick={handleResetAdvancedSettings} className="btn-secondary">{t('tts.advancedAudio.resetDefaults')}</button></div>
+                        <div className="sm:col-span-2 flex justify-between items-center">
+                          <Link to="/ssml-guide" className="text-sm text-highlight dark:text-dark-highlight hover:underline flex items-center gap-1.5">
+                            <InformationCircleIcon className="w-5 h-5"/>
+                            {t('tts.ssmlGuideLink')}
+                          </Link>
+                          <button type="button" onClick={handleResetAdvancedSettings} className="btn-secondary">{t('tts.advancedAudio.resetDefaults')}</button>
+                        </div>
                     </div>
                 )}
                 {activeSettingsTab === 'chunking' && (
