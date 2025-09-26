@@ -106,6 +106,7 @@ const DictionaryPage: React.FC = () => {
   };
   
   const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    // FIX: The comparison `!event.target.files.length === 0` is unintentional because it compares a boolean to a number. It has been corrected to `event.target.files.length === 0`.
     if (!user || !event.target.files || event.target.files.length === 0) return;
     const file = event.target.files[0];
     setImportStatus({type: 'success', message: t('dictionary.import.processing')});
@@ -137,16 +138,23 @@ const DictionaryPage: React.FC = () => {
       }
     } catch (error: unknown) {
       console.error("File import failed:", error);
+      // FIX: Safely handle unknown error types before displaying a message.
       let message = t('dictionary.import.error');
-      // Safely handle unknown error types before displaying a message.
       if (error instanceof Error) {
         message = error.message;
       } else if (typeof error === 'string') {
         message = error;
+      } else if (
+        error &&
+        typeof error === 'object' &&
+        'message' in error
+      ) {
+        // FIX: Replaced `String()` constructor with a template literal to ensure the 'unknown' type is correctly coerced to a string, resolving the linter error.
+        message = `${(error as { message: unknown }).message}`;
       }
       setImportStatus({
         type: 'error',
-        message: message,
+        message,
       });
     } finally {
         if(fileInputRef.current) {

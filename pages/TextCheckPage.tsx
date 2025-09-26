@@ -64,6 +64,25 @@ const TextStatsDisplay: React.FC<{ text: string }> = ({ text }) => {
     );
 };
 
+const withTimeout = <T,>(promise: Promise<T>, ms: number): Promise<T> => {
+    return new Promise((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+            reject(new Error(`Promise timed out after ${ms} ms`));
+        }, ms);
+
+        promise.then(
+            (res) => {
+                clearTimeout(timeoutId);
+                resolve(res);
+            },
+            (err) => {
+                clearTimeout(timeoutId);
+                reject(err);
+            }
+        );
+    });
+};
+
 
 const TextCheckPage: React.FC = () => {
     const { t } = useI18n();
@@ -87,6 +106,9 @@ const TextCheckPage: React.FC = () => {
     const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
     const [newProjectName, setNewProjectName] = useState('');
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+    const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
+    
+    const SESSION_STORAGE_KEY = `text-check-session-${user?.id}`;
 
     const handleReset = useCallback(() => {
         setCurrentStep(0);
@@ -94,12 +116,21 @@ const TextCheckPage: React.FC = () => {
         setAnalysisResults([null, null, null]);
         setError('');
         setProject(null);
-    }, []);
+        if (user) {
+            localStorage.removeItem(SESSION_STORAGE_KEY);
+        }
+        navigate('/text-check', { replace: true });
+    }, [user, navigate, SESSION_STORAGE_KEY]);
 
+    // Load session or project
     useEffect(() => {
-        const loadProject = async () => {
-            if (projectId && user) {
-                setIsPageLoading(true);
+        const loadData = async () => {
+            if (!user) return;
+            setIsPageLoading(true);
+
+            if (projectId) {
+                // Loading a specific project
+                localStorage.removeItem(SESSION_STORAGE_KEY); // Clear any stray session
                 try {
                     const loadedProject = await projectService.getProjectById(projectId);
                     if (loadedProject && loadedProject.user_id === user.id) {
@@ -109,21 +140,49 @@ const TextCheckPage: React.FC = () => {
                         setCurrentStep(loadedProject.current_step || 0);
                         setSaveStatus('saved');
                     } else {
-                        navigate('/text-check'); // Project not found or doesn't belong to user
+                        navigate('/text-check');
                     }
                 } catch (e) {
                     console.error("Failed to load project", e);
                     navigate('/projects');
-                } finally {
-                    setIsPageLoading(false);
                 }
             } else {
-                handleReset();
-                setIsPageLoading(false);
+                // No project ID, attempt to load from session storage
+                const savedSessionRaw = localStorage.getItem(SESSION_STORAGE_KEY);
+                if (savedSessionRaw) {
+                    try {
+                        const savedSession = JSON.parse(savedSessionRaw);
+                        setOriginalText(savedSession.originalText || '');
+                        setAnalysisResults(savedSession.analysisResults || [null, null, null]);
+                        setCurrentStep(savedSession.currentStep || 0);
+                        setSaveStatus('idle'); // Session is always "unsaved"
+                    } catch (e) {
+                        console.error("Failed to parse saved session", e);
+                        localStorage.removeItem(SESSION_STORAGE_KEY);
+                    }
+                } else {
+                    // No project and no session, start fresh
+                    handleReset();
+                }
             }
+            setIsPageLoading(false);
         };
-        loadProject();
-    }, [projectId, user, navigate, handleReset]);
+        loadData();
+    }, [projectId, user, navigate, handleReset, SESSION_STORAGE_KEY]);
+    
+    // Save session to local storage
+    useEffect(() => {
+        // Only save if there's no active project ID and there is text.
+        if (!projectId && originalText && user) {
+            const sessionToSave = JSON.stringify({
+                originalText,
+                analysisResults,
+                currentStep,
+            });
+            localStorage.setItem(SESSION_STORAGE_KEY, sessionToSave);
+            setSaveStatus('idle');
+        }
+    }, [originalText, analysisResults, currentStep, projectId, user, SESSION_STORAGE_KEY]);
 
 
     useEffect(() => {
@@ -148,7 +207,8 @@ const TextCheckPage: React.FC = () => {
         try {
             const content = await file.text();
             handleReset();
-            setOriginalText(content);
+            // Need a slight delay for state to reset before setting new text
+            setTimeout(() => setOriginalText(content), 0);
         } catch (err) {
             console.error("Failed to read file", err);
             setError(t('textCheck.error.fileRead'));
@@ -182,7 +242,8 @@ const TextCheckPage: React.FC = () => {
         } else { // Create new project
             if (!newProjectName.trim()) {
                 setIsSaveModalOpen(true);
-                // The actual saving will be triggered by the modal submission
+                // Saving will be triggered by modal submission
+                setSaveStatus('idle'); // Reset status while modal is open
                 return;
             }
         }
@@ -196,58 +257,110 @@ const TextCheckPage: React.FC = () => {
             const newProject = await projectService.createProject(user.id, newProjectName, originalText, analysisResults, currentStep);
             setSaveStatus('saved');
             setNewProjectName('');
+            localStorage.removeItem(SESSION_STORAGE_KEY);
             navigate(`/text-check/${newProject.id}`, { replace: true });
         } catch(e) {
             setSaveStatus('error');
         }
     };
-
+    
     const handleProcess = async () => {
         if (!user || !settings) return;
-        setIsLoading(true);
-        setError('');
-
+        
         const selectedModel = settings.aiModels.selected;
         const apiKey = settings.aiModels.keys[selectedModel];
-
         if (!apiKey) {
             setError(t('textCheck.error.noApiKey'));
-            setIsLoading(false);
             return;
         }
-
+    
+        setIsLoading(true);
+        setError('');
+        setProgress(null);
+    
         try {
-            let response;
             const sourceText = currentStep === 0 ? originalText : stripHighlightTags(analysisResults[currentStep - 1]?.processedText || '');
             
-            if (currentStep === 0) {
-                response = await textAnalysisService.correctAndClean(sourceText, apiKey);
-            } else if (currentStep === 1) {
-                response = await textAnalysisService.addSelectiveDiacritics(sourceText, apiKey);
-            } else if (currentStep === 2) {
-                response = await textAnalysisService.replaceWordsFromDictionary(sourceText, user.id);
+            const chunks = sourceText.split('\n\n').filter(chunk => chunk.trim().length > 0);
+            const totalChunks = chunks.length;
+            if (totalChunks === 0) {
+                setIsLoading(false);
+                return;
             }
-
-            if(response) {
-                const newResults = [...analysisResults];
-                newResults[currentStep] = response;
-                setAnalysisResults(newResults);
-                await textAnalysisService.logAnalysis(user.id, response.correctionsCount, currentStep + 1);
-                
-                // Auto-save if it's an existing project
-                if (project) {
-                    await handleSave(newResults, currentStep);
-                } else {
-                    setSaveStatus('idle'); // Mark as having unsaved changes
+    
+            setProgress({ current: 0, total: totalChunks });
+    
+            const processChunk = (chunk: string): Promise<AnalysisResponse> => {
+                switch (currentStep) {
+                    case 0:
+                        return textAnalysisService.correctAndClean(chunk, apiKey);
+                    case 1:
+                        return textAnalysisService.addSelectiveDiacritics(chunk, apiKey);
+                    case 2:
+                        return textAnalysisService.replaceWordsFromDictionary(chunk, user.id);
+                    default:
+                        return Promise.resolve({ processedText: chunk, correctionsCount: 0 });
                 }
-            }
+            };
+            
+            const CONCURRENCY_LIMIT = 5;
+            let allResults: AnalysisResponse[] = [];
+            let processedChunksCount = 0;
+    
+            for (let i = 0; i < totalChunks; i += CONCURRENCY_LIMIT) {
+                const batch = chunks.slice(i, i + CONCURRENCY_LIMIT);
+                const batchPromises = batch.map(chunk => withTimeout(processChunk(chunk), 30000));
+    
+                const batchSettledResults = await Promise.allSettled(batchPromises);
 
+                const currentBatchResults: AnalysisResponse[] = batchSettledResults.map((result, index) => {
+                    if (result.status === 'fulfilled') {
+                        return result.value;
+                    } else {
+                        console.error(`Chunk processing failed or timed out for chunk "${batch[index].substring(0, 50)}...":`, result.reason);
+                        return { processedText: batch[index], correctionsCount: 0 };
+                    }
+                });
+                
+                allResults = [...allResults, ...currentBatchResults];
+                processedChunksCount += batch.length;
+                setProgress({ current: processedChunksCount, total: totalChunks });
+                
+                const combinedResult = allResults.reduce(
+                    (acc, response, index) => {
+                        acc.processedText += (index > 0 ? '\n\n' : '') + response.processedText;
+                        acc.correctionsCount += response.correctionsCount;
+                        return acc;
+                    }, { processedText: '', correctionsCount: 0 }
+                );
+    
+                const newResults = [...analysisResults];
+                newResults[currentStep] = combinedResult;
+                setAnalysisResults(newResults);
+            }
+            
+            const finalCombinedResult = allResults.reduce((acc, res) => ({...acc, correctionsCount: acc.correctionsCount + res.correctionsCount}), {processedText: '', correctionsCount: 0});
+            await textAnalysisService.logAnalysis(user.id, finalCombinedResult.correctionsCount, currentStep + 1);
+    
+            const finalResultsState = [...analysisResults];
+            finalResultsState[currentStep] = allResults.reduce((acc, res, idx) => ({
+                processedText: acc.processedText + (idx > 0 ? '\n\n' : '') + res.processedText,
+                correctionsCount: acc.correctionsCount + res.correctionsCount,
+            }), { processedText: '', correctionsCount: 0 });
+
+            if (project) {
+                await handleSave(finalResultsState, currentStep);
+            } else {
+                setSaveStatus('idle');
+            }
+    
         } catch (err) {
             console.error(err);
             const errorMessage = err instanceof Error ? err.message : String(err);
             setError(t('textCheck.error') + ` (${errorMessage})`);
         } finally {
             setIsLoading(false);
+            setProgress(null);
         }
     };
     
@@ -280,7 +393,7 @@ const TextCheckPage: React.FC = () => {
             case 'saving': return t('textCheck.save.status.saving');
             case 'saved': return t('textCheck.save.status.saved');
             case 'error': return t('textCheck.save.status.error');
-            case 'idle': return project ? t('textCheck.save.status.unsaved') : '';
+            case 'idle': return project || originalText ? t('textCheck.save.status.unsaved') : '';
             default: return '';
         }
     }
@@ -325,7 +438,7 @@ const TextCheckPage: React.FC = () => {
                         <span className="text-sm text-text-secondary dark:text-dark-text-secondary italic">{getSaveStatusText()}</span>
                         <button
                             onClick={() => handleSave(analysisResults, currentStep)}
-                            disabled={saveStatus === 'saving'}
+                            disabled={saveStatus === 'saving' || !originalText}
                             className="flex items-center gap-2 bg-highlight text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
                         >
                            <SaveIcon className="w-5 h-5" />
@@ -342,6 +455,26 @@ const TextCheckPage: React.FC = () => {
 
                 {error && <p className="bg-red-500/10 text-red-500 p-3 rounded mb-4 text-center border border-red-500/20">{error}</p>}
                 
+                {isLoading && progress && (
+                    <div className="my-8 p-6 bg-accent/50 dark:bg-dark-accent/50 rounded-lg border border-border dark:border-dark-border">
+                        <h3 className="text-center text-xl font-bold mb-3 text-text-primary dark:text-dark-text-primary">
+                            {t('textCheck.button.processing')}
+                        </h3>
+                        <p className="text-center text-lg mb-4 text-text-secondary dark:text-dark-text-secondary tabular-nums">
+                            {t('textCheck.processingChunk', { current: progress.current, total: progress.total })}
+                        </p>
+                        <div className="w-full bg-secondary dark:bg-dark-secondary rounded-full h-4 border border-border dark:border-dark-border overflow-hidden">
+                            <div 
+                                className="bg-highlight h-4 rounded-full transition-all duration-500 ease-out flex items-center justify-center" 
+                                style={{ width: `${(progress.current / progress.total) * 100}%` }}
+                            >
+                               <span className="text-white text-xs font-bold px-2">{Math.round((progress.current / progress.total) * 100)}%</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+
                 {currentStep < 3 && !analysisResults[2] && (
                     <>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
@@ -365,7 +498,7 @@ const TextCheckPage: React.FC = () => {
                                     onChange={(e) => {
                                         if (currentStep === 0) {
                                             setOriginalText(e.target.value);
-                                            if (project) setSaveStatus('idle');
+                                            setSaveStatus('idle'); // Mark as unsaved changes
                                         }
                                     }}
                                     rows={12}
@@ -380,9 +513,7 @@ const TextCheckPage: React.FC = () => {
                                     {t('textCheck.outputText')}
                                 </label>
                                 <div className="w-full min-h-[290px] bg-accent dark:bg-dark-accent rounded-lg text-text-primary dark:text-dark-text-primary overflow-y-auto">
-                                    {isLoading ? (
-                                        <ProgressLoader />
-                                    ) : isStepCompleted ? (
+                                    {isStepCompleted ? (
                                         <TextDiffViewer markedText={currentResult.processedText} />
                                     ) : null}
                                 </div>
@@ -390,7 +521,7 @@ const TextCheckPage: React.FC = () => {
                             </div>
                         </div>
 
-                        {isStepCompleted && (
+                        {isStepCompleted && !isLoading && (
                             <div className={`mt-4 text-center text-sm font-medium ${correctionsCount && correctionsCount > 0 ? 'text-green-600' : 'text-text-secondary dark:text-dark-text-secondary'}`}>
                                 {typeof correctionsCount === 'number' && correctionsCount > 0 
                                     ? t('textCheck.stats', { count: correctionsCount }) 
@@ -418,7 +549,7 @@ const TextCheckPage: React.FC = () => {
                                 </button>
                             )}
                              {isStepCompleted && currentStep === 2 && (
-                                <button onClick={() => navigate('/text-check')} className="py-2 px-4 rounded-md text-highlight border border-highlight hover:bg-highlight/10 transition-colors">
+                                <button onClick={handleReset} className="py-2 px-4 rounded-md text-highlight border border-highlight hover:bg-highlight/10 transition-colors">
                                     {t('textCheck.button.startOver')}
                                 </button>
                             )}
@@ -448,7 +579,7 @@ const TextCheckPage: React.FC = () => {
                                 <SpeakerWaveIcon className="w-5 h-5" />
                                 {t('textCheck.button.tts')}
                             </button>
-                            <button onClick={() => navigate('/text-check')} className="py-2 px-4 rounded-md text-highlight border border-highlight hover:bg-highlight/10 transition-colors">
+                            <button onClick={handleReset} className="py-2 px-4 rounded-md text-highlight border border-highlight hover:bg-highlight/10 transition-colors">
                                 {t('textCheck.button.startOver')}
                             </button>
                         </div>

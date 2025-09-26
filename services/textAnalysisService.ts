@@ -81,6 +81,8 @@ export const textAnalysisService = {
 
 Return a single JSON object with this exact structure: { "processedText": "The full text with changes wrapped in <ch> tags", "correctionsCount": total_number_of_changes }
 
+**CRITICAL**: The value for "processedText" MUST be a valid JSON string. This means any double quotes (") or backslashes (\\) within the text itself must be properly escaped (e.g., \\" and \\\\).
+
 Do not include any explanations or introductory text outside of the JSON object.
 
 Raw Text:
@@ -96,6 +98,8 @@ Raw Text:
 2. Count the total number of words you modified.
 
 Return a single JSON object with this exact structure: { "processedText": "The selectively diacritized text with changes in <ch> tags", "correctionsCount": total_number_of_changes }
+
+**CRITICAL**: The value for "processedText" MUST be a valid JSON string. This means any double quotes (") or backslashes (\\) within the text itself must be properly escaped (e.g., \\" and \\\\).
 
 Do not include any explanations or introductory text outside of the JSON object.
 

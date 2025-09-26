@@ -1,3 +1,5 @@
+
+
 import React, { createContext, useState, useEffect, useCallback, useMemo } from 'react';
 
 // --- Embedded Translations ---
@@ -172,6 +174,7 @@ const enTranslations = {
     "textCheck.save.status.saved": "All changes saved",
     "textCheck.save.status.unsaved": "Unsaved changes",
     "textCheck.save.status.error": "Save failed",
+    "textCheck.processingChunk": "Processing chunk {{current}} of {{total}}...",
     "projects.title": "My Documents",
     "projects.subtitle": "Manage your text analysis projects.",
     "projects.new": "New Document",
@@ -214,6 +217,21 @@ const enTranslations = {
     "settings.tabs.users": "User Management",
     "settings.tabs.plans": "Plan Management",
     "settings.tabs.payment": "Payment Gateways",
+    "settings.tabs.footer": "Footer",
+    "settings.footer.title": "Footer Content Management",
+    "settings.footer.description": "Customize the content of your website's footer.",
+    "settings.footer.siteDescription": "Site Description",
+    "settings.footer.copyright": "Copyright Text",
+    "settings.footer.platformLinks": "Platform Links",
+    "settings.footer.legalLinks": "Legal Links",
+    "settings.footer.socialLinks": "Social Media Links",
+    "settings.footer.linkText": "Link Text",
+    "settings.footer.url": "URL",
+    "settings.footer.addLink": "Add Link",
+    "settings.footer.remove": "Remove",
+    "settings.footer.twitterUrl": "Twitter URL",
+    "settings.footer.githubUrl": "GitHub URL",
+    "settings.footer.linkedinUrl": "LinkedIn URL",
     "settings.textAnalysis.title": "Text Analysis Models",
     "settings.textAnalysis.description": "Choose the AI model and provide the API key for the text analysis tool.",
     "settings.textAnalysis.model": "AI Model",
@@ -617,6 +635,7 @@ const arTranslations = {
     "textCheck.save.status.saved": "تم حفظ كل التغييرات",
     "textCheck.save.status.unsaved": "تغييرات غير محفوظة",
     "textCheck.save.status.error": "فشل الحفظ",
+    "textCheck.processingChunk": "جارِ معالجة المقطع {{current}} من {{total}}...",
     "projects.title": "مستنداتي",
     "projects.subtitle": "إدارة مشاريع تحليل النصوص الخاصة بك.",
     "projects.new": "مستند جديد",
@@ -659,6 +678,21 @@ const arTranslations = {
     "settings.tabs.users": "إدارة المستخدمين",
     "settings.tabs.plans": "إدارة الخطط",
     "settings.tabs.payment": "بوابات الدفع",
+    "settings.tabs.footer": "التذييل",
+    "settings.footer.title": "إدارة محتوى التذييل",
+    "settings.footer.description": "خصص محتوى تذييل موقعك الإلكتروني.",
+    "settings.footer.siteDescription": "وصف الموقع",
+    "settings.footer.copyright": "نص حقوق النشر",
+    "settings.footer.platformLinks": "روابط المنصة",
+    "settings.footer.legalLinks": "روابط قانونية",
+    "settings.footer.socialLinks": "روابط التواصل الاجتماعي",
+    "settings.footer.linkText": "نص الرابط",
+    "settings.footer.url": "الرابط",
+    "settings.footer.addLink": "إضافة رابط",
+    "settings.footer.remove": "إزالة",
+    "settings.footer.twitterUrl": "رابط تويتر",
+    "settings.footer.githubUrl": "رابط GitHub",
+    "settings.footer.linkedinUrl": "رابط LinkedIn",
     "settings.textAnalysis.title": "نماذج تحليل النص",
     "settings.textAnalysis.description": "اختر نموذج الذكاء الاصطناعي وقدم مفتاح API لأداة تحليل النص.",
     "settings.textAnalysis.model": "نموذج الذكاء الاصطناعي",
@@ -894,21 +928,15 @@ const arTranslations = {
     "ssmlGuide.prosody.description": "وسم <prosody> قوي جدًا. يتيح لك التحكم في 'rate' (السرعة)، 'pitch' (طبقة الصوت)، و 'volume' (مستوى الصوت) للكلام.",
     "ssmlGuide.prosody.plain": "يمكن قراءة هذه الجملة بطرق مختلفة.",
     "ssmlGuide.prosody.ssml": "<prosody rate=\"slow\" pitch=\"-10%\">يمكن قراءة هذه الجملة ببطء وبطبقة صوت منخفضة.</prosody> <prosody rate=\"120%\" volume=\"loud\">أو يمكن أن تكون سريعة وبصوت عالٍ!</prosody>"
-}
+};
 
-// FIX: Add missing provider and context exports
 interface I18nContextType {
   language: 'en' | 'ar';
   setLanguage: (lang: 'en' | 'ar') => void;
-  t: (key: string, params?: Record<string, string | number>) => string;
+  t: (key: string, replacements?: Record<string, string | number>) => string;
 }
 
 export const I18nContext = createContext<I18nContextType | null>(null);
-
-const translations: Record<string, typeof enTranslations | typeof arTranslations> = {
-  en: enTranslations,
-  ar: arTranslations,
-};
 
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<'en' | 'ar'>(() => {
@@ -916,30 +944,31 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (savedLang === 'en' || savedLang === 'ar') {
       return savedLang;
     }
-    return 'ar';
+    return navigator.language.startsWith('ar') ? 'ar' : 'en';
   });
 
   useEffect(() => {
-    localStorage.setItem('language', language);
     document.documentElement.lang = language;
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
+    localStorage.setItem('language', language);
   }, [language]);
 
   const setLanguage = (lang: 'en' | 'ar') => {
     setLanguageState(lang);
   };
 
-  const t = useCallback((key: string, params?: Record<string, string | number>) => {
-    const langTranslations = translations[language] as Record<string, string>;
-    let translation = langTranslations[key] || key;
-    if (params) {
-      Object.keys(params).forEach(paramKey => {
-        translation = translation.replace(new RegExp(`{{${paramKey}}}`, 'g'), String(params[paramKey]));
+  const translations = useMemo(() => (language === 'ar' ? arTranslations : enTranslations), [language]);
+
+  const t = useCallback((key: string, replacements?: Record<string, string | number>): string => {
+    let translation = (translations as any)[key] || key;
+    if (replacements) {
+      Object.keys(replacements).forEach(placeholder => {
+        translation = translation.replace(`{{${placeholder}}}`, String(replacements[placeholder]));
       });
     }
     return translation;
-  }, [language]);
-
+  }, [translations]);
+  
   const value = useMemo(() => ({ language, setLanguage, t }), [language, t]);
 
   return (

@@ -9,6 +9,7 @@ import { XCircleIcon } from '../components/icons/XCircleIcon';
 import { settingsService } from '../services/settingsService';
 import { textAnalysisService } from '../services/textAnalysisService';
 import { supabase } from '../supabaseClient';
+import FooterSettingsPanel from '../components/FooterSettingsPanel';
 
 const GeneralSettings: React.FC = () => {
     // ... same as before, no changes needed in this sub-component
@@ -306,7 +307,7 @@ const PaymentGatewaySettings: React.FC = () => {
 }
 
 
-type Tab = 'general' | 'users' | 'plans' | 'payment';
+type Tab = 'general' | 'users' | 'plans' | 'payment' | 'footer';
 
 const SettingsPage: React.FC = () => {
     const { t } = useI18n();
@@ -321,6 +322,8 @@ const SettingsPage: React.FC = () => {
                 return <SubscriptionPlanManagement />;
             case 'payment':
                 return <PaymentGatewaySettings />;
+            case 'footer':
+                return <FooterSettingsPanel />;
             case 'general':
             default:
                 return <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-lg shadow-lg max-w-3xl"><GeneralSettings /></div>;
@@ -355,6 +358,9 @@ const SettingsPage: React.FC = () => {
                             </button>
                             <button onClick={() => setActiveTab('payment')} className={getTabClass('payment')}>
                                 {t('settings.tabs.payment')}
+                            </button>
+                            <button onClick={() => setActiveTab('footer')} className={getTabClass('footer')}>
+                                {t('settings.tabs.footer')}
                             </button>
                         </>
                     )}

@@ -65,6 +65,12 @@ export interface TTSResponseChunk {
   filename: string;
 }
 
+export interface EditableLink {
+  id: string;
+  text: string;
+  url: string;
+}
+
 export interface Settings {
     aiModels: {
         selected: AiModel;
@@ -84,6 +90,14 @@ export interface Settings {
         keys?: {
             elevenlabs: string[];
         }
+    };
+    footer?: {
+      description: string;
+      copyright: string;
+      ogImage: string;
+      platformLinks: EditableLink[];
+      legalLinks: EditableLink[];
+      socialLinks: EditableLink[];
     }
 }
 
