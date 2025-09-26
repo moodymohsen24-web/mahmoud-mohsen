@@ -620,7 +620,7 @@ const TextToSpeechPage: React.FC = () => {
 
   // --- Render-related calculations ---
 
-  // FIX: Operators '+' and '>' cannot be applied to types 'unknown'.
+  // Fix: Operators '+' and '>' cannot be applied to types 'unknown'.
   // Safely reduce the apiKeyBalance by ensuring values are treated as numbers.
   const totalBalance = Object.values(apiKeyBalance).reduce((sum, bal) => {
     const numericBal = Number(bal);

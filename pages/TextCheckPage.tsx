@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useI18n } from '../hooks/useI18n';
 import { textAnalysisService } from '../services/textAnalysisService';
 import { settingsService } from '../services/settingsService';
@@ -7,10 +7,12 @@ import { useAuth } from '../hooks/useAuth';
 import { ClipboardDocumentIcon } from '../components/icons/ClipboardDocumentIcon';
 import { ArrowDownTrayIcon } from '../components/icons/ArrowDownTrayIcon';
 import { ArrowUpTrayIcon } from '../components/icons/ArrowUpTrayIcon';
-import type { AnalysisResponse, Settings } from '../types';
-import { useNavigate } from 'react-router-dom';
+import type { AnalysisResponse, Settings, Project } from '../types';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { SpeakerWaveIcon } from '../components/icons/SpeakerWaveIcon';
 import ProgressLoader from '../components/ProgressLoader';
+import { projectService } from '../services/projectService';
+import { SaveIcon } from '../components/icons/SaveIcon';
 
 const Stepper: React.FC<{ currentStep: number }> = ({ currentStep }) => {
     const { t } = useI18n();
@@ -66,15 +68,63 @@ const TextStatsDisplay: React.FC<{ text: string }> = ({ text }) => {
 const TextCheckPage: React.FC = () => {
     const { t } = useI18n();
     const { user } = useAuth();
+    const { projectId } = useParams<{ projectId?: string }>();
     const navigate = useNavigate();
+    
     const [settings, setSettings] = useState<Settings | null>(null);
+    const [project, setProject] = useState<Project | null>(null);
+    
     const [currentStep, setCurrentStep] = useState(0);
     const [originalText, setOriginalText] = useState('');
     const [analysisResults, setAnalysisResults] = useState<(AnalysisResponse | null)[]>([null, null, null]);
+    
     const [isLoading, setIsLoading] = useState(false);
+    const [isPageLoading, setIsPageLoading] = useState(true);
     const [error, setError] = useState('');
     const [copySuccess, setCopySuccess] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+    const [newProjectName, setNewProjectName] = useState('');
+    const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+    const handleReset = useCallback(() => {
+        setCurrentStep(0);
+        setOriginalText('');
+        setAnalysisResults([null, null, null]);
+        setError('');
+        setProject(null);
+    }, []);
+
+    useEffect(() => {
+        const loadProject = async () => {
+            if (projectId && user) {
+                setIsPageLoading(true);
+                try {
+                    const loadedProject = await projectService.getProjectById(projectId);
+                    if (loadedProject && loadedProject.user_id === user.id) {
+                        setProject(loadedProject);
+                        setOriginalText(loadedProject.original_text);
+                        setAnalysisResults(loadedProject.analysis_results || [null, null, null]);
+                        setCurrentStep(loadedProject.current_step || 0);
+                        setSaveStatus('saved');
+                    } else {
+                        navigate('/text-check'); // Project not found or doesn't belong to user
+                    }
+                } catch (e) {
+                    console.error("Failed to load project", e);
+                    navigate('/projects');
+                } finally {
+                    setIsPageLoading(false);
+                }
+            } else {
+                handleReset();
+                setIsPageLoading(false);
+            }
+        };
+        loadProject();
+    }, [projectId, user, navigate, handleReset]);
+
 
     useEffect(() => {
         const loadSettings = async () => {
@@ -85,13 +135,6 @@ const TextCheckPage: React.FC = () => {
         };
         loadSettings();
     }, [user]);
-
-    const handleReset = () => {
-        setCurrentStep(0);
-        setOriginalText('');
-        setAnalysisResults([null, null, null]);
-        setError('');
-    };
 
     const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!event.target.files || event.target.files.length === 0) return;
@@ -104,6 +147,7 @@ const TextCheckPage: React.FC = () => {
 
         try {
             const content = await file.text();
+            handleReset();
             setOriginalText(content);
         } catch (err) {
             console.error("Failed to read file", err);
@@ -115,9 +159,47 @@ const TextCheckPage: React.FC = () => {
         }
     };
     
-    // Function to strip <ch> tags for the next processing step
     const stripHighlightTags = (text: string) => {
         return text.replace(/<ch.*?>/g, '').replace(/<\/ch>/g, '');
+    };
+
+    const handleSave = async (updatedResults: (AnalysisResponse | null)[], updatedStep: number) => {
+        if (!user) return;
+        setSaveStatus('saving');
+    
+        if (project) { // Update existing project
+            try {
+                const updatedProject = await projectService.updateProject(project.id, {
+                    analysis_results: updatedResults,
+                    current_step: updatedStep,
+                    original_text: originalText,
+                });
+                setProject(updatedProject);
+                setSaveStatus('saved');
+            } catch (err) {
+                setSaveStatus('error');
+            }
+        } else { // Create new project
+            if (!newProjectName.trim()) {
+                setIsSaveModalOpen(true);
+                // The actual saving will be triggered by the modal submission
+                return;
+            }
+        }
+    };
+    
+    const handleCreateProject = async () => {
+        if (!user || !newProjectName.trim()) return;
+        setIsSaveModalOpen(false);
+        setSaveStatus('saving');
+        try {
+            const newProject = await projectService.createProject(user.id, newProjectName, originalText, analysisResults, currentStep);
+            setSaveStatus('saved');
+            setNewProjectName('');
+            navigate(`/text-check/${newProject.id}`, { replace: true });
+        } catch(e) {
+            setSaveStatus('error');
+        }
     };
 
     const handleProcess = async () => {
@@ -138,7 +220,6 @@ const TextCheckPage: React.FC = () => {
             let response;
             const sourceText = currentStep === 0 ? originalText : stripHighlightTags(analysisResults[currentStep - 1]?.processedText || '');
             
-            // For now, all models use the gemini service logic. This can be expanded.
             if (currentStep === 0) {
                 response = await textAnalysisService.correctAndClean(sourceText, apiKey);
             } else if (currentStep === 1) {
@@ -151,8 +232,14 @@ const TextCheckPage: React.FC = () => {
                 const newResults = [...analysisResults];
                 newResults[currentStep] = response;
                 setAnalysisResults(newResults);
-                // Log the successful analysis
                 await textAnalysisService.logAnalysis(user.id, response.correctionsCount, currentStep + 1);
+                
+                // Auto-save if it's an existing project
+                if (project) {
+                    await handleSave(newResults, currentStep);
+                } else {
+                    setSaveStatus('idle'); // Mark as having unsaved changes
+                }
             }
 
         } catch (err) {
@@ -164,54 +251,90 @@ const TextCheckPage: React.FC = () => {
         }
     };
     
-    const nextStep = () => {
-        if (currentStep < 2) setCurrentStep(currentStep + 1);
-    };
-    
-    const prevStep = () => {
-        if (currentStep > 0) setCurrentStep(currentStep - 1);
-    };
-    
-    const finalProcessedText = stripHighlightTags(analysisResults[2]?.processedText || '');
-
-    const handleCopy = () => {
-        navigator.clipboard.writeText(finalProcessedText);
-        setCopySuccess(true);
-        setTimeout(() => setCopySuccess(false), 2000);
-    };
+    const nextStep = () => { if (currentStep < 2) setCurrentStep(currentStep + 1); };
+    const prevStep = () => { if (currentStep > 0) setCurrentStep(currentStep - 1); };
+    const finalProcessedText = analysisResults[2] ? stripHighlightTags(analysisResults[2]?.processedText || '') : '';
+    const handleCopy = () => { navigator.clipboard.writeText(finalProcessedText); setCopySuccess(true); setTimeout(() => setCopySuccess(false), 2000); };
 
     const handleDownload = () => {
         const blob = new Blob([finalProcessedText], { type: 'text/plain;charset=utf-8' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = 'corrected_text.txt';
+        link.download = `${project?.name || 'corrected_text'}.txt`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     };
 
-    const handleConvertToSpeech = () => {
-        navigate('/text-to-speech', { state: { textToConvert: finalProcessedText } });
-    };
+    const handleConvertToSpeech = () => { navigate('/text-to-speech', { state: { textToConvert: finalProcessedText } }); };
     
     const titles = [t('textCheck.step1.title'), t('textCheck.step2.title'), t('textCheck.step3.title')];
     const descriptions = [t('textCheck.step1.description'), t('textCheck.step2.description'), t('textCheck.step3.description')];
     const sourceText = currentStep === 0 ? originalText : stripHighlightTags(analysisResults[currentStep - 1]?.processedText || '');
     const currentResult = analysisResults[currentStep];
     const correctionsCount = currentResult?.correctionsCount;
-
     const isStepCompleted = !!currentResult;
+    
+    const getSaveStatusText = () => {
+        switch(saveStatus) {
+            case 'saving': return t('textCheck.save.status.saving');
+            case 'saved': return t('textCheck.save.status.saved');
+            case 'error': return t('textCheck.save.status.error');
+            case 'idle': return project ? t('textCheck.save.status.unsaved') : '';
+            default: return '';
+        }
+    }
+
+    if (isPageLoading) {
+        return <ProgressLoader />;
+    }
 
     return (
         <div className="container mx-auto max-w-5xl px-6 py-8">
-            <div className="text-center mb-8">
-                <h1 className="text-3xl font-bold text-text-primary dark:text-dark-text-primary mb-2">{t('textCheck.title')}</h1>
-                <p className="text-text-secondary dark:text-dark-text-secondary">{t('textCheck.subtitle')}</p>
-            </div>
+            {isSaveModalOpen && (
+                 <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={() => setIsSaveModalOpen(false)}>
+                    <div className="bg-secondary dark:bg-dark-secondary rounded-lg shadow-xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
+                        <h3 className="text-lg font-bold mb-4">{t('textCheck.save.modalTitle')}</h3>
+                        <form onSubmit={(e) => { e.preventDefault(); handleCreateProject(); }}>
+                            <label className="block text-sm font-bold mb-2" htmlFor="projectName">{t('textCheck.save.modalLabel')}</label>
+                            <input
+                                id="projectName" type="text" value={newProjectName}
+                                onChange={(e) => setNewProjectName(e.target.value)} required autoFocus
+                                placeholder={t('textCheck.save.modalPlaceholder')}
+                                className="w-full p-2 bg-accent dark:bg-dark-accent rounded-lg focus:outline-none focus:ring-2 focus:ring-highlight"
+                            />
+                            <div className="flex justify-end gap-4 mt-6">
+                                <button type="button" onClick={() => setIsSaveModalOpen(false)} className="py-2 px-4 rounded-md hover:bg-gray-500/10">{t('planManagement.cancel')}</button>
+                                <button type="submit" className="py-2 px-4 rounded-md bg-highlight text-white hover:bg-blue-700">{t('textCheck.save.modalButton')}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-lg shadow-lg">
+                <div className="flex justify-between items-start mb-4">
+                    <div>
+                        <h1 className="text-2xl font-bold text-text-primary dark:text-dark-text-primary mb-1">{project?.name || t('textCheck.title')}</h1>
+                        <p className="text-sm text-text-secondary dark:text-dark-text-secondary">
+                            <Link to="/projects" className="hover:underline">{t('sidebar.projects')}</Link>
+                            {project && <span> / {project.name}</span>}
+                        </p>
+                    </div>
+                     <div className="flex items-center gap-4">
+                        <span className="text-sm text-text-secondary dark:text-dark-text-secondary italic">{getSaveStatusText()}</span>
+                        <button
+                            onClick={() => handleSave(analysisResults, currentStep)}
+                            disabled={saveStatus === 'saving'}
+                            className="flex items-center gap-2 bg-highlight text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                        >
+                           <SaveIcon className="w-5 h-5" />
+                           {t('textCheck.save.button')}
+                        </button>
+                    </div>
+                </div>
+
                 <Stepper currentStep={isStepCompleted ? currentStep + 1 : currentStep} />
-                
                 <div className="text-center my-8">
                     <h2 className="text-xl font-semibold text-text-primary dark:text-dark-text-primary">{titles[currentStep]}</h2>
                     <p className="text-text-secondary dark:text-dark-text-secondary mt-1">{descriptions[currentStep]}</p>
@@ -239,7 +362,12 @@ const TextCheckPage: React.FC = () => {
                                 </div>
                                 <textarea
                                     value={sourceText}
-                                    onChange={(e) => currentStep === 0 ? setOriginalText(e.target.value) : null}
+                                    onChange={(e) => {
+                                        if (currentStep === 0) {
+                                            setOriginalText(e.target.value);
+                                            if (project) setSaveStatus('idle');
+                                        }
+                                    }}
                                     rows={12}
                                     className="w-full p-3 bg-accent dark:bg-dark-accent rounded-lg focus:outline-none focus:ring-2 focus:ring-highlight dark:focus:ring-dark-highlight text-text-primary dark:text-dark-text-primary"
                                     readOnly={currentStep > 0}
@@ -290,7 +418,7 @@ const TextCheckPage: React.FC = () => {
                                 </button>
                             )}
                              {isStepCompleted && currentStep === 2 && (
-                                <button onClick={handleReset} className="py-2 px-4 rounded-md text-highlight border border-highlight hover:bg-highlight/10 transition-colors">
+                                <button onClick={() => navigate('/text-check')} className="py-2 px-4 rounded-md text-highlight border border-highlight hover:bg-highlight/10 transition-colors">
                                     {t('textCheck.button.startOver')}
                                 </button>
                             )}
@@ -320,7 +448,7 @@ const TextCheckPage: React.FC = () => {
                                 <SpeakerWaveIcon className="w-5 h-5" />
                                 {t('textCheck.button.tts')}
                             </button>
-                            <button onClick={handleReset} className="py-2 px-4 rounded-md text-highlight border border-highlight hover:bg-highlight/10 transition-colors">
+                            <button onClick={() => navigate('/text-check')} className="py-2 px-4 rounded-md text-highlight border border-highlight hover:bg-highlight/10 transition-colors">
                                 {t('textCheck.button.startOver')}
                             </button>
                         </div>

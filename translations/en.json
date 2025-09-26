@@ -1,3 +1,4 @@
+
 {
     "header.brand": "Masmoo",
     "header.welcome": "Welcome, {{name}}",
@@ -15,6 +16,7 @@
     "authModal.signUp": "Sign Up",
 
     "sidebar.dashboard": "Dashboard",
+    "sidebar.projects": "My Documents",
     "sidebar.textCheck": "Text Check",
     "sidebar.textToSpeech": "Text-to-Speech",
     "sidebar.dictionary": "Dictionary",
@@ -174,6 +176,29 @@
     "textCheck.button.tts": "Convert to Speech",
     "textCheck.stats.words": "Words",
     "textCheck.stats.characters": "Characters",
+    "textCheck.save.button": "Save",
+    "textCheck.save.modalTitle": "Save Document",
+    "textCheck.save.modalLabel": "Document Name",
+    "textCheck.save.modalPlaceholder": "e.g., My First Article",
+    "textCheck.save.modalButton": "Save Document",
+    "textCheck.save.status.saving": "Saving...",
+    "textCheck.save.status.saved": "All changes saved",
+    "textCheck.save.status.unsaved": "Unsaved changes",
+    "textCheck.save.status.error": "Save failed",
+
+    "projects.title": "My Documents",
+    "projects.subtitle": "Manage your text analysis projects.",
+    "projects.new": "New Document",
+    "projects.empty.title": "No documents yet",
+    "projects.empty.description": "Click 'New Document' to start your first analysis.",
+    "projects.table.name": "Name",
+    "projects.table.lastModified": "Last Modified",
+    "projects.table.actions": "Actions",
+    "projects.rename": "Rename",
+    "projects.delete": "Delete",
+    "projects.deleteConfirm": "Are you sure you want to delete this document? This cannot be undone.",
+    "projects.deleteError": "Failed to delete the document.",
+    "projects.renameError": "Failed to rename the document.",
 
     "dictionary.title": "Custom Dictionary",
     "dictionary.subtitle": "Manage the words that will be automatically replaced in the final step of the text check.",

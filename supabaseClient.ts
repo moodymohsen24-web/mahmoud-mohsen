@@ -1,9 +1,37 @@
 import { createClient } from '@supabase/supabase-js';
-import type { UserRole, Settings, SubscriptionPlan } from './types';
+import type { UserRole, Settings, SubscriptionPlan, AnalysisResponse } from './types';
 
 export interface Database {
   public: {
     Tables: {
+      projects: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          original_text: string;
+          analysis_results: (AnalysisResponse | null)[];
+          current_step: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          original_text: string;
+          analysis_results?: (AnalysisResponse | null)[];
+          current_step?: number;
+        };
+        Update: {
+          name?: string;
+          original_text?: string;
+          analysis_results?: (AnalysisResponse | null)[];
+          current_step?: number;
+          updated_at?: string;
+        };
+        Relationships: []
+      };
       profiles: {
         Row: {
           id: string;

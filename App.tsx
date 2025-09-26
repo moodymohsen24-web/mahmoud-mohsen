@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
@@ -22,6 +23,7 @@ import CheckoutPage from './pages/CheckoutPage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import PaymentCancelledPage from './pages/PaymentCancelledPage';
 import TextToSpeechPage from './pages/TextToSpeechPage';
+import ProjectsPage from './pages/ProjectsPage';
 
 const App: React.FC = () => {
   return (
@@ -39,7 +41,9 @@ const App: React.FC = () => {
               <Route element={<ProtectedRoute />}>
                 <Route element={<DashboardLayout />}>
                   <Route path="dashboard" element={<DashboardPage />} />
+                  <Route path="projects" element={<ProjectsPage />} />
                   <Route path="text-check" element={<TextCheckPage />} />
+                  <Route path="text-check/:projectId" element={<TextCheckPage />} />
                   <Route path="dictionary" element={<DictionaryPage />} />
                   <Route path="text-to-speech" element={<TextToSpeechPage />} />
                   <Route path="subscription" element={<SubscriptionPage />} />

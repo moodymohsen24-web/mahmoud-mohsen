@@ -1,4 +1,5 @@
 
+
 export type UserRole = 'ADMIN' | 'MODERATOR' | 'MEMBER';
 
 export interface SubscriptionPlan {
@@ -92,4 +93,15 @@ export interface ModalContextType {
   modal: ModalType;
   openModal: (modal: ModalType) => void;
   closeModal: () => void;
+}
+
+export interface Project {
+  id: string;
+  user_id: string;
+  name: string;
+  original_text: string;
+  analysis_results: (AnalysisResponse | null)[];
+  current_step: number;
+  created_at: string;
+  updated_at: string;
 }

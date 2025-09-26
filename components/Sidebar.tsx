@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useI18n } from '../hooks/useI18n';
@@ -8,6 +9,7 @@ import { BookOpenIcon } from './icons/BookOpenIcon';
 import { Cog6ToothIcon } from './icons/Cog6ToothIcon';
 import { CreditCardIcon } from './icons/CreditCardIcon';
 import { SpeakerWaveIcon } from './icons/SpeakerWaveIcon';
+import { FolderIcon } from './icons/FolderIcon';
 
 const Sidebar: React.FC = () => {
     const { t } = useI18n();
@@ -25,6 +27,10 @@ const Sidebar: React.FC = () => {
                 <NavLink to="/dashboard" className={navLinkClasses} end>
                     <ChartBarIcon className="w-6 h-6" />
                     <span>{t('sidebar.dashboard')}</span>
+                </NavLink>
+                <NavLink to="/projects" className={navLinkClasses}>
+                    <FolderIcon className="w-6 h-6" />
+                    <span>{t('sidebar.projects')}</span>
                 </NavLink>
                 <NavLink to="/text-check" className={navLinkClasses}>
                     <PencilSquareIcon className="w-6 h-6" />

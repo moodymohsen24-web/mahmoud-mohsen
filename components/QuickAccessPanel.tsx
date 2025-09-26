@@ -5,6 +5,7 @@ import { PencilSquareIcon } from './icons/PencilSquareIcon';
 import { SpeakerWaveIcon } from './icons/SpeakerWaveIcon';
 import { BookOpenIcon } from './icons/BookOpenIcon';
 import { Cog6ToothIcon } from './icons/Cog6ToothIcon';
+import { FolderIcon } from './icons/FolderIcon';
 
 const QuickAccessCard: React.FC<{ to: string; icon: React.ReactNode; title: string; }> = ({ to, icon, title }) => (
     <Link to={to} className="bg-secondary dark:bg-dark-secondary p-6 rounded-lg shadow-md border border-border dark:border-dark-border flex flex-col items-center justify-center text-center transform hover:scale-105 transition-transform duration-300">
@@ -19,6 +20,7 @@ const QuickAccessPanel: React.FC = () => {
     const { t } = useI18n();
 
     const links = [
+        { to: '/projects', icon: <FolderIcon className="w-8 h-8"/>, title: t('sidebar.projects') },
         { to: '/text-check', icon: <PencilSquareIcon className="w-8 h-8"/>, title: t('sidebar.textCheck') },
         { to: '/dictionary', icon: <BookOpenIcon className="w-8 h-8"/>, title: t('sidebar.dictionary') },
         { to: '/settings', icon: <Cog6ToothIcon className="w-8 h-8"/>, title: t('sidebar.settings') },

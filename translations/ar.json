@@ -1,3 +1,4 @@
+
 {
     "header.brand": "مسموع",
     "header.welcome": "أهلاً، {{name}}",
@@ -15,6 +16,7 @@
     "authModal.signUp": "إنشاء حساب",
 
     "sidebar.dashboard": "لوحة التحكم",
+    "sidebar.projects": "مستنداتي",
     "sidebar.textCheck": "فحص النص",
     "sidebar.textToSpeech": "تحويل النص إلى صوت",
     "sidebar.dictionary": "القاموس",
@@ -174,6 +176,29 @@
     "textCheck.button.tts": "تحويل النص إلى صوت",
     "textCheck.stats.words": "الكلمات",
     "textCheck.stats.characters": "الأحرف",
+    "textCheck.save.button": "حفظ",
+    "textCheck.save.modalTitle": "حفظ المستند",
+    "textCheck.save.modalLabel": "اسم المستند",
+    "textCheck.save.modalPlaceholder": "مثال: مقالي الأول",
+    "textCheck.save.modalButton": "حفظ المستند",
+    "textCheck.save.status.saving": "جارِ الحفظ...",
+    "textCheck.save.status.saved": "تم حفظ كل التغييرات",
+    "textCheck.save.status.unsaved": "تغييرات غير محفوظة",
+    "textCheck.save.status.error": "فشل الحفظ",
+
+    "projects.title": "مستنداتي",
+    "projects.subtitle": "إدارة مشاريع تحليل النصوص الخاصة بك.",
+    "projects.new": "مستند جديد",
+    "projects.empty.title": "لا توجد مستندات بعد",
+    "projects.empty.description": "انقر على 'مستند جديد' لبدء أول تحليل لك.",
+    "projects.table.name": "الاسم",
+    "projects.table.lastModified": "آخر تعديل",
+    "projects.table.actions": "الإجراءات",
+    "projects.rename": "إعادة تسمية",
+    "projects.delete": "حذف",
+    "projects.deleteConfirm": "هل أنت متأكد من أنك تريد حذف هذا المستند؟ لا يمكن التراجع عن هذا الإجراء.",
+    "projects.deleteError": "فشل حذف المستند.",
+    "projects.renameError": "فشل إعادة تسمية المستند.",
 
     "dictionary.title": "القاموس المخصص",
     "dictionary.subtitle": "إدارة الكلمات التي سيتم استبدالها تلقائياً في الخطوة الأخيرة من فحص النص.",

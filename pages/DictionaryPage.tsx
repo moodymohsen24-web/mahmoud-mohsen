@@ -106,7 +106,7 @@ const DictionaryPage: React.FC = () => {
   };
   
   const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!user || !event.target.files || event.target.files.length === 0) return;
+    if (!user || !event.target.files || !event.target.files.length === 0) return;
     const file = event.target.files[0];
     setImportStatus({type: 'success', message: t('dictionary.import.processing')});
     setIsMutating(true);
@@ -137,7 +137,7 @@ const DictionaryPage: React.FC = () => {
       }
     } catch (error) {
       console.error(error);
-      // FIX: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+      // Fix: Argument of type 'unknown' is not assignable to parameter of type 'string'.
       // Safely handle the caught error by ensuring the message is a string.
       const errorMessage = error instanceof Error ? error.message : t('dictionary.import.error');
       setImportStatus({ type: 'error', message: errorMessage });
