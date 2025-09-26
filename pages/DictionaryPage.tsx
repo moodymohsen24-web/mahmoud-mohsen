@@ -138,13 +138,12 @@ const DictionaryPage: React.FC = () => {
     } catch (error: unknown) {
       console.error("File import failed:", error);
       let message = t('dictionary.import.error');
-      // Fix: Safely handle unknown error types before displaying a message.
+      // Safely handle unknown error types before displaying a message.
       if (error instanceof Error) {
         message = error.message;
       } else if (typeof error === 'string') {
         message = error;
       }
-      // For other object shapes, we'll stick to the generic error message.
       setImportStatus({
         type: 'error',
         message: message,

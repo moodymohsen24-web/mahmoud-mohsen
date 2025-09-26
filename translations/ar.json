@@ -26,6 +26,12 @@
     "experimental.uploadKeys": "تحميل ملف مفاتيح",
 
     "footer.copyright": "مسموع. جميع الحقوق محفوظة.",
+    "footer.description": "يقوم 'مسموع' بتحويل نصوصك، مقالاتك، أو خطبك المكتوبة إلى محتوى مُعد بإتقان، وجاهز لأداء صوتي لا تشوبه شائبة.",
+    "footer.links.platform": "المنصة",
+    "footer.links.legal": "قانوني",
+    "footer.links.social": "التواصل",
+    "footer.links.privacy": "سياسة الخصوصية",
+    "footer.links.terms": "شروط الخدمة",
 
     "form.name": "الاسم",
     "form.email": "البريد الإلكتروني",

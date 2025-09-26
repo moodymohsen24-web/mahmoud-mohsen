@@ -26,6 +26,12 @@
     "experimental.uploadKeys": "Upload Keys File",
 
     "footer.copyright": "Masmoo. All rights reserved.",
+    "footer.description": "Masmoo transforms your written scripts, articles, or speeches into perfectly prepared content, ready for flawless audio performance.",
+    "footer.links.platform": "Platform",
+    "footer.links.legal": "Legal",
+    "footer.links.social": "Social",
+    "footer.links.privacy": "Privacy Policy",
+    "footer.links.terms": "Terms of Service",
 
     "form.name": "Name",
     "form.email": "Email Address",
