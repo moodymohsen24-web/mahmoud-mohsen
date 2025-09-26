@@ -19,7 +19,7 @@ export const projectService = {
       .order('updated_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching projects:', error);
+      console.error('Error fetching projects:', error.message);
       throw error;
     }
     return data as Project[];

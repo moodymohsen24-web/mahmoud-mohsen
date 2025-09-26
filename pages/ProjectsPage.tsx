@@ -24,7 +24,8 @@ const ProjectsPage: React.FC = () => {
         const userProjects = await projectService.getProjectsForUser(user.id);
         setProjects(userProjects);
       } catch (error) {
-        console.error("Failed to fetch projects:", error);
+        const message = error instanceof Error ? error.message : String(error);
+        console.error("Failed to fetch projects:", message);
       } finally {
         setIsLoading(false);
       }

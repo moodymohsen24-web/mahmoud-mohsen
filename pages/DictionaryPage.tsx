@@ -106,7 +106,8 @@ const DictionaryPage: React.FC = () => {
   };
   
   const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!user || !event.target.files || !event.target.files.length === 0) return;
+    // FIX: This comparison appears to be unintentional because the types 'boolean' and 'number' have no overlap.
+    if (!user || !event.target.files || event.target.files.length === 0) return;
     const file = event.target.files[0];
     setImportStatus({type: 'success', message: t('dictionary.import.processing')});
     setIsMutating(true);
@@ -135,12 +136,12 @@ const DictionaryPage: React.FC = () => {
       } else {
         throw new Error("No valid word pairs found in file.");
       }
-    } catch (error) {
-      console.error(error);
-      // Fix: Argument of type 'unknown' is not assignable to parameter of type 'string'.
-      // Safely handle the caught error by ensuring the message is a string.
-      const errorMessage = error instanceof Error ? error.message : t('dictionary.import.error');
-      setImportStatus({ type: 'error', message: errorMessage });
+    } catch (error: unknown) {
+      console.error("File import failed:", error);
+      // FIX: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+      // Safely handle the caught error by using `instanceof Error`.
+      const message = error instanceof Error ? error.message : t('dictionary.import.error');
+      setImportStatus({ type: 'error', message });
     } finally {
         if(fileInputRef.current) {
             fileInputRef.current.value = "";

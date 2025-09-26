@@ -620,11 +620,14 @@ const TextToSpeechPage: React.FC = () => {
 
   // --- Render-related calculations ---
 
-  // Fix: Operators '+' and '>' cannot be applied to types 'unknown'.
-  // Safely reduce the apiKeyBalance by ensuring values are treated as numbers.
+  // FIX: Operator '+' cannot be applied to types 'unknown' and 'number'.
+  // Safely reduce the apiKeyBalance by ensuring all values are treated as numbers.
   const totalBalance = Object.values(apiKeyBalance).reduce((sum, bal) => {
-    const numericBal = Number(bal);
-    return sum + (!isNaN(numericBal) && numericBal > 0 ? numericBal : 0);
+    // Explicitly handle non-numeric or invalid values from the balance record.
+    if (typeof bal !== 'number' || isNaN(bal)) {
+      return sum;
+    }
+    return sum + Math.max(0, bal);
   }, 0);
   const successfulChunks = convertedChunks.filter(c => c.status === 'success');
   const isSelectAllForMergeChecked = successfulChunks.length > 0 && selectedForMerge.size === successfulChunks.length;
