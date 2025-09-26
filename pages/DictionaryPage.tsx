@@ -106,7 +106,6 @@ const DictionaryPage: React.FC = () => {
   };
   
   const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    // FIX: This comparison appears to be unintentional because the types 'boolean' and 'number' have no overlap.
     if (!user || !event.target.files || event.target.files.length === 0) return;
     const file = event.target.files[0];
     setImportStatus({type: 'success', message: t('dictionary.import.processing')});
@@ -138,11 +137,17 @@ const DictionaryPage: React.FC = () => {
       }
     } catch (error: unknown) {
       console.error("File import failed:", error);
-      // FIX: Argument of type 'unknown' is not assignable to parameter of type 'string'.
-      // Safely handle the caught error by using `instanceof Error`.
+      let message = t('dictionary.import.error');
+      // Fix: Safely handle unknown error types before displaying a message.
+      if (error instanceof Error) {
+        message = error.message;
+      } else if (typeof error === 'string') {
+        message = error;
+      }
+      // For other object shapes, we'll stick to the generic error message.
       setImportStatus({
         type: 'error',
-        message: error instanceof Error ? error.message : t('dictionary.import.error'),
+        message: message,
       });
     } finally {
         if(fileInputRef.current) {

@@ -208,7 +208,6 @@ const TextToSpeechPage: React.FC = () => {
                     setLogMessages(savedState.logMessages || []);
                     const chunksFromStorage: ConvertedChunk[] = (savedState.convertedChunks || []);
                     if (chunksFromStorage.length > 0) {
-                        // FIX: Add an explicit return type `Promise<ConvertedChunk>` to the async map function to correct a TypeScript type inference issue.
                         Promise.all(chunksFromStorage.map(async (chunk: ConvertedChunk): Promise<ConvertedChunk> => {
                             if (chunk.status === 'success' && user?.id) {
                                 const blob = await getChunkFromDb(user.id, chunk.id);
@@ -257,14 +256,27 @@ const TextToSpeechPage: React.FC = () => {
     showToast(t('tts.session.cleared'));
   }, [user, t, LOCAL_STORAGE_KEY]);
 
+  // This is the fix: handle incoming text from TextCheckPage
   useEffect(() => {
-    if (location.state?.textToConvert) {
-      handleClearSession();
-      setFullText(location.state.textToConvert);
+    const textToLoad = location.state?.textToConvert;
+    if (textToLoad && user) {
+      // Manually clear the session state EXCEPT for the text input itself,
+      // to prepare for the new text.
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      clearAllUserChunksFromDb(user.id);
+      setLogMessages([]);
+      setConvertedChunks([]);
+      setProgress(0);
+      setCurrentProcess(0);
+      
+      // Now, set the new text from the location state.
+      setFullText(textToLoad);
       log(t('tts.general.log.textLoadedFromCheck'), 'success');
+      
+      // Clean up location state to prevent re-loading on refresh.
       window.history.replaceState({}, document.title);
     }
-  }, [location.state, t, log, handleClearSession]);
+  }, [location.state, user, log, t, LOCAL_STORAGE_KEY]);
   
   useEffect(() => {
     setShowMultilingualWarning(!uiSettings.modelId.includes('multilingual'));
@@ -620,9 +632,9 @@ const TextToSpeechPage: React.FC = () => {
 
   // --- Render-related calculations ---
 
-  const totalBalance = Object.values(apiKeyBalance).reduce((sum: number, bal: unknown) => {
+  const totalBalance = Object.values(apiKeyBalance).reduce((sum: number, bal: number) => {
     const numericBal = Number(bal);
-    return sum + (isNaN(numericBal) ? 0 : Math.max(0, numericBal));
+    return sum + (Number.isNaN(numericBal) ? 0 : Math.max(0, numericBal));
   }, 0);
   const successfulChunks = convertedChunks.filter(c => c.status === 'success');
   const isSelectAllForMergeChecked = successfulChunks.length > 0 && selectedForMerge.size === successfulChunks.length;
