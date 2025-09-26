@@ -47,7 +47,7 @@ const LoginForm: React.FC = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 text-text-primary dark:text-dark-text-primary bg-accent dark:bg-dark-accent rounded-lg focus:outline-none focus:ring-2 focus:ring-highlight dark:focus:ring-dark-highlight"
+                className="w-full px-4 py-3 text-text-primary dark:text-dark-text-primary bg-secondary dark:bg-dark-secondary rounded-lg border border-border dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-highlight"
                 required
                 />
             </div>
@@ -60,7 +60,7 @@ const LoginForm: React.FC = () => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 text-text-primary dark:text-dark-text-primary bg-accent dark:bg-dark-accent rounded-lg focus:outline-none focus:ring-2 focus:ring-highlight dark:focus:ring-dark-highlight"
+                className="w-full px-4 py-3 text-text-primary dark:text-dark-text-primary bg-secondary dark:bg-dark-secondary rounded-lg border border-border dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-highlight"
                 required
                 />
             </div>
@@ -90,7 +90,7 @@ const LoginForm: React.FC = () => {
                 <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-highlight dark:bg-dark-highlight text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:shadow-outline transition-colors disabled:opacity-50"
+                className="w-full bg-highlight text-white font-semibold py-3 px-4 rounded-lg shadow-sm hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-highlight"
                 >
                 {isLoading ? t('login.signingIn') : t('login.signInButton')}
                 </button>

@@ -35,7 +35,7 @@ const UserMenu: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
                 </svg>
             </button>
             {isOpen && (
-                <div className="absolute top-full mt-2 end-0 bg-secondary dark:bg-dark-secondary rounded-md shadow-lg py-1 w-40 z-20">
+                <div className="absolute top-full mt-2 end-0 bg-secondary dark:bg-dark-secondary rounded-md shadow-lg py-1 w-40 z-20 border border-border dark:border-dark-border">
                     <Link
                         to="/profile"
                         onClick={() => setIsOpen(false)}
@@ -91,7 +91,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-secondary/80 dark:bg-dark-secondary/80 backdrop-blur-lg shadow-lg sticky top-0 z-50">
+    <header className="bg-secondary/80 dark:bg-dark-secondary/80 backdrop-blur-lg sticky top-0 z-50 border-b border-border dark:border-dark-border">
       <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
         <Link 
           to={isAuthenticated ? "/dashboard" : "/"} 
@@ -116,7 +116,7 @@ const Header: React.FC = () => {
               </div>
               <button
                 onClick={() => openModal('auth')}
-                className="bg-highlight dark:bg-dark-highlight text-white py-2 px-4 rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
+                className="bg-highlight text-white font-semibold py-2 px-4 rounded-lg shadow-sm hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-highlight"
               >
                   {t('header.loginOrSignUp')}
               </button>

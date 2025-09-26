@@ -137,7 +137,10 @@ const DictionaryPage: React.FC = () => {
       }
     } catch (error) {
       console.error(error);
-      setImportStatus({ type: 'error', message: t('dictionary.import.error') });
+      // FIX: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+      // Safely handle the caught error by ensuring the message is a string.
+      const errorMessage = error instanceof Error ? error.message : t('dictionary.import.error');
+      setImportStatus({ type: 'error', message: errorMessage });
     } finally {
         if(fileInputRef.current) {
             fileInputRef.current.value = "";

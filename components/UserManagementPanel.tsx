@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { authService } from '../services/authService';
 import { useAuth } from '../hooks/useAuth';
 import { useI18n } from '../hooks/useI18n';
 import type { User, UserRole } from '../types';
+import { TrashIcon } from './icons/TrashIcon';
 
 const UserManagementPanel: React.FC = () => {
     const [users, setUsers] = useState<User[]>([]);
@@ -86,7 +86,7 @@ const UserManagementPanel: React.FC = () => {
                     value={selectedRole}
                     onChange={(e) => setSelectedRole(e.target.value as UserRole)}
                     disabled={user.id === adminUser?.id}
-                    className="bg-accent dark:bg-dark-accent border border-accent dark:border-dark-accent text-text-primary dark:text-dark-text-primary text-sm rounded-lg focus:ring-highlight focus:border-highlight block w-full p-2"
+                    className="bg-accent dark:bg-dark-accent border border-border dark:border-dark-border text-text-primary dark:text-dark-text-primary text-sm rounded-lg focus:ring-highlight focus:border-highlight block w-full p-2"
                 >
                     <option value="ADMIN">{t('userManagement.role.admin')}</option>
                     <option value="MODERATOR">{t('userManagement.role.moderator')}</option>
@@ -96,7 +96,7 @@ const UserManagementPanel: React.FC = () => {
                      <button 
                         onClick={onUpdate}
                         disabled={isUpdating}
-                        className="px-3 py-2 text-sm font-medium text-white bg-highlight rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                        className="bg-accent dark:bg-dark-accent text-text-primary dark:text-dark-text-primary font-semibold py-2 px-4 rounded-lg shadow-sm border border-border dark:border-dark-border hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors disabled:opacity-50"
                     >
                         {isUpdating ? '...' : t('userManagement.update')}
                     </button>
@@ -106,7 +106,7 @@ const UserManagementPanel: React.FC = () => {
     };
 
     return (
-        <div className="bg-secondary dark:bg-dark-secondary p-6 rounded-lg shadow-lg">
+        <div className="bg-secondary dark:bg-dark-secondary p-6 rounded-lg shadow-md border border-border dark:border-dark-border">
             <h3 className="text-xl font-bold text-text-primary dark:text-dark-text-primary mb-2">{t('dashboard.userManagement.title')}</h3>
             <p className="text-text-secondary dark:text-dark-text-secondary mb-6">{t('dashboard.userManagement.subtitle')}</p>
             
@@ -123,24 +123,25 @@ const UserManagementPanel: React.FC = () => {
                                 <th scope="col" className="px-6 py-3">{t('userManagement.table.name')}</th>
                                 <th scope="col" className="px-6 py-3">{t('userManagement.table.email')}</th>
                                 <th scope="col" className="px-6 py-3">{t('userManagement.table.role')}</th>
-                                <th scope="col" className="px-6 py-3">{t('userManagement.table.actions')}</th>
+                                <th scope="col" className="px-6 py-3 text-end">{t('userManagement.table.actions')}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {users.map(user => (
-                                <tr key={user.id} className="bg-secondary dark:bg-dark-secondary border-b border-accent dark:border-dark-accent">
+                                <tr key={user.id} className="bg-secondary dark:bg-dark-secondary border-b border-border dark:border-dark-border">
                                     <td className="px-6 py-4 font-medium text-text-primary dark:text-dark-text-primary whitespace-nowrap">{user.name}</td>
                                     <td className="px-6 py-4">{user.email || 'N/A'}</td>
                                     <td className="px-6 py-4">
                                         <RoleSelector user={user} />
                                     </td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-4 text-end">
                                         <button 
                                             onClick={() => handleDeleteUser(user.id)}
                                             disabled={user.id === adminUser?.id}
-                                            className="font-medium text-red-500 hover:underline disabled:text-gray-400 disabled:no-underline disabled:cursor-not-allowed"
+                                            className="p-2 text-text-secondary hover:bg-red-500/10 hover:text-red-500 rounded-full transition-colors disabled:text-gray-400 disabled:bg-transparent disabled:cursor-not-allowed"
+                                            title={t('userManagement.delete')}
                                         >
-                                            {t('userManagement.delete')}
+                                            <TrashIcon className="w-5 h-5"/>
                                         </button>
                                     </td>
                                 </tr>

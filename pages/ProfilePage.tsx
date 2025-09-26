@@ -60,7 +60,7 @@ const ProfilePage: React.FC = () => {
       <h1 className="text-3xl font-bold text-text-primary dark:text-dark-text-primary mb-2">{t('profile.title')}</h1>
       <p className="text-text-secondary dark:text-dark-text-secondary mb-8">{t('profile.subtitle')}</p>
       
-      <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-lg shadow-lg">
+      <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-lg shadow-md border border-border dark:border-dark-border">
         {error && <p className="bg-red-500/10 text-red-500 p-3 rounded mb-6 text-center border border-red-500/20">{error}</p>}
         {success && <p className="bg-green-500/10 text-green-500 p-3 rounded mb-6 text-center border border-green-500/20">{success}</p>}
         
@@ -71,7 +71,7 @@ const ProfilePage: React.FC = () => {
             </label>
             <input
               id="name" type="text" value={name} onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 text-text-primary dark:text-dark-text-primary bg-accent dark:bg-dark-accent rounded-lg focus:outline-none focus:ring-2 focus:ring-highlight dark:focus:ring-dark-highlight"
+              className="w-full px-4 py-3 text-text-primary dark:text-dark-text-primary bg-primary dark:bg-dark-primary rounded-lg border border-border dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-highlight"
               required
             />
           </div>
@@ -82,12 +82,12 @@ const ProfilePage: React.FC = () => {
             </label>
             <input
               id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 text-text-primary dark:text-dark-text-primary bg-accent dark:bg-dark-accent rounded-lg focus:outline-none focus:ring-2 focus:ring-highlight dark:focus:ring-dark-highlight"
+              className="w-full px-4 py-3 text-text-primary dark:text-dark-text-primary bg-primary dark:bg-dark-primary rounded-lg border border-border dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-highlight"
               required
             />
           </div>
 
-          <hr className="border-accent dark:border-dark-accent" />
+          <hr className="border-border dark:border-dark-border" />
 
           <div>
             <label className="block text-text-secondary dark:text-dark-text-secondary text-sm font-bold mb-2" htmlFor="newPassword">
@@ -96,14 +96,14 @@ const ProfilePage: React.FC = () => {
             <input
               id="newPassword" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-4 py-3 text-text-primary dark:text-dark-text-primary bg-accent dark:bg-dark-accent rounded-lg focus:outline-none focus:ring-2 focus:ring-highlight dark:focus:ring-dark-highlight"
+              className="w-full px-4 py-3 text-text-primary dark:text-dark-text-primary bg-primary dark:bg-dark-primary rounded-lg border border-border dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-highlight"
             />
           </div>
 
           <div>
             <button
               type="submit" disabled={isLoading}
-              className="w-full bg-highlight dark:bg-dark-highlight text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:shadow-outline transition-colors disabled:opacity-50"
+              className="w-full bg-highlight text-white font-semibold py-3 px-4 rounded-lg shadow-sm hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-highlight"
             >
               {isLoading ? t('profile.updating') : t('profile.updateButton')}
             </button>

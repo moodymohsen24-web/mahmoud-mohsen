@@ -12,16 +12,18 @@
         extend: {
           colors: {
             // Light theme
-            'primary': '#f8fafc',
-            'secondary': '#ffffff',
-            'accent': '#f1f5f9',
-            'highlight': '#3b82f6',
+            'primary': '#f8fafc', // main bg
+            'secondary': '#ffffff', // card bg
+            'accent': '#f1f5f9', // subtle bg, hover
+            'border': '#e2e8f0', // borders
+            'highlight': '#3b82f6', // primary actions
             'text-primary': '#1e293b',
             'text-secondary': '#64748b',
             // Dark theme
-            'dark-primary': '#0f172a',
-            'dark-secondary': '#1e293b',
-            'dark-accent': '#334155',
+            'dark-primary': '#0f172a', // main bg
+            'dark-secondary': '#1e293b', // card bg
+            'dark-accent': '#334155', // subtle bg, hover
+            'dark-border': '#475569', // borders
             'dark-highlight': '#3b82f6', // highlight can be same
             'dark-text-primary': '#f8fafc',
             'dark-text-secondary': '#94a3b8',
@@ -48,7 +50,7 @@
 }
 </script>
 </head>
-<body>
+<body class="bg-primary dark:bg-dark-primary text-text-primary dark:text-dark-text-primary antialiased">
   <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>

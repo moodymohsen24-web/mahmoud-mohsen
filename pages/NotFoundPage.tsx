@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useI18n } from '../hooks/useI18n';
@@ -17,7 +16,7 @@ const NotFoundPage: React.FC = () => {
       </p>
       <Link
         to="/"
-        className="px-8 py-3 bg-highlight dark:bg-dark-highlight text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-transform transform hover:scale-105"
+        className="bg-highlight text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:bg-blue-700 dark:hover:bg-blue-500 transition-transform transform hover:scale-105"
       >
         {t('notFound.goHome')}
       </Link>

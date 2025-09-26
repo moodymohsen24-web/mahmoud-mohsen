@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { RocketLaunchIcon } from '../components/icons/RocketLaunchIcon';
@@ -9,7 +8,7 @@ import { subscriptionService } from '../services/subscriptionService';
 import type { SubscriptionPlan } from '../types';
 
 const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; children: React.ReactNode }> = ({ icon, title, children }) => (
-    <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-lg shadow-lg text-center transform hover:-translate-y-2 transition-transform duration-300 flex flex-col items-center">
+    <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-lg shadow-md border border-border dark:border-dark-border text-center transform hover:-translate-y-2 transition-transform duration-300 flex flex-col items-center">
         <div className="flex-shrink-0 bg-accent dark:bg-dark-accent p-4 rounded-full mb-6">
             {icon}
         </div>
@@ -19,7 +18,7 @@ const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; children: Re
 );
 
 const TestimonialCard: React.FC<{ quote: string; author: string; role: string; }> = ({ quote, author, role }) => (
-    <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-lg shadow-lg">
+    <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-lg shadow-md border border-border dark:border-dark-border">
         <p className="text-text-secondary dark:text-dark-text-secondary italic mb-6">"{quote}"</p>
         <div className="text-start">
             <p className="font-bold text-text-primary dark:text-dark-text-primary">{author}</p>
@@ -65,7 +64,7 @@ const PricingSection: React.FC = () => {
                         {plans.map((plan) => (
                             <div
                                 key={plan.id}
-                                className={`bg-secondary dark:bg-dark-secondary rounded-lg shadow-lg p-8 flex flex-col transition-all duration-300 text-center ${!plan.is_default ? 'border-2 border-highlight' : ''}`}
+                                className={`bg-secondary dark:bg-dark-secondary rounded-lg shadow-lg p-8 flex flex-col transition-all duration-300 text-center border ${!plan.is_default ? 'border-2 border-highlight' : 'border-border dark:border-dark-border'}`}
                             >
                                 <h3 className="text-2xl font-bold text-highlight dark:text-dark-highlight mb-4">{plan.name}</h3>
                                 <p className="text-4xl font-extrabold text-text-primary dark:text-dark-text-primary mb-2">
@@ -84,7 +83,7 @@ const PricingSection: React.FC = () => {
                                     to="/signup"
                                     className={`w-full block py-3 px-6 rounded-lg font-bold transition-colors text-lg ${
                                         !plan.is_default
-                                            ? 'bg-highlight text-white hover:bg-blue-700'
+                                            ? 'bg-highlight text-white hover:bg-blue-700 dark:hover:bg-blue-500 shadow-sm'
                                             : 'bg-highlight/15 text-highlight hover:bg-highlight/25'
                                     }`}
                                 >
@@ -116,7 +115,7 @@ const HomePage: React.FC = () => {
           </p>
           <Link
             to="/signup"
-            className="bg-highlight dark:bg-dark-highlight text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 dark:hover:bg-blue-600 transition-all duration-300 transform hover:scale-105 text-lg inline-block"
+            className="bg-highlight text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 dark:hover:bg-blue-600 transition-all duration-300 transform hover:scale-105 text-lg inline-block shadow-lg"
           >
             {t('home.hero.cta')}
           </Link>
@@ -124,7 +123,7 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-secondary dark:bg-dark-secondary">
+      <section id="features" className="py-20 bg-secondary dark:bg-dark-secondary border-y border-border dark:border-dark-border">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-text-primary dark:text-dark-text-primary">{t('home.features.title')}</h2>
@@ -179,7 +178,7 @@ const HomePage: React.FC = () => {
       <PricingSection />
 
       {/* Final CTA Section */}
-      <section className="py-20 bg-secondary/50 dark:bg-dark-secondary/50">
+      <section className="py-20 bg-secondary/50 dark:bg-dark-secondary/50 border-t border-border dark:border-dark-border">
         <div className="container mx-auto text-center">
             <h2 className="text-4xl font-bold text-text-primary dark:text-dark-text-primary mb-4">{t('home.cta.title')}</h2>
             <p className="text-text-secondary dark:text-dark-text-secondary max-w-2xl mx-auto mb-8">
@@ -187,7 +186,7 @@ const HomePage: React.FC = () => {
             </p>
             <Link
                 to="/signup"
-                className="bg-highlight dark:bg-dark-highlight text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 dark:hover:bg-blue-600 transition-all duration-300 transform hover:scale-105 text-lg inline-block"
+                className="bg-highlight text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 dark:hover:bg-blue-600 transition-all duration-300 transform hover:scale-105 text-lg inline-block shadow-lg"
             >
                 {t('home.cta.button')}
             </Link>

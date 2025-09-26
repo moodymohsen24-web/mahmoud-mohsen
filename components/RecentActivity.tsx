@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { Activity } from '../types';
 import { PencilSquareIcon } from './icons/PencilSquareIcon';
@@ -25,7 +24,7 @@ const RecentActivity: React.FC<{ activities: Activity[] }> = ({ activities }) =>
   }
 
   return (
-    <div className="bg-secondary dark:bg-dark-secondary p-6 rounded-lg shadow-lg h-full">
+    <div className="bg-secondary dark:bg-dark-secondary p-6 rounded-lg shadow-md border border-border dark:border-dark-border h-full">
       <h3 className="text-xl font-semibold text-text-primary dark:text-dark-text-primary mb-4">{t('dashboard.recentActivity.title')}</h3>
       {activities.length === 0 ? (
           <p className="text-center text-text-secondary dark:text-dark-text-secondary py-8">{t('dashboard.recentActivity.empty')}</p>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useI18n } from '../hooks/useI18n';
@@ -8,7 +7,7 @@ import { BookOpenIcon } from './icons/BookOpenIcon';
 import { Cog6ToothIcon } from './icons/Cog6ToothIcon';
 
 const QuickAccessCard: React.FC<{ to: string; icon: React.ReactNode; title: string; }> = ({ to, icon, title }) => (
-    <Link to={to} className="bg-secondary dark:bg-dark-secondary p-6 rounded-lg shadow-lg flex flex-col items-center justify-center text-center transform hover:scale-105 transition-transform duration-300">
+    <Link to={to} className="bg-secondary dark:bg-dark-secondary p-6 rounded-lg shadow-md border border-border dark:border-dark-border flex flex-col items-center justify-center text-center transform hover:scale-105 transition-transform duration-300">
         <div className="bg-accent dark:bg-dark-accent p-4 rounded-full mb-4 text-highlight dark:text-dark-highlight">
             {icon}
         </div>

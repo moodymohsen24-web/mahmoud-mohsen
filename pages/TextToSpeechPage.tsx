@@ -620,7 +620,12 @@ const TextToSpeechPage: React.FC = () => {
 
   // --- Render-related calculations ---
 
-  const totalBalance = Object.values(apiKeyBalance).reduce((sum, bal) => sum + (bal > 0 ? bal : 0), 0);
+  // FIX: Operators '+' and '>' cannot be applied to types 'unknown'.
+  // Safely reduce the apiKeyBalance by ensuring values are treated as numbers.
+  const totalBalance = Object.values(apiKeyBalance).reduce((sum, bal) => {
+    const numericBal = Number(bal);
+    return sum + (!isNaN(numericBal) && numericBal > 0 ? numericBal : 0);
+  }, 0);
   const successfulChunks = convertedChunks.filter(c => c.status === 'success');
   const isSelectAllForMergeChecked = successfulChunks.length > 0 && selectedForMerge.size === successfulChunks.length;
   const handleSelectAllForMerge = (e: React.ChangeEvent<HTMLInputElement>) => setSelectedForMerge(e.target.checked ? new Set(successfulChunks.map(c => c.id)) : new Set());
