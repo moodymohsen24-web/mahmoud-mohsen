@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { SoundWaveIcon } from './icons/SoundWaveIcon';
 import { TwitterIcon } from './icons/TwitterIcon';
@@ -101,12 +100,12 @@ const Footer: React.FC = () => {
 
     return (
       <div className="container mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand Section */}
           <div className="lg:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-3 mb-4">
                 <SoundWaveIcon className="w-8 h-8 text-highlight dark:text-dark-highlight"/>
-                <span className="text-xl font-bold">مسموع</span>
+                <span className="text-2xl font-bold">مسموع</span>
             </div>
             <p className="text-text-secondary dark:text-dark-text-secondary text-sm">
                 {description}
@@ -115,8 +114,8 @@ const Footer: React.FC = () => {
 
           {/* Links Section */}
           <div>
-            <h3 className="font-semibold text-text-primary dark:text-dark-text-primary mb-4">المنصة</h3>
-            <ul className="space-y-2">
+            <h3 className="text-sm font-semibold text-text-primary dark:text-dark-text-primary uppercase tracking-wider mb-4">المنصة</h3>
+            <ul className="space-y-3">
                 {platformLinks.map(link => (
                     <li key={link.id}><a href={link.url} className="text-sm text-text-secondary dark:text-dark-text-secondary hover:text-highlight transition-colors">{link.text}</a></li>
                 ))}
@@ -125,8 +124,8 @@ const Footer: React.FC = () => {
 
           {/* Legal Section */}
           <div>
-            <h3 className="font-semibold text-text-primary dark:text-dark-text-primary mb-4">قانوني</h3>
-            <ul className="space-y-2">
+            <h3 className="text-sm font-semibold text-text-primary dark:text-dark-text-primary uppercase tracking-wider mb-4">قانوني</h3>
+            <ul className="space-y-3">
                 {legalLinks.map(link => (
                     <li key={link.id}><a href={link.url} className="text-sm text-text-secondary dark:text-dark-text-secondary hover:text-highlight transition-colors">{link.text}</a></li>
                 ))}
@@ -135,7 +134,7 @@ const Footer: React.FC = () => {
 
           {/* Social Section */}
           <div>
-            <h3 className="font-semibold text-text-primary dark:text-dark-text-primary mb-4">التواصل</h3>
+            <h3 className="text-sm font-semibold text-text-primary dark:text-dark-text-primary uppercase tracking-wider mb-4">التواصل</h3>
              <div className="flex space-x-4">
               {socialLinks.map(link => {
                 const iconKey = link.text.toLowerCase().trim();
@@ -161,7 +160,7 @@ const Footer: React.FC = () => {
   };
   
   return (
-    <footer className="bg-secondary/80 dark:bg-dark-secondary/80 backdrop-blur-lg border-t border-border dark:border-dark-border mt-12">
+    <footer className="bg-secondary/50 dark:bg-dark-secondary/50 backdrop-blur-lg border-t border-border dark:border-dark-border mt-12">
       {renderContent()}
     </footer>
   );

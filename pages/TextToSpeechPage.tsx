@@ -658,8 +658,8 @@ const TextToSpeechPage: React.FC = () => {
                     <div> <label className="block text-sm font-bold mb-1" htmlFor="dict-replacement">{t('dictionary.add.replacement')}</label> <input id="dict-replacement" type="text" value={dictReplacement} onChange={e => setDictReplacement(e.target.value)} className="w-full p-2 bg-accent dark:bg-dark-accent rounded-lg focus:outline-none focus:ring-2 focus:ring-highlight" autoFocus /> </div>
                 </div>
                 <div className="flex justify-end gap-4 mt-6">
-                    <button onClick={handleCloseDictModal} className="btn-secondary">{t('planManagement.cancel')}</button>
-                    <button onClick={handleAddToDictionary} disabled={!dictReplacement.trim()} className="btn-primary">{t('dictionary.add.button')}</button>
+                    <button onClick={handleCloseDictModal} className="bg-accent dark:bg-dark-accent text-text-primary dark:text-dark-text-primary font-medium py-2 px-4 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">{t('planManagement.cancel')}</button>
+                    <button onClick={handleAddToDictionary} disabled={!dictReplacement.trim()} className="bg-highlight text-white font-bold py-2 px-4 rounded-lg hover:bg-highlight-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed">{t('dictionary.add.button')}</button>
                 </div>
             </div>
         </div>
@@ -667,12 +667,12 @@ const TextToSpeechPage: React.FC = () => {
 
       <h1 className="text-3xl font-bold flex items-center gap-2"> <SpeakerWaveIcon className="w-8 h-8 text-highlight dark:text-dark-highlight" /> <span>{t('tts.title')}</span> </h1>
 
-      <Card title={t('tts.configuration.title')} headerActions={<button onClick={handleClearSession} className="btn-secondary text-sm">{t('tts.session.clear')}</button>}>
+      <Card title={t('tts.configuration.title')} headerActions={<button onClick={handleClearSession} className="bg-accent dark:bg-dark-accent text-text-primary dark:text-dark-text-primary font-medium py-2 px-4 text-sm rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">{t('tts.session.clear')}</button>}>
         <div className="space-y-4">
             <textarea value={fullText} onChange={(e) => setFullText(e.target.value)} rows={8} className="w-full p-3 bg-accent dark:bg-dark-accent rounded-lg" placeholder={t('tts.controls.placeholder')} />
             <div className="flex gap-2">
-                <label className="btn-primary cursor-pointer flex-1 flex items-center justify-center gap-2"> <ArrowUpTrayIcon className="w-5 h-5"/> <span>{t('textCheck.button.upload')}</span> <input type="file" accept=".txt" className="hidden" onChange={e => e.target.files && selectTextFile(e.target.files[0])} /> </label>
-                <button onClick={handleEnhanceText} className="btn-secondary flex-1 flex items-center justify-center gap-2" disabled={isEnhancing || !fullText}> <SparklesIcon className="w-5 h-5"/> <span>{isEnhancing ? t('tts.enhance.enhancing') : t('tts.configuration.enhanceWithAI')}</span> </button>
+                <label className="bg-highlight text-white font-bold py-2 px-4 rounded-lg hover:bg-highlight-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex-1 flex items-center justify-center gap-2"> <ArrowUpTrayIcon className="w-5 h-5"/> <span>{t('textCheck.button.upload')}</span> <input type="file" accept=".txt" className="hidden" onChange={e => e.target.files && selectTextFile(e.target.files[0])} /> </label>
+                <button onClick={handleEnhanceText} className="bg-accent dark:bg-dark-accent text-text-primary dark:text-dark-text-primary font-medium py-2 px-4 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-1 flex items-center justify-center gap-2" disabled={isEnhancing || !fullText}> <SparklesIcon className="w-5 h-5"/> <span>{isEnhancing ? t('tts.enhance.enhancing') : t('tts.configuration.enhanceWithAI')}</span> </button>
             </div>
         </div>
         <div className="mt-6">
@@ -686,7 +686,7 @@ const TextToSpeechPage: React.FC = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="sm:col-span-2">
                             <Select label={t('tts.settings.voice')} options={voices} value={uiSettings.voiceId} onChange={e => setUiSettings(s => ({...s, voiceId: e.target.value}))} />
-                            <button onClick={() => previewVoice(uiSettings.voiceId)} disabled={isPreviewingVoice} className="text-sm btn-secondary mt-2 w-full">{isPreviewingVoice ? t('tts.voice.previewing') : t('tts.voice.preview')}</button>
+                            <button onClick={() => previewVoice(uiSettings.voiceId)} disabled={isPreviewingVoice} className="text-sm bg-accent dark:bg-dark-accent text-text-primary dark:text-dark-text-primary font-medium py-2 px-4 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2 w-full">{isPreviewingVoice ? t('tts.voice.previewing') : t('tts.voice.preview')}</button>
                         </div>
                         <div className="sm:col-span-2"><Select label={t('tts.settings.model')} options={models} value={uiSettings.modelId} onChange={e => setUiSettings(s => ({...s, modelId: e.target.value}))} /> {showMultilingualWarning && (<p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1 px-1 flex items-center gap-1"><InformationCircleIcon className="w-4 h-4" /> {t('tts.model.nonMultilingualWarning')}</p>)}</div>
                         <Input containerClassName="sm:col-span-2" label={t('tts.voiceTuning.stability')} type="range" min="0" max="1" step="0.01" value={uiSettings.stability} onChange={e => setUiSettings(s => ({...s, stability: parseFloat(e.target.value)}))} title={areVoiceSettingsSupported ? String(uiSettings.stability) : t('tts.voiceTuning.unavailable')} disabled={!areVoiceSettingsSupported}/>
@@ -697,7 +697,7 @@ const TextToSpeechPage: React.FC = () => {
                             <InformationCircleIcon className="w-5 h-5"/>
                             {t('tts.ssmlGuideLink')}
                           </Link>
-                          <button type="button" onClick={handleResetAdvancedSettings} className="btn-secondary">{t('tts.advancedAudio.resetDefaults')}</button>
+                          <button type="button" onClick={handleResetAdvancedSettings} className="bg-accent dark:bg-dark-accent text-text-primary dark:text-dark-text-primary font-medium py-2 px-4 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">{t('tts.advancedAudio.resetDefaults')}</button>
                         </div>
                     </div>
                 )}
@@ -718,13 +718,13 @@ const TextToSpeechPage: React.FC = () => {
                 )}
                 {activeSettingsTab === 'keys' && (
                     <div className="space-y-4">
-                      <div className="flex gap-2"><input type="password" value={newApiKeyInput} onChange={(e) => setNewApiKeyInput(e.target.value)} placeholder={t('tts.apiKeyManagement.enterNew')} className="flex-grow form-input"/><button onClick={handleAddNewKey} className="btn-primary">{t('tts.apiKeyManagement.add')}</button></div>
+                      <div className="flex gap-2"><input type="password" value={newApiKeyInput} onChange={(e) => setNewApiKeyInput(e.target.value)} placeholder={t('tts.apiKeyManagement.enterNew')} className="flex-grow px-3 py-2 text-text-primary dark:text-dark-text-primary bg-secondary dark:bg-dark-secondary rounded-lg border border-accent dark:border-dark-accent focus:outline-none focus:ring-2 focus:ring-highlight dark:focus:ring-dark-highlight"/><button onClick={handleAddNewKey} className="bg-highlight text-white font-bold py-2 px-4 rounded-lg hover:bg-highlight-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed">{t('tts.apiKeyManagement.add')}</button></div>
                       <div className="flex flex-wrap gap-2 border-t border-accent dark:border-dark-accent pt-4">
-                          <button onClick={() => checkBalances(apiKeys)} disabled={isCheckingBalances} className="btn-secondary">{isCheckingBalances ? t('tts.apiKeyManagement.checking') : t('tts.apiKeyManagement.checkAll')}</button>
-                          <label className="btn-primary cursor-pointer inline-flex items-center gap-2"> <ArrowUpTrayIcon className="w-5 h-5"/> <span>{t('tts.apiKeyManagement.uploadKeys')}</span> <input type="file" accept=".txt" className="hidden" onChange={(e) => e.target.files && loadKeysFromFile(e.target.files[0])} /> </label>
+                          <button onClick={() => checkBalances(apiKeys)} disabled={isCheckingBalances} className="bg-accent dark:bg-dark-accent text-text-primary dark:text-dark-text-primary font-medium py-2 px-4 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">{isCheckingBalances ? t('tts.apiKeyManagement.checking') : t('tts.apiKeyManagement.checkAll')}</button>
+                          <label className="bg-highlight text-white font-bold py-2 px-4 rounded-lg hover:bg-highlight-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer inline-flex items-center gap-2"> <ArrowUpTrayIcon className="w-5 h-5"/> <span>{t('tts.apiKeyManagement.uploadKeys')}</span> <input type="file" accept=".txt" className="hidden" onChange={(e) => e.target.files && loadKeysFromFile(e.target.files[0])} /> </label>
                           <div className="flex-grow"></div>
-                          <button onClick={deleteSelectedKeys} disabled={selectedApiKeys.length === 0} className="btn-danger-outline flex items-center gap-2"> <TrashIcon className="w-5 h-5"/> <span>{t('tts.apiKeyManagement.deleteSelected', { count: selectedApiKeys.length })}</span> </button>
-                          <button onClick={deleteAllKeys} disabled={apiKeys.length === 0} className="btn-danger">{t('tts.apiKeyManagement.deleteAll')}</button>
+                          <button onClick={deleteSelectedKeys} disabled={selectedApiKeys.length === 0} className="bg-transparent text-red-500 border border-red-500 font-medium py-2 px-4 rounded-lg hover:bg-red-500 hover:text-white transition-colors disabled:opacity-50 disabled:text-red-500/50 disabled:border-red-500/50 disabled:bg-transparent flex items-center gap-2"> <TrashIcon className="w-5 h-5"/> <span>{t('tts.apiKeyManagement.deleteSelected', { count: selectedApiKeys.length })}</span> </button>
+                          <button onClick={deleteAllKeys} disabled={apiKeys.length === 0} className="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">{t('tts.apiKeyManagement.deleteAll')}</button>
                       </div>
                       <div className="overflow-x-auto max-h-64"><table className="w-full text-sm text-left">
                           <thead className="text-xs uppercase bg-accent dark:bg-dark-accent sticky top-0"><tr><th className="p-2"><input type="checkbox" onChange={handleSelectAllKeys} checked={apiKeys.length > 0 && selectedApiKeys.length === apiKeys.length} /></th><th className="p-2">#</th><th className="p-2">{t('tts.apiKeyManagement.table.key')}</th><th className="p-2">{t('tts.apiKeyManagement.table.balance')}</th><th className="p-2">{t('tts.apiKeyManagement.table.status')}</th></tr></thead>
@@ -738,8 +738,8 @@ const TextToSpeechPage: React.FC = () => {
 
       <Card>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <button onClick={startConversion} disabled={isRunning || !fullText || apiKeys.length === 0} className="btn-primary text-xl font-bold bg-green-600 hover:bg-green-700 w-full h-14 flex items-center justify-center gap-3 shadow-lg transform hover:scale-105 transition-transform duration-200"><PlayCircleIcon className="w-8 h-8"/> {t('tts.controls.start')}</button>
-              <button onClick={stopConversion} disabled={!isRunning} className="btn-danger text-xl font-bold bg-red-600 hover:bg-red-700 w-full h-14 flex items-center justify-center gap-3 shadow-lg transform hover:scale-105 transition-transform duration-200"><StopCircleIcon className="w-8 h-8"/> {t('tts.controls.stop')}</button>
+              <button onClick={startConversion} disabled={isRunning || !fullText || apiKeys.length === 0} className="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xl h-14 flex items-center justify-center gap-3 shadow-lg transform hover:scale-105 duration-200"><PlayCircleIcon className="w-8 h-8"/> {t('tts.controls.start')}</button>
+              <button onClick={stopConversion} disabled={!isRunning} className="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xl h-14 flex items-center justify-center gap-3 shadow-lg transform hover:scale-105 duration-200"><StopCircleIcon className="w-8 h-8"/> {t('tts.controls.stop')}</button>
           </div>
           {isRunning && (<div className="mt-4 space-y-2">
               <div className="w-full bg-accent dark:bg-dark-accent rounded-full h-4"><div className="bg-highlight h-4 rounded-full" style={{ width: `${progress}%`, transition: 'width 0.5s' }}></div></div>
@@ -756,7 +756,7 @@ const TextToSpeechPage: React.FC = () => {
             {activeResultsTab === 'chunks' && (<div>
               <div className="flex justify-between items-center mb-4">
                   <div className="flex items-center gap-2"> <input type="checkbox" id="selectAllForMerge" checked={isSelectAllForMergeChecked} onChange={handleSelectAllForMerge} disabled={successfulChunks.length === 0} className="h-4 w-4 rounded border-gray-300 text-highlight focus:ring-highlight disabled:opacity-50" /> <label htmlFor="selectAllForMerge" className="text-sm font-medium text-text-secondary dark:text-dark-text-secondary">{t('tts.convertedChunks.selectAll')}</label> </div>
-                  <button onClick={handleMergeAndDownload} disabled={selectedForMerge.size < 1 || isMerging} className="btn-primary flex items-center gap-2"><ArchiveBoxArrowDownIcon className="w-5 h-5"/> {isMerging ? t('tts.convertedChunks.merging') : t('tts.convertedChunks.mergeAndDownload', { count: selectedForMerge.size })}</button>
+                  <button onClick={handleMergeAndDownload} disabled={selectedForMerge.size < 1 || isMerging} className="bg-highlight text-white font-bold py-2 px-4 rounded-lg hover:bg-highlight-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"><ArchiveBoxArrowDownIcon className="w-5 h-5"/> {isMerging ? t('tts.convertedChunks.merging') : t('tts.convertedChunks.mergeAndDownload', { count: selectedForMerge.size })}</button>
               </div>
               <div className="space-y-2 overflow-y-auto max-h-[500px] p-1">
                 {convertedChunks.length > 0 ? convertedChunks.map(chunk => (
@@ -772,7 +772,7 @@ const TextToSpeechPage: React.FC = () => {
                             {selection && selection.chunkId === chunk.id && (<div className="absolute -top-12 right-0 z-10"><button onClick={handleOpenDictModal} className="bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-3 text-sm flex items-center gap-1 shadow-lg rounded-md transition-colors"><BookOpenIcon className="w-4 h-4" />{t('tts.addToDictionary.button')}</button></div>)}
                         </div>
                         {chunk.audioUrl && <audio ref={el => { audioRefs.current[chunk.id] = el; }} src={chunk.audioUrl} controls className="w-full h-10" />}
-                        <div className="flex justify-end items-center gap-2"><button onClick={() => handleRetryChunk(chunk.id)} className="btn-secondary text-sm">{t('tts.convertedChunks.retry')}</button> {chunk.audioUrl && <a href={chunk.audioUrl} download={`${chunk.id}.mp3`} className="btn-secondary text-sm">{t('tts.convertedChunks.download')}</a>}</div>
+                        <div className="flex justify-end items-center gap-2"><button onClick={() => handleRetryChunk(chunk.id)} className="bg-accent dark:bg-dark-accent text-text-primary dark:text-dark-text-primary font-medium py-2 px-4 text-sm rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">{t('tts.convertedChunks.retry')}</button> {chunk.audioUrl && <a href={chunk.audioUrl} download={`${chunk.id}.mp3`} className="bg-accent dark:bg-dark-accent text-text-primary dark:text-dark-text-primary font-medium py-2 px-4 text-sm rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">{t('tts.convertedChunks.download')}</a>}</div>
                       </div>
                     )}
                   </div>
@@ -780,18 +780,17 @@ const TextToSpeechPage: React.FC = () => {
               </div>
             </div>)}
             {activeResultsTab === 'log' && (<div>
-              <div className="flex flex-wrap gap-2 mb-4"><button onClick={copyLogToClipboard} className="btn-secondary flex items-center gap-1"><ClipboardDocumentIcon className="w-4 h-4"/>{t('tts.logs.copy')}</button><button onClick={exportLogToFile} className="btn-secondary flex items-center gap-1"><ArrowDownTrayIcon className="w-4 h-4"/>{t('tts.logs.export')}</button><button onClick={clearLog} className="btn-secondary flex items-center gap-1"><TrashIcon className="w-4 h-4"/>{t('tts.logs.clear')}</button></div>
+              <div className="flex flex-wrap gap-2 mb-4">
+                <button onClick={copyLogToClipboard} className="bg-accent dark:bg-dark-accent text-text-primary dark:text-dark-text-primary font-medium py-2 px-4 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"><ClipboardDocumentIcon className="w-4 h-4"/>{t('tts.logs.copy')}</button>
+                <button onClick={exportLogToFile} className="bg-accent dark:bg-dark-accent text-text-primary dark:text-dark-text-primary font-medium py-2 px-4 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"><ArrowDownTrayIcon className="w-4 h-4"/>{t('tts.logs.export')}</button>
+                <button onClick={clearLog} className="bg-accent dark:bg-dark-accent text-text-primary dark:text-dark-text-primary font-medium py-2 px-4 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"><TrashIcon className="w-4 h-4"/>{t('tts.logs.clear')}</button>
+              </div>
               <div ref={logContainerRef} onScroll={handleLogScroll} className="h-[400px] bg-primary dark:bg-dark-primary p-2 rounded-md overflow-y-auto text-sm font-mono">{logMessages.map((msg, index) => <div key={index} className={`mb-1 ${msg.level === 'success' ? 'text-green-500' : msg.level === 'error' ? 'text-red-500' : ''}`}>{msg.message}</div>)}</div>
             </div>)}
           </div>
       </Card>
       
       <style>{`
-        .btn-primary { @apply bg-highlight text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed; }
-        .btn-secondary { @apply bg-accent dark:bg-dark-accent text-text-primary dark:text-dark-text-primary font-medium py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-dark-accent/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed; }
-        .btn-danger { @apply bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed; }
-        .btn-danger-outline { @apply bg-transparent text-red-600 border border-red-600 font-bold py-2 px-4 rounded-lg hover:bg-red-600 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-transparent disabled:text-red-600/50 disabled:border-red-600/50; }
-        .form-input { @apply px-3 py-2 text-text-primary dark:text-dark-text-primary bg-secondary dark:bg-dark-secondary rounded-lg border border-accent dark:border-dark-accent focus:outline-none focus:ring-2 focus:ring-highlight dark:focus:ring-dark-highlight; }
         audio::-webkit-media-controls-panel { background-color: #e2e8f0; } /* light theme */
         .dark audio::-webkit-media-controls-panel { background-color: #334155; } /* dark theme */
       `}</style>

@@ -448,6 +448,7 @@
     "subscriptionPage.title": "Subscription Plans",
     "subscriptionPage.subtitle": "Choose the plan that's right for you.",
     "subscriptionPage.currentPlan": "Current Plan",
+    "subscriptionPage.mostPopular": "Most Popular",
     "subscriptionPage.upgrade": "Upgrade",
     "subscriptionPage.getStarted": "Get Started",
     "subscriptionPage.price.month": "/month",

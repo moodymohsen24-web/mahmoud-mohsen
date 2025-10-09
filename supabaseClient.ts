@@ -211,4 +211,8 @@ export interface Database {
 const supabaseUrl = 'https://hfhfjtpcmcqobbytjldj.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmaGZqdHBjbWNxb2JieXRqbGRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyNDkxNjcsImV4cCI6MjA3MDgyNTE2N30.U-WWzGQi2qzi3TJJnrWOk_KcByDtXgo2NCdbO7nbipQ';
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  db: {
+    schema: 'public',
+  }
+});

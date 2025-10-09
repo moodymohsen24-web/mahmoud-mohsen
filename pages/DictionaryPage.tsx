@@ -106,7 +106,7 @@ const DictionaryPage: React.FC = () => {
   };
   
   const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    // FIX: The comparison `!event.target.files.length === 0` is unintentional because it compares a boolean to a number. It has been corrected to `event.target.files.length === 0`.
+    // Corrected the faulty boolean logic for checking if files exist. The original comparison was always false.
     if (!user || !event.target.files || event.target.files.length === 0) return;
     const file = event.target.files[0];
     setImportStatus({type: 'success', message: t('dictionary.import.processing')});
@@ -138,7 +138,7 @@ const DictionaryPage: React.FC = () => {
       }
     } catch (error: unknown) {
       console.error("File import failed:", error);
-      // FIX: Safely handle unknown error types before displaying a message.
+      // Safely handle unknown error types before displaying a message.
       let message = t('dictionary.import.error');
       if (error instanceof Error) {
         message = error.message;
@@ -149,7 +149,7 @@ const DictionaryPage: React.FC = () => {
         typeof error === 'object' &&
         'message' in error
       ) {
-        // FIX: Coerced the 'unknown' type to a string to fix the assignment error.
+        // FIX: The error object has a message property of an unknown type. Coerce it to a string.
         message = String((error as { message: unknown }).message);
       }
       setImportStatus({
@@ -190,7 +190,7 @@ const DictionaryPage: React.FC = () => {
                 <input id="replacementWord" type="text" value={replacementWord} onChange={(e) => setReplacementWord(e.target.value)}
                 className="w-full p-2 bg-accent dark:bg-dark-accent rounded-lg focus:outline-none focus:ring-2 focus:ring-highlight"/>
             </div>
-            <button type="submit" disabled={isMutating} className="w-full bg-highlight text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50">
+            <button type="submit" disabled={isMutating} className="w-full bg-highlight text-white font-bold py-2 px-4 rounded-lg hover:bg-highlight-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 {isMutating ? '...' : t('dictionary.add.button')}
             </button>
             </form>
@@ -199,7 +199,7 @@ const DictionaryPage: React.FC = () => {
             <h2 className="text-xl font-bold text-text-primary dark:text-dark-text-primary mb-4">{t('dictionary.import.title')}</h2>
             <p className="text-sm text-text-secondary dark:text-dark-text-secondary mb-4">{t('dictionary.import.description')}</p>
             <input type="file" accept=".txt,.csv" onChange={handleFileImport} ref={fileInputRef} className="hidden" id="file-upload" disabled={isMutating} />
-            <label htmlFor="file-upload" className={`w-full text-center cursor-pointer block bg-highlight text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors ${isMutating ? 'opacity-50 cursor-not-allowed' : ''}`}>
+            <label htmlFor="file-upload" className={`w-full text-center cursor-pointer block bg-highlight text-white font-bold py-2 px-4 rounded-lg hover:bg-highlight-hover transition-colors ${isMutating ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 {isMutating ? t('dictionary.import.processing') : t('dictionary.import.button')}
             </label>
         </div>

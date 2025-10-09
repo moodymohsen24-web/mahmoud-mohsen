@@ -8,8 +8,8 @@ import { subscriptionService } from '../services/subscriptionService';
 import type { SubscriptionPlan } from '../types';
 
 const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; children: React.ReactNode }> = ({ icon, title, children }) => (
-    <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-lg shadow-md border border-border dark:border-dark-border text-center transform hover:-translate-y-2 transition-transform duration-300 flex flex-col items-center">
-        <div className="flex-shrink-0 bg-accent dark:bg-dark-accent p-4 rounded-full mb-6">
+    <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-xl shadow-card-shadow dark:shadow-card-shadow-dark text-center transform hover:-translate-y-1 transition-transform duration-300 flex flex-col items-center">
+        <div className="flex-shrink-0 bg-highlight/10 p-4 rounded-full mb-6">
             {icon}
         </div>
         <h3 className="text-xl font-bold text-text-primary dark:text-dark-text-primary mb-2">{title}</h3>
@@ -18,7 +18,7 @@ const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; children: Re
 );
 
 const TestimonialCard: React.FC<{ quote: string; author: string; role: string; }> = ({ quote, author, role }) => (
-    <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-lg shadow-md border border-border dark:border-dark-border">
+    <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-xl shadow-card-shadow dark:shadow-card-shadow-dark">
         <p className="text-text-secondary dark:text-dark-text-secondary italic mb-6">"{quote}"</p>
         <div className="text-start">
             <p className="font-bold text-text-primary dark:text-dark-text-primary">{author}</p>
@@ -48,11 +48,11 @@ const PricingSection: React.FC = () => {
     }, []);
 
     return (
-        <section id="pricing" className="py-20 bg-primary dark:bg-dark-primary">
+        <section id="pricing" className="py-24 bg-primary dark:bg-dark-primary">
             <div className="container mx-auto px-6">
                 <div className="text-center mb-16">
                     <h2 className="text-4xl font-bold text-text-primary dark:text-dark-text-primary">{t('home.pricing.title')}</h2>
-                    <p className="text-text-secondary dark:text-dark-text-secondary mt-2 max-w-2xl mx-auto">{t('home.pricing.subtitle')}</p>
+                    <p className="text-lg text-text-secondary dark:text-dark-text-secondary mt-4 max-w-2xl mx-auto">{t('home.pricing.subtitle')}</p>
                 </div>
 
                 {isLoading ? (
@@ -60,18 +60,21 @@ const PricingSection: React.FC = () => {
                         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-highlight"></div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-start">
                         {plans.map((plan) => (
                             <div
                                 key={plan.id}
-                                className={`bg-secondary dark:bg-dark-secondary rounded-lg shadow-lg p-8 flex flex-col transition-all duration-300 text-center border ${!plan.is_default ? 'border-2 border-highlight' : 'border-border dark:border-dark-border'}`}
+                                className={`relative bg-secondary dark:bg-dark-secondary rounded-xl shadow-card-shadow dark:shadow-card-shadow-dark p-8 flex flex-col transition-all duration-300 text-center border ${!plan.is_default ? 'border-2 border-highlight' : 'border border-border dark:border-dark-border'}`}
                             >
-                                <h3 className="text-2xl font-bold text-highlight dark:text-dark-highlight mb-4">{plan.name}</h3>
-                                <p className="text-4xl font-extrabold text-text-primary dark:text-dark-text-primary mb-2">
+                                {!plan.is_default && (
+                                    <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 bg-highlight text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">{t('subscriptionPage.mostPopular')}</div>
+                                )}
+                                <h3 className="text-2xl font-bold text-text-primary dark:text-dark-text-primary mb-4">{plan.name}</h3>
+                                <p className="text-5xl font-extrabold text-text-primary dark:text-dark-text-primary mb-2">
                                     ${plan.price}
-                                    <span className="text-lg font-medium text-text-secondary dark:text-dark-text-secondary">{t('subscriptionPage.price.month')}</span>
+                                    <span className="text-base font-medium text-text-secondary dark:text-dark-text-secondary">{t('subscriptionPage.price.month')}</span>
                                 </p>
-                                <ul className="space-y-3 my-8 flex-grow text-start">
+                                <ul className="space-y-4 my-8 flex-grow text-start">
                                     {plan.features.map((feature, index) => (
                                         <li key={index} className="flex items-center gap-3">
                                             <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
@@ -83,8 +86,8 @@ const PricingSection: React.FC = () => {
                                     to="/signup"
                                     className={`w-full block py-3 px-6 rounded-lg font-bold transition-colors text-lg ${
                                         !plan.is_default
-                                            ? 'bg-highlight text-white hover:bg-blue-700 dark:hover:bg-blue-500 shadow-sm'
-                                            : 'bg-highlight/15 text-highlight hover:bg-highlight/25'
+                                            ? 'bg-highlight text-white hover:bg-highlight-hover shadow-md'
+                                            : 'bg-accent text-highlight hover:bg-slate-200 dark:bg-dark-accent dark:hover:bg-slate-700'
                                     }`}
                                 >
                                     {t('home.pricing.cta')}
@@ -104,18 +107,21 @@ const HomePage: React.FC = () => {
   return (
     <div className="bg-primary dark:bg-dark-primary text-text-primary dark:text-dark-text-primary">
       {/* Hero Section */}
-      <section className="relative text-center py-24 px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-secondary to-primary dark:from-dark-primary dark:via-dark-secondary dark:to-dark-primary opacity-50"></div>
-        <div className="container mx-auto relative">
-          <h1 className="text-5xl md:text-6xl font-extrabold leading-tight mb-4 animate-fade-in-down">
+      <section className="relative text-center pt-32 pb-24 px-4 overflow-hidden">
+        <div aria-hidden="true" className="absolute inset-0 z-0">
+          <div className="absolute circle-1 w-96 h-96 bg-blue-200 dark:bg-blue-900/50 rounded-full -top-20 -left-40 opacity-50 blur-3xl"></div>
+          <div className="absolute circle-2 w-96 h-96 bg-purple-200 dark:bg-purple-900/50 rounded-full -bottom-20 -right-40 opacity-50 blur-3xl"></div>
+        </div>
+        <div className="container mx-auto relative z-10">
+          <h1 className="text-5xl md:text-7xl font-extrabold leading-tight mb-6 animate-fade-in-down bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 text-transparent bg-clip-text">
             {t('home.hero.title')}
           </h1>
-          <p className="text-lg md:text-xl text-text-secondary dark:text-dark-text-secondary max-w-3xl mx-auto mb-8 animate-fade-in-up">
+          <p className="text-lg md:text-xl text-text-secondary dark:text-dark-text-secondary max-w-3xl mx-auto mb-10 animate-fade-in-up">
             {t('home.hero.subtitle')}
           </p>
           <Link
             to="/signup"
-            className="bg-highlight text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 dark:hover:bg-blue-600 transition-all duration-300 transform hover:scale-105 text-lg inline-block shadow-lg"
+            className="bg-highlight text-white font-bold py-4 px-10 rounded-full hover:bg-highlight-hover transition-all duration-300 transform hover:scale-105 text-lg inline-block shadow-lg shadow-highlight/30"
           >
             {t('home.hero.cta')}
           </Link>
@@ -123,11 +129,11 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-secondary dark:bg-dark-secondary border-y border-border dark:border-dark-border">
+      <section id="features" className="py-24 bg-secondary dark:bg-dark-secondary border-y border-border dark:border-dark-border">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-text-primary dark:text-dark-text-primary">{t('home.features.title')}</h2>
-            <p className="text-text-secondary dark:text-dark-text-secondary mt-2 max-w-2xl mx-auto">{t('home.features.subtitle')}</p>
+            <p className="text-lg text-text-secondary dark:text-dark-text-secondary mt-4 max-w-2xl mx-auto">{t('home.features.subtitle')}</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <FeatureCard
@@ -153,13 +159,13 @@ const HomePage: React.FC = () => {
       </section>
       
       {/* Testimonials Section */}
-      <section className="py-20 bg-primary dark:bg-dark-primary">
+      <section className="py-24 bg-primary dark:bg-dark-primary">
           <div className="container mx-auto px-6">
               <div className="text-center mb-16">
                   <h2 className="text-4xl font-bold text-text-primary dark:text-dark-text-primary">{t('home.testimonials.title')}</h2>
-                  <p className="text-text-secondary dark:text-dark-text-secondary mt-2 max-w-2xl mx-auto">{t('home.testimonials.subtitle')}</p>
+                  <p className="text-lg text-text-secondary dark:text-dark-text-secondary mt-4 max-w-2xl mx-auto">{t('home.testimonials.subtitle')}</p>
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
                   <TestimonialCard 
                     quote={t('home.testimonials.card1.quote')}
                     author="Alex Johnson"
@@ -178,15 +184,15 @@ const HomePage: React.FC = () => {
       <PricingSection />
 
       {/* Final CTA Section */}
-      <section className="py-20 bg-secondary/50 dark:bg-dark-secondary/50 border-t border-border dark:border-dark-border">
+      <section className="py-24 bg-secondary/50 dark:bg-dark-secondary/50 border-t border-border dark:border-dark-border">
         <div className="container mx-auto text-center">
             <h2 className="text-4xl font-bold text-text-primary dark:text-dark-text-primary mb-4">{t('home.cta.title')}</h2>
-            <p className="text-text-secondary dark:text-dark-text-secondary max-w-2xl mx-auto mb-8">
+            <p className="text-lg text-text-secondary dark:text-dark-text-secondary max-w-2xl mx-auto mb-8">
                 {t('home.cta.subtitle')}
             </p>
             <Link
                 to="/signup"
-                className="bg-highlight text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 dark:hover:bg-blue-600 transition-all duration-300 transform hover:scale-105 text-lg inline-block shadow-lg"
+                className="bg-highlight text-white font-bold py-4 px-10 rounded-full hover:bg-highlight-hover transition-all duration-300 transform hover:scale-105 text-lg inline-block shadow-lg shadow-highlight/30"
             >
                 {t('home.cta.button')}
             </Link>

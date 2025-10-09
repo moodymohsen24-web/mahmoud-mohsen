@@ -7,6 +7,7 @@ import type { Project } from '../types';
 import { FolderIcon } from '../components/icons/FolderIcon';
 import { PencilIcon } from '../components/icons/PencilIcon';
 import { TrashIcon } from '../components/icons/TrashIcon';
+import { XCircleIcon } from '../components/icons/XCircleIcon';
 
 const ProjectsPage: React.FC = () => {
   const { t, language } = useI18n();
@@ -14,18 +15,21 @@ const ProjectsPage: React.FC = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const [isRenaming, setIsRenaming] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
 
   const fetchProjects = useCallback(async () => {
     if (user) {
       setIsLoading(true);
+      setError('');
       try {
         const userProjects = await projectService.getProjectsForUser(user.id);
         setProjects(userProjects);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        console.error("Failed to fetch projects:", message);
+      } catch (err: any) {
+        const message = err.message || 'An unexpected error occurred while fetching your documents.';
+        console.error("Failed to fetch projects:", err);
+        setError(message);
       } finally {
         setIsLoading(false);
       }
@@ -75,6 +79,22 @@ const ProjectsPage: React.FC = () => {
         <div className="flex justify-center items-center h-full">
             <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-highlight"></div>
         </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-20 bg-secondary dark:bg-dark-secondary rounded-lg">
+        <XCircleIcon className="w-16 h-16 mx-auto text-red-500 mb-4" />
+        <h2 className="text-xl font-semibold text-red-500">Error Loading Projects</h2>
+        <p className="text-text-secondary dark:text-dark-text-secondary mt-2 max-w-lg mx-auto">{error}</p>
+        <button 
+          onClick={fetchProjects} 
+          className="mt-6 bg-highlight text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Retry
+        </button>
+      </div>
     );
   }
 

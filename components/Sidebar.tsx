@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useI18n } from '../hooks/useI18n';
@@ -15,14 +13,14 @@ const Sidebar: React.FC = () => {
     const { t } = useI18n();
 
     const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
-        `flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+        `flex items-center gap-4 px-4 py-3 rounded-lg font-semibold transition-colors text-base relative ${
         isActive
-            ? 'bg-highlight/15 text-highlight'
+            ? 'bg-highlight/10 text-highlight'
             : 'text-text-secondary dark:text-dark-text-secondary hover:bg-accent dark:hover:bg-dark-accent hover:text-text-primary dark:hover:text-dark-text-primary'
         }`;
 
     return (
-        <div className="bg-secondary dark:bg-dark-secondary p-4 rounded-lg shadow-lg h-full flex flex-col">
+        <div className="bg-secondary dark:bg-dark-secondary p-4 rounded-xl shadow-card-shadow dark:shadow-card-shadow-dark h-full flex flex-col">
             <nav className="flex flex-col gap-2">
                 <NavLink to="/dashboard" className={navLinkClasses} end>
                     <ChartBarIcon className="w-6 h-6" />

@@ -8,8 +8,8 @@ import { Cog6ToothIcon } from './icons/Cog6ToothIcon';
 import { FolderIcon } from './icons/FolderIcon';
 
 const QuickAccessCard: React.FC<{ to: string; icon: React.ReactNode; title: string; }> = ({ to, icon, title }) => (
-    <Link to={to} className="bg-secondary dark:bg-dark-secondary p-6 rounded-lg shadow-md border border-border dark:border-dark-border flex flex-col items-center justify-center text-center transform hover:scale-105 transition-transform duration-300">
-        <div className="bg-accent dark:bg-dark-accent p-4 rounded-full mb-4 text-highlight dark:text-dark-highlight">
+    <Link to={to} className="bg-secondary dark:bg-dark-secondary p-6 rounded-xl shadow-card-shadow dark:shadow-card-shadow-dark flex flex-col items-center justify-center text-center transform hover:-translate-y-1 transition-transform duration-300">
+        <div className="bg-highlight/10 dark:bg-dark-accent p-4 rounded-full mb-4 text-highlight dark:text-dark-highlight">
             {icon}
         </div>
         <h3 className="font-semibold text-text-primary dark:text-dark-text-primary">{title}</h3>

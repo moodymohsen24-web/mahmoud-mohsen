@@ -12,21 +12,31 @@
         extend: {
           colors: {
             // Light theme
-            'primary': '#f8fafc', // main bg
-            'secondary': '#ffffff', // card bg
-            'accent': '#f1f5f9', // subtle bg, hover
-            'border': '#e2e8f0', // borders
-            'highlight': '#3b82f6', // primary actions
-            'text-primary': '#1e293b',
-            'text-secondary': '#64748b',
+            'primary': '#f8fafc', // slate-50 - Main background
+            'secondary': '#ffffff', // white - Card, modal, header background
+            'accent': '#f1f5f9', // slate-100 - Subtle hover, borders
+            'highlight': '#2563eb', // blue-600 - Primary buttons, links
+            'highlight-hover': '#1d4ed8', // blue-700
+            'text-primary': '#0f172a', // slate-900
+            'text-secondary': '#64748b', // slate-500
+            'border': '#e2e8f0', // slate-200
+            
             // Dark theme
-            'dark-primary': '#0f172a', // main bg
-            'dark-secondary': '#1e293b', // card bg
-            'dark-accent': '#334155', // subtle bg, hover
-            'dark-border': '#475569', // borders
-            'dark-highlight': '#3b82f6', // highlight can be same
-            'dark-text-primary': '#f8fafc',
-            'dark-text-secondary': '#94a3b8',
+            'dark-primary': '#020617', // slate-950 - Main background
+            'dark-secondary': '#0f172a', // slate-900 - Card, modal, header background
+            'dark-accent': '#1e293b', // slate-800 - Subtle hover, borders
+            'dark-highlight': '#3b82f6', // blue-500
+            'dark-highlight-hover': '#2563eb', // blue-600
+            'dark-text-primary': '#f1f5f9', // slate-100
+            'dark-text-secondary': '#94a3b8', // slate-400
+            'dark-border': '#334155', // slate-700
+          },
+          boxShadow: {
+            'card-shadow': '0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.07)',
+            'card-shadow-dark': '0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -2px rgba(0, 0, 0, 0.15)',
+          },
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', '"Noto Sans"', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"', '"Noto Color Emoji"'],
           },
           opacity: {
             '15': '0.15',
@@ -50,7 +60,7 @@
 }
 </script>
 </head>
-<body class="bg-primary dark:bg-dark-primary text-text-primary dark:text-dark-text-primary antialiased">
+<body class="bg-primary dark:bg-dark-primary text-text-primary dark:text-dark-text-primary antialiased font-sans">
   <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>

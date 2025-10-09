@@ -12,8 +12,8 @@ const UsageChart: React.FC<UsageChartProps> = ({ data }) => {
   const { effectiveTheme } = useTheme();
 
   const colors = {
-    light: { text: '#64748b', grid: '#f1f5f9', tooltipBg: '#ffffff', tooltipText: '#1e293b', line: '#3b82f6' },
-    dark: { text: '#94a3b8', grid: '#334155', tooltipBg: '#1e293b', tooltipText: '#f8fafc', line: '#3b82f6' },
+    light: { text: '#64748b', grid: '#f1f5f9', tooltipBg: '#ffffff', tooltipText: '#0f172a', line: '#2563eb' },
+    dark: { text: '#94a3b8', grid: '#1e293b', tooltipBg: '#0f172a', tooltipText: '#f1f5f9', line: '#3b82f6' },
   };
   const currentColors = colors[effectiveTheme];
 
@@ -24,7 +24,7 @@ const UsageChart: React.FC<UsageChartProps> = ({ data }) => {
   }));
 
   return (
-    <div className="bg-secondary dark:bg-dark-secondary p-6 rounded-lg shadow-lg h-96">
+    <div className="bg-secondary dark:bg-dark-secondary p-6 rounded-xl shadow-card-shadow dark:shadow-card-shadow-dark h-96">
         <h3 className="text-xl font-semibold text-text-primary dark:text-dark-text-primary mb-4">{t('dashboard.usageChart.title')}</h3>
         <ResponsiveContainer width="100%" height="90%">
             <LineChart
@@ -45,6 +45,7 @@ const UsageChart: React.FC<UsageChartProps> = ({ data }) => {
                         backgroundColor: currentColors.tooltipBg, 
                         borderColor: currentColors.grid,
                         color: currentColors.tooltipText,
+                        borderRadius: '0.75rem',
                     }}
                     labelStyle={{ fontWeight: 'bold' }}
                     formatter={(value) => [value, t('dashboard.usageChart.checks')]}

@@ -35,7 +35,7 @@ const UserMenu: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
                 </svg>
             </button>
             {isOpen && (
-                <div className="absolute top-full mt-2 end-0 bg-secondary dark:bg-dark-secondary rounded-md shadow-lg py-1 w-40 z-20 border border-border dark:border-dark-border">
+                <div className="absolute top-full mt-2 end-0 bg-secondary dark:bg-dark-secondary rounded-lg shadow-card-shadow dark:shadow-card-shadow-dark py-1 w-48 z-20 border border-border dark:border-dark-border">
                     <Link
                         to="/profile"
                         onClick={() => setIsOpen(false)}
@@ -92,15 +92,15 @@ const Header: React.FC = () => {
 
   return (
     <header className="bg-secondary/80 dark:bg-dark-secondary/80 backdrop-blur-lg sticky top-0 z-50 border-b border-border dark:border-dark-border">
-      <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
+      <nav className="container mx-auto px-6 sm:px-8 py-3 flex justify-between items-center">
         <Link 
           to={isAuthenticated ? "/dashboard" : "/"} 
-          className="flex items-center gap-2 text-xl font-bold text-text-primary dark:text-dark-text-primary hover:text-highlight dark:hover:text-dark-highlight transition-colors"
+          className="flex items-center gap-3 text-2xl font-bold text-text-primary dark:text-dark-text-primary hover:text-highlight dark:hover:text-dark-highlight transition-colors"
         >
             <SoundWaveIcon className="w-8 h-8 text-highlight dark:text-dark-highlight"/>
             <span>{t('header.brand')}</span>
         </Link>
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-1 sm:gap-2">
           {isAuthenticated ? (
             <>
               <UserMenu onLogout={handleLogout} />
@@ -109,14 +109,14 @@ const Header: React.FC = () => {
             </>
           ) : (
             <>
-              <div className="hidden md:flex items-center gap-6">
+              <div className="hidden md:flex items-center gap-8">
                 <Link to="/" className="text-text-primary dark:text-dark-text-primary font-medium hover:text-highlight dark:hover:text-dark-highlight transition-colors">{t('header.home')}</Link>
                 <a href="#features" onClick={handleFeaturesClick} className="text-text-primary dark:text-dark-text-primary font-medium hover:text-highlight dark:hover:text-dark-highlight transition-colors">{t('header.features')}</a>
                 <a href="#pricing" onClick={handlePricingClick} className="text-text-primary dark:text-dark-text-primary font-medium hover:text-highlight dark:hover:text-dark-highlight transition-colors">{t('header.pricing')}</a>
               </div>
               <button
                 onClick={() => openModal('auth')}
-                className="bg-highlight text-white font-semibold py-2 px-4 rounded-lg shadow-sm hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-highlight"
+                className="bg-highlight text-white font-semibold py-2 px-4 rounded-lg shadow-sm hover:bg-highlight-hover transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-highlight"
               >
                   {t('header.loginOrSignUp')}
               </button>
