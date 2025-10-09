@@ -13,14 +13,6 @@ serve(async (req: Request) => {
 
   // Use a top-level try-catch to ensure a structured JSON response is always returned.
   try {
-    // Manually check content-type before parsing JSON to avoid crashes.
-    if (!req.headers.get("content-type")?.includes("application/json")) {
-        return new Response(JSON.stringify({ success: false, status: 'error', message: 'Invalid content-type, expected application/json.' }), {
-          status: 415, // Use a proper status code, but the client won't see it directly. The important part is the body.
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-    }
-
     let body;
     try {
         body = await req.json();

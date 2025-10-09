@@ -106,7 +106,6 @@ const DictionaryPage: React.FC = () => {
   };
   
   const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    // Corrected the faulty boolean logic for checking if files exist. The original comparison was always false.
     if (!user || !event.target.files || event.target.files.length === 0) return;
     const file = event.target.files[0];
     setImportStatus({type: 'success', message: t('dictionary.import.processing')});
@@ -136,26 +135,10 @@ const DictionaryPage: React.FC = () => {
       } else {
         throw new Error("No valid word pairs found in file.");
       }
-    } catch (error: unknown) {
+    } catch (error) {
       console.error("File import failed:", error);
-      // Safely handle unknown error types before displaying a message.
-      let message = t('dictionary.import.error');
-      if (error instanceof Error) {
-        message = error.message;
-      } else if (typeof error === 'string') {
-        message = error;
-      } else if (
-        error &&
-        typeof error === 'object' &&
-        'message' in error
-      ) {
-        // FIX: The error object has a message property of an unknown type. Coerce it to a string.
-        message = String((error as { message: unknown }).message);
-      }
-      setImportStatus({
-        type: 'error',
-        message,
-      });
+      const message = error instanceof Error ? error.message : t('dictionary.import.error');
+      setImportStatus({ type: 'error', message });
     } finally {
         if(fileInputRef.current) {
             fileInputRef.current.value = "";
@@ -166,17 +149,19 @@ const DictionaryPage: React.FC = () => {
 
   return (
     <div className="container mx-auto max-w-4xl">
-      <h1 className="text-3xl font-bold text-text-primary dark:text-dark-text-primary mb-2">{t('dictionary.title')}</h1>
-      <p className="text-text-secondary dark:text-dark-text-secondary mb-8">{t('dictionary.subtitle')}</p>
+      <div className="animate-fade-in-down">
+        <h1 className="text-3xl font-bold text-text-primary dark:text-dark-text-primary mb-2">{t('dictionary.title')}</h1>
+        <p className="text-text-secondary dark:text-dark-text-secondary mb-8">{t('dictionary.subtitle')}</p>
+      </div>
 
       {importStatus && (
-        <div className={`p-3 rounded mb-6 text-center border ${importStatus.type === 'success' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
+        <div className={`p-3 rounded mb-6 text-center border animate-fade-in ${importStatus.type === 'success' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
           {importStatus.message}
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-lg shadow-lg">
+        <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-lg shadow-lg animate-fade-in-up" style={{ animationDelay: '100ms' }}>
             <h2 className="text-xl font-bold text-text-primary dark:text-dark-text-primary mb-4">{t('dictionary.add.title')}</h2>
             <form onSubmit={handleAddWord} className="space-y-4">
             {addWordError && <div className="bg-red-500/10 text-red-500 text-sm p-3 rounded text-center border border-red-500/20">{addWordError}</div>}
@@ -190,22 +175,22 @@ const DictionaryPage: React.FC = () => {
                 <input id="replacementWord" type="text" value={replacementWord} onChange={(e) => setReplacementWord(e.target.value)}
                 className="w-full p-2 bg-accent dark:bg-dark-accent rounded-lg focus:outline-none focus:ring-2 focus:ring-highlight"/>
             </div>
-            <button type="submit" disabled={isMutating} className="w-full bg-highlight text-white font-bold py-2 px-4 rounded-lg hover:bg-highlight-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            <button type="submit" disabled={isMutating} className="w-full bg-highlight text-white font-bold py-2 px-4 rounded-lg hover:bg-highlight-hover transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
                 {isMutating ? '...' : t('dictionary.add.button')}
             </button>
             </form>
         </div>
-        <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-lg shadow-lg">
+        <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-lg shadow-lg animate-fade-in-up" style={{ animationDelay: '200ms' }}>
             <h2 className="text-xl font-bold text-text-primary dark:text-dark-text-primary mb-4">{t('dictionary.import.title')}</h2>
             <p className="text-sm text-text-secondary dark:text-dark-text-secondary mb-4">{t('dictionary.import.description')}</p>
             <input type="file" accept=".txt,.csv" onChange={handleFileImport} ref={fileInputRef} className="hidden" id="file-upload" disabled={isMutating} />
-            <label htmlFor="file-upload" className={`w-full text-center cursor-pointer block bg-highlight text-white font-bold py-2 px-4 rounded-lg hover:bg-highlight-hover transition-colors ${isMutating ? 'opacity-50 cursor-not-allowed' : ''}`}>
+            <label htmlFor="file-upload" className={`w-full text-center cursor-pointer block bg-highlight text-white font-bold py-2 px-4 rounded-lg hover:bg-highlight-hover transition-colors active:scale-95 ${isMutating ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 {isMutating ? t('dictionary.import.processing') : t('dictionary.import.button')}
             </label>
         </div>
       </div>
       
-      <div className="bg-secondary dark:bg-dark-secondary p-6 rounded-lg shadow-lg">
+      <div className="bg-secondary dark:bg-dark-secondary p-6 rounded-lg shadow-lg animate-fade-in-up" style={{ animationDelay: '300ms' }}>
           {isLoading ? <p className="text-center text-text-secondary dark:text-dark-text-secondary py-8">Loading...</p> :
            Object.keys(dictionary).length === 0 ? (
                 <p className="text-center text-text-secondary dark:text-dark-text-secondary py-8">{t('dictionary.empty')}</p>
@@ -220,8 +205,12 @@ const DictionaryPage: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {Object.entries(dictionary).map(([original, replacement]) => (
-                            <tr key={original} className="border-b border-accent dark:border-dark-accent">
+                        {Object.entries(dictionary).map(([original, replacement], index) => (
+                            <tr 
+                              key={original} 
+                              className="border-b border-accent dark:border-dark-accent animate-fade-in"
+                              style={{ animationDelay: `${index * 30}ms`, animationDuration: '300ms' }}
+                            >
                                 {editingKey === original ? (
                                     <>
                                         <td className="px-6 py-2">
@@ -240,10 +229,10 @@ const DictionaryPage: React.FC = () => {
                                 ) : (
                                     <>
                                         <td className="px-6 py-4 font-medium">{original}</td>
-                                        <td className="px-6 py-4">{replacement}</td>
+                                        <td className="px-6 py-4">{String(replacement)}</td>
                                         <td className="px-6 py-4 text-end">
                                             <div className="flex justify-end items-center gap-2">
-                                                <button onClick={() => handleEditStart(original, replacement)} disabled={isMutating} title={t('dictionary.edit')} className="p-2 text-highlight hover:bg-highlight/10 rounded-full">
+                                                <button onClick={() => handleEditStart(original, String(replacement))} disabled={isMutating} title={t('dictionary.edit')} className="p-2 text-highlight hover:bg-highlight/10 rounded-full">
                                                     <PencilIcon className="w-5 h-5" />
                                                 </button>
                                                 <button onClick={() => handleDeleteWord(original)} disabled={isMutating} title={t('dictionary.delete')} className="p-2 text-red-500 hover:bg-red-500/10 rounded-full">

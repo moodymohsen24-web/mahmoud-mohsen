@@ -90,7 +90,7 @@ const ProjectsPage: React.FC = () => {
         <p className="text-text-secondary dark:text-dark-text-secondary mt-2 max-w-lg mx-auto">{error}</p>
         <button 
           onClick={fetchProjects} 
-          className="mt-6 bg-highlight text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors"
+          className="mt-6 bg-highlight text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors active:scale-95"
         >
           Retry
         </button>
@@ -100,18 +100,18 @@ const ProjectsPage: React.FC = () => {
 
   return (
     <div className="container mx-auto">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-8 animate-fade-in-down">
         <div>
           <h1 className="text-3xl font-bold text-text-primary dark:text-dark-text-primary mb-2">{t('projects.title')}</h1>
           <p className="text-text-secondary dark:text-dark-text-secondary">{t('projects.subtitle')}</p>
         </div>
-        <Link to="/text-check" className="bg-highlight text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors">
+        <Link to="/text-check" className="bg-highlight text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors active:scale-95">
           {t('projects.new')}
         </Link>
       </div>
 
       {projects.length === 0 ? (
-        <div className="text-center py-20 bg-secondary dark:bg-dark-secondary rounded-lg">
+        <div className="text-center py-20 bg-secondary dark:bg-dark-secondary rounded-lg animate-fade-in-up">
           <FolderIcon className="w-16 h-16 mx-auto text-text-secondary dark:text-dark-text-secondary opacity-50 mb-4" />
           <h2 className="text-xl font-semibold text-text-primary dark:text-dark-text-primary">{t('projects.empty.title')}</h2>
           <p className="text-text-secondary dark:text-dark-text-secondary mt-2">{t('projects.empty.description')}</p>
@@ -127,8 +127,12 @@ const ProjectsPage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {projects.map(project => (
-                <tr key={project.id} className="border-b border-accent dark:border-dark-accent hover:bg-accent dark:hover:bg-dark-accent/50">
+              {projects.map((project, index) => (
+                <tr 
+                  key={project.id} 
+                  className="border-b border-accent dark:border-dark-accent hover:bg-accent dark:hover:bg-dark-accent/50 animate-fade-in"
+                  style={{ animationDelay: `${index * 50}ms`, animationDuration: '300ms' }}
+                >
                   <td className="px-6 py-4 font-medium">
                     {isRenaming === project.id ? (
                         <input

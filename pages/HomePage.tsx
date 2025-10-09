@@ -7,8 +7,8 @@ import { useI18n } from '../hooks/useI18n';
 import { subscriptionService } from '../services/subscriptionService';
 import type { SubscriptionPlan } from '../types';
 
-const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; children: React.ReactNode }> = ({ icon, title, children }) => (
-    <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-xl shadow-card-shadow dark:shadow-card-shadow-dark text-center transform hover:-translate-y-1 transition-transform duration-300 flex flex-col items-center">
+const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; children: React.ReactNode, delay: string }> = ({ icon, title, children, delay }) => (
+    <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-xl shadow-card-shadow dark:shadow-card-shadow-dark text-center transform hover:-translate-y-1 transition-transform duration-300 flex flex-col items-center animate-fade-in-up" style={{ animationDelay: delay }}>
         <div className="flex-shrink-0 bg-highlight/10 p-4 rounded-full mb-6">
             {icon}
         </div>
@@ -17,8 +17,8 @@ const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; children: Re
     </div>
 );
 
-const TestimonialCard: React.FC<{ quote: string; author: string; role: string; }> = ({ quote, author, role }) => (
-    <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-xl shadow-card-shadow dark:shadow-card-shadow-dark">
+const TestimonialCard: React.FC<{ quote: string; author: string; role: string; delay: string }> = ({ quote, author, role, delay }) => (
+    <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-xl shadow-card-shadow dark:shadow-card-shadow-dark animate-fade-in-up" style={{ animationDelay: delay }}>
         <p className="text-text-secondary dark:text-dark-text-secondary italic mb-6">"{quote}"</p>
         <div className="text-start">
             <p className="font-bold text-text-primary dark:text-dark-text-primary">{author}</p>
@@ -50,7 +50,7 @@ const PricingSection: React.FC = () => {
     return (
         <section id="pricing" className="py-24 bg-primary dark:bg-dark-primary">
             <div className="container mx-auto px-6">
-                <div className="text-center mb-16">
+                <div className="text-center mb-16 animate-fade-in-up">
                     <h2 className="text-4xl font-bold text-text-primary dark:text-dark-text-primary">{t('home.pricing.title')}</h2>
                     <p className="text-lg text-text-secondary dark:text-dark-text-secondary mt-4 max-w-2xl mx-auto">{t('home.pricing.subtitle')}</p>
                 </div>
@@ -61,10 +61,11 @@ const PricingSection: React.FC = () => {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-start">
-                        {plans.map((plan) => (
+                        {plans.map((plan, index) => (
                             <div
                                 key={plan.id}
-                                className={`relative bg-secondary dark:bg-dark-secondary rounded-xl shadow-card-shadow dark:shadow-card-shadow-dark p-8 flex flex-col transition-all duration-300 text-center border ${!plan.is_default ? 'border-2 border-highlight' : 'border border-border dark:border-dark-border'}`}
+                                className={`relative bg-secondary dark:bg-dark-secondary rounded-xl shadow-card-shadow dark:shadow-card-shadow-dark p-8 flex flex-col transition-all duration-300 text-center border animate-fade-in-up ${!plan.is_default ? 'border-2 border-highlight' : 'border border-border dark:border-dark-border'}`}
+                                style={{ animationDelay: `${200 + index * 150}ms` }}
                             >
                                 {!plan.is_default && (
                                     <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 bg-highlight text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">{t('subscriptionPage.mostPopular')}</div>
@@ -84,7 +85,7 @@ const PricingSection: React.FC = () => {
                                 </ul>
                                 <Link
                                     to="/signup"
-                                    className={`w-full block py-3 px-6 rounded-lg font-bold transition-colors text-lg ${
+                                    className={`w-full block py-3 px-6 rounded-lg font-bold transition-all duration-200 text-lg active:scale-95 ${
                                         !plan.is_default
                                             ? 'bg-highlight text-white hover:bg-highlight-hover shadow-md'
                                             : 'bg-accent text-highlight hover:bg-slate-200 dark:bg-dark-accent dark:hover:bg-slate-700'
@@ -113,15 +114,16 @@ const HomePage: React.FC = () => {
           <div className="absolute circle-2 w-96 h-96 bg-purple-200 dark:bg-purple-900/50 rounded-full -bottom-20 -right-40 opacity-50 blur-3xl"></div>
         </div>
         <div className="container mx-auto relative z-10">
-          <h1 className="text-5xl md:text-7xl font-extrabold leading-tight mb-6 animate-fade-in-down bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 text-transparent bg-clip-text">
+          <h1 className="text-5xl md:text-7xl font-extrabold leading-tight mb-6 animate-fade-in-down bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 text-transparent bg-clip-text" style={{ animationDelay: '200ms' }}>
             {t('home.hero.title')}
           </h1>
-          <p className="text-lg md:text-xl text-text-secondary dark:text-dark-text-secondary max-w-3xl mx-auto mb-10 animate-fade-in-up">
+          <p className="text-lg md:text-xl text-text-secondary dark:text-dark-text-secondary max-w-3xl mx-auto mb-10 animate-fade-in-down" style={{ animationDelay: '400ms' }}>
             {t('home.hero.subtitle')}
           </p>
           <Link
             to="/signup"
-            className="bg-highlight text-white font-bold py-4 px-10 rounded-full hover:bg-highlight-hover transition-all duration-300 transform hover:scale-105 text-lg inline-block shadow-lg shadow-highlight/30"
+            className="bg-highlight text-white font-bold py-4 px-10 rounded-full hover:bg-highlight-hover transition-all duration-300 transform hover:scale-105 text-lg inline-block shadow-lg shadow-highlight/30 animate-fade-in-up active:scale-95"
+             style={{ animationDelay: '600ms' }}
           >
             {t('home.hero.cta')}
           </Link>
@@ -131,7 +133,7 @@ const HomePage: React.FC = () => {
       {/* Features Section */}
       <section id="features" className="py-24 bg-secondary dark:bg-dark-secondary border-y border-border dark:border-dark-border">
         <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16 animate-fade-in-up">
             <h2 className="text-4xl font-bold text-text-primary dark:text-dark-text-primary">{t('home.features.title')}</h2>
             <p className="text-lg text-text-secondary dark:text-dark-text-secondary mt-4 max-w-2xl mx-auto">{t('home.features.subtitle')}</p>
           </div>
@@ -139,18 +141,21 @@ const HomePage: React.FC = () => {
             <FeatureCard
               icon={<RocketLaunchIcon className="w-10 h-10 text-highlight dark:text-dark-highlight" />}
               title={t('home.features.card1.title')}
+              delay="200ms"
             >
               {t('home.features.card1.description')}
             </FeatureCard>
             <FeatureCard
               icon={<ShieldCheckIcon className="w-10 h-10 text-highlight dark:text-dark-highlight" />}
               title={t('home.features.card2.title')}
+              delay="350ms"
             >
              {t('home.features.card2.description')}
             </FeatureCard>
             <FeatureCard
               icon={<ServerIcon className="w-10 h-10 text-highlight dark:text-dark-highlight" />}
               title={t('home.features.card3.title')}
+              delay="500ms"
             >
               {t('home.features.card3.description')}
             </FeatureCard>
@@ -161,7 +166,7 @@ const HomePage: React.FC = () => {
       {/* Testimonials Section */}
       <section className="py-24 bg-primary dark:bg-dark-primary">
           <div className="container mx-auto px-6">
-              <div className="text-center mb-16">
+              <div className="text-center mb-16 animate-fade-in-up">
                   <h2 className="text-4xl font-bold text-text-primary dark:text-dark-text-primary">{t('home.testimonials.title')}</h2>
                   <p className="text-lg text-text-secondary dark:text-dark-text-secondary mt-4 max-w-2xl mx-auto">{t('home.testimonials.subtitle')}</p>
               </div>
@@ -170,11 +175,13 @@ const HomePage: React.FC = () => {
                     quote={t('home.testimonials.card1.quote')}
                     author="Alex Johnson"
                     role={t('home.testimonials.card1.role')}
+                    delay="200ms"
                   />
                   <TestimonialCard 
                     quote={t('home.testimonials.card2.quote')}
                     author="Maria Garcia"
                     role={t('home.testimonials.card2.role')}
+                    delay="350ms"
                   />
               </div>
           </div>
@@ -185,14 +192,14 @@ const HomePage: React.FC = () => {
 
       {/* Final CTA Section */}
       <section className="py-24 bg-secondary/50 dark:bg-dark-secondary/50 border-t border-border dark:border-dark-border">
-        <div className="container mx-auto text-center">
+        <div className="container mx-auto text-center animate-fade-in-up">
             <h2 className="text-4xl font-bold text-text-primary dark:text-dark-text-primary mb-4">{t('home.cta.title')}</h2>
             <p className="text-lg text-text-secondary dark:text-dark-text-secondary max-w-2xl mx-auto mb-8">
                 {t('home.cta.subtitle')}
             </p>
             <Link
                 to="/signup"
-                className="bg-highlight text-white font-bold py-4 px-10 rounded-full hover:bg-highlight-hover transition-all duration-300 transform hover:scale-105 text-lg inline-block shadow-lg shadow-highlight/30"
+                className="bg-highlight text-white font-bold py-4 px-10 rounded-full hover:bg-highlight-hover transition-all duration-300 transform hover:scale-105 text-lg inline-block shadow-lg shadow-highlight/30 active:scale-95"
             >
                 {t('home.cta.button')}
             </Link>

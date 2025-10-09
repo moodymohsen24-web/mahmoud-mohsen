@@ -116,7 +116,7 @@ const Header: React.FC = () => {
               </div>
               <button
                 onClick={() => openModal('auth')}
-                className="bg-highlight text-white font-semibold py-2 px-4 rounded-lg shadow-sm hover:bg-highlight-hover transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-highlight"
+                className="bg-highlight text-white font-semibold py-2 px-4 rounded-lg shadow-sm hover:bg-highlight-hover transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-highlight"
               >
                   {t('header.loginOrSignUp')}
               </button>

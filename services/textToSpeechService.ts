@@ -1,4 +1,3 @@
-
 import { supabase } from '../supabaseClient';
 import type { TTSGenerationSettings, Settings } from '../types';
 import { settingsService } from './settingsService';
@@ -46,33 +45,19 @@ export const textToSpeechService = {
     }
 
     try {
-        const response = await fetch('https://api.elevenlabs.io/v1/user', {
-            headers: { 'xi-api-key': apiKey }
+        const { data, error } = await supabase.functions.invoke('validate-elevenlabs-key', {
+            body: { api_key: apiKey },
         });
 
-        const data = await response.json();
-
-        if (response.status === 401) {
-            return { success: false, status: 'invalid', message: data.detail?.message || "Invalid API Key." };
+        if (error) {
+            // This error is for failures in invoking the function itself (e.g., network, function not found)
+            throw new Error(`Failed to invoke validation function: ${error.message}`);
         }
 
-        if (!response.ok) {
-            const errorMessage = data.detail?.message || `ElevenLabs API Error (${response.status})`;
-            return { success: false, status: 'error', message: errorMessage };
-        }
+        // The edge function is designed to always return a JSON object with the validation result.
+        // We can directly return this data, as its structure matches KeyValidationResult.
+        return data as KeyValidationResult;
 
-        const sub = data?.subscription;
-        if (sub && typeof sub.character_limit === 'number' && typeof sub.character_count === 'number') {
-            const balanceData = {
-                character_count: sub.character_count,
-                character_limit: sub.character_limit,
-            };
-            const isDepleted = balanceData.character_count >= balanceData.character_limit;
-            const status = isDepleted ? 'depleted' : 'active';
-            return { success: true, status, data: balanceData };
-        }
-
-        return { success: true, status: 'active', data: null };
     } catch (error: any) {
         console.error("Critical error in validateKey:", error);
         return { success: false, status: 'error', message: error.message || 'An unexpected error occurred.' };

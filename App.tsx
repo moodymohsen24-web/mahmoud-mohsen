@@ -32,7 +32,7 @@ const App: React.FC = () => {
       <HashRouter>
         <div className="flex flex-col min-h-screen bg-primary dark:bg-dark-primary text-text-primary dark:text-dark-text-primary">
           <Header />
-          <main className="flex-grow flex flex-col">
+          <main className="flex-grow flex flex-col animate-fade-in" style={{ animationDuration: '300ms' }}>
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<LoginPage />} />

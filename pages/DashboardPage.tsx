@@ -15,6 +15,12 @@ import { WalletIcon } from '../components/icons/WalletIcon';
 import QuickAccessPanel from '../components/QuickAccessPanel';
 import DashboardSkeleton from '../components/DashboardSkeleton';
 
+const AnimatedStatCard: React.FC<{ title: string; value: string; icon: React.ReactNode; delay: number }> = ({ title, value, icon, delay }) => (
+    <div className="animate-fade-in-up" style={{ animationDelay: `${delay}ms` }}>
+        <StatCard title={title} value={value} icon={icon} />
+    </div>
+);
+
 const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const [coreData, setCoreData] = useState<Omit<DashboardData, 'totalActiveKeys' | 'totalBalance'> | null>(null);
@@ -67,23 +73,27 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="container mx-auto">
-      <h1 className="text-3xl font-bold text-text-primary dark:text-dark-text-primary mb-2">{t('dashboard.welcome', { name: user.name })}</h1>
-      <p className="text-text-secondary dark:text-dark-text-secondary mb-8">{t('dashboard.subtitle')}</p>
+      <div className="animate-fade-in-down">
+        <h1 className="text-3xl font-bold text-text-primary dark:text-dark-text-primary mb-2">{t('dashboard.welcome', { name: user.name })}</h1>
+        <p className="text-text-secondary dark:text-dark-text-secondary mb-8">{t('dashboard.subtitle')}</p>
+      </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title={t('dashboard.statCards.checksThisMonth')} value={coreData.checksThisMonth.toLocaleString()} icon={<DocumentTextIcon className="w-8 h-8 text-highlight dark:text-dark-highlight"/>} />
-        <StatCard title={t('dashboard.statCards.totalCorrections')} value={coreData.totalCorrections.toLocaleString()} icon={<SparklesIcon className="w-8 h-8 text-highlight dark:text-dark-highlight"/>} />
-        <StatCard title={t('dashboard.statCards.dictionaryWords')} value={coreData.dictionaryWords.toLocaleString()} icon={<BookOpenIcon className="w-8 h-8 text-highlight dark:text-dark-highlight"/>} />
-        <StatCard title={t('dashboard.statCards.currentPlan')} value={user.subscription_plans?.name || 'N/A'} icon={<CreditCardIcon className="w-8 h-8 text-highlight dark:text-dark-highlight"/>} />
+        <AnimatedStatCard delay={100} title={t('dashboard.statCards.checksThisMonth')} value={coreData.checksThisMonth.toLocaleString()} icon={<DocumentTextIcon className="w-8 h-8 text-highlight dark:text-dark-highlight"/>} />
+        <AnimatedStatCard delay={200} title={t('dashboard.statCards.totalCorrections')} value={coreData.totalCorrections.toLocaleString()} icon={<SparklesIcon className="w-8 h-8 text-highlight dark:text-dark-highlight"/>} />
+        <AnimatedStatCard delay={300} title={t('dashboard.statCards.dictionaryWords')} value={coreData.dictionaryWords.toLocaleString()} icon={<BookOpenIcon className="w-8 h-8 text-highlight dark:text-dark-highlight"/>} />
+        <AnimatedStatCard delay={400} title={t('dashboard.statCards.currentPlan')} value={user.subscription_plans?.name || 'N/A'} icon={<CreditCardIcon className="w-8 h-8 text-highlight dark:text-dark-highlight"/>} />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-        <StatCard 
+        <AnimatedStatCard 
+          delay={500}
           title={'المفاتيح النشطة'} 
           value={isTtsLoading ? '...' : (ttsStats?.totalActiveKeys ?? 0).toLocaleString()} 
           icon={<KeyIcon className="w-8 h-8 text-highlight dark:text-dark-highlight"/>} 
         />
-        <StatCard 
+        <AnimatedStatCard 
+          delay={600}
           title={'إجمالي الرصيد المتاح'} 
           value={isTtsLoading ? '...' : (ttsStats?.totalBalance ?? 0).toLocaleString()} 
           icon={<WalletIcon className="w-8 h-8 text-highlight dark:text-dark-highlight"/>} 
@@ -91,15 +101,17 @@ const DashboardPage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 animate-fade-in-up" style={{ animationDelay: '700ms' }}>
             <UsageChart data={coreData.usageLast7Days} />
         </div>
-        <div>
+        <div className="animate-fade-in-up" style={{ animationDelay: '800ms' }}>
             <RecentActivity activities={coreData.recentActivities} />
         </div>
       </div>
 
-      <QuickAccessPanel />
+      <div className="animate-fade-in-up" style={{ animationDelay: '900ms' }}>
+        <QuickAccessPanel />
+      </div>
 
     </div>
   );

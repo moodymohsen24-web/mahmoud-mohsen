@@ -40,9 +40,52 @@
           },
           opacity: {
             '15': '0.15',
-          }
+          },
+          keyframes: {
+            'fade-in': {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            'fade-in-down': {
+              '0%': { opacity: '0', transform: 'translateY(-10px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            'fade-in-up': {
+                '0%': { opacity: '0', transform: 'translateY(10px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
+          },
+          animation: {
+            'fade-in': 'fade-in 0.5s ease-out',
+            'fade-in-down': 'fade-in-down 0.5s ease-out',
+            'fade-in-up': 'fade-in-up 0.5s ease-out',
+          },
         },
       },
+      plugins: [
+        function({ addBase, theme }) {
+          addBase({
+            '.btn-primary': {
+              backgroundColor: theme('colors.highlight'),
+              color: theme('colors.white'),
+              fontWeight: '600',
+              padding: '.75rem 1.5rem',
+              borderRadius: '0.5rem',
+              transition: 'all 0.2s ease-in-out',
+              '&:hover': {
+                backgroundColor: theme('colors.highlight-hover'),
+              },
+              '&:active': {
+                  transform: 'scale(0.95)',
+              },
+              '&:disabled': {
+                opacity: '0.5',
+                cursor: 'not-allowed',
+              }
+            },
+          })
+        }
+      ]
     }
   </script>
 <script type="importmap">
