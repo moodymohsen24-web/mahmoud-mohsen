@@ -83,7 +83,7 @@ Return a single JSON object with this exact structure: { "processedText": "The f
 
 **CRITICAL**: The value for "processedText" MUST be a valid JSON string. This means any double quotes (") or backslashes (\\) within the text itself must be properly escaped (e.g., \\" and \\\\).
 
-Do not include any explanations or introductory text outside of the JSON object.
+Your entire response must be ONLY the JSON object, starting with { and ending with }. Do not add any other text, greetings, explanations, or markdown code blocks like \`\`\`json before or after the JSON object.
 
 Raw Text:
 "${text}"`;
@@ -101,7 +101,7 @@ Return a single JSON object with this exact structure: { "processedText": "The s
 
 **CRITICAL**: The value for "processedText" MUST be a valid JSON string. This means any double quotes (") or backslashes (\\) within the text itself must be properly escaped (e.g., \\" and \\\\).
 
-Do not include any explanations or introductory text outside of the JSON object.
+Your entire response must be ONLY the JSON object, starting with { and ending with }. Do not add any other text, greetings, explanations, or markdown code blocks like \`\`\`json before or after the JSON object.
 
 Text: "${text}"`;
 

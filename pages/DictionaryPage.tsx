@@ -149,8 +149,8 @@ const DictionaryPage: React.FC = () => {
         typeof error === 'object' &&
         'message' in error
       ) {
-        // FIX: Replaced `String()` constructor with a template literal to ensure the 'unknown' type is correctly coerced to a string, resolving the linter error.
-        message = `${(error as { message: unknown }).message}`;
+        // FIX: Coerced the 'unknown' type to a string to fix the assignment error.
+        message = String((error as { message: unknown }).message);
       }
       setImportStatus({
         type: 'error',
