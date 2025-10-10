@@ -71,6 +71,15 @@ export interface EditableLink {
   url: string;
 }
 
+export interface FooterContent {
+  description: string;
+  copyright: string;
+  ogImage: string;
+  platformLinks: EditableLink[];
+  legalLinks: EditableLink[];
+  socialLinks: EditableLink[];
+}
+
 export interface Settings {
     aiModels: {
         selected: AiModel;
@@ -92,12 +101,8 @@ export interface Settings {
         }
     };
     footer?: {
-      description: string;
-      copyright: string;
-      ogImage: string;
-      platformLinks: EditableLink[];
-      legalLinks: EditableLink[];
-      socialLinks: EditableLink[];
+      en: FooterContent;
+      ar: FooterContent;
     }
 }
 

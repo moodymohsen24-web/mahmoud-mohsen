@@ -3,27 +3,27 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useI18n } from '../hooks/useI18n';
 import { useAuth } from '../hooks/useAuth';
 import { settingsService } from '../services/settingsService';
-import type { Settings, EditableLink } from '../types';
+import type { Settings, EditableLink, FooterContent } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import { TrashIcon } from './icons/TrashIcon';
 
 const LinkEditor: React.FC<{
     links: EditableLink[];
-    setLinks: React.Dispatch<React.SetStateAction<EditableLink[]>>;
+    onLinksChange: (links: EditableLink[]) => void;
     title: string;
-}> = ({ links, setLinks, title }) => {
+}> = ({ links, onLinksChange, title }) => {
     const { t } = useI18n();
 
     const handleLinkChange = (id: string, field: 'text' | 'url', value: string) => {
-        setLinks(prevLinks => prevLinks.map(link => link.id === id ? { ...link, [field]: value } : link));
+        onLinksChange(links.map(link => link.id === id ? { ...link, [field]: value } : link));
     };
 
     const addLink = () => {
-        setLinks(prev => [...prev, { id: uuidv4(), text: '', url: '' }]);
+        onLinksChange([...links, { id: uuidv4(), text: '', url: '' }]);
     };
 
     const removeLink = (id: string) => {
-        setLinks(prev => prev.filter(link => link.id !== id));
+        onLinksChange(links.filter(link => link.id !== id));
     };
 
     return (
@@ -67,6 +67,7 @@ const FooterSettingsPanel: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    const [activeLang, setActiveLang] = useState<'en' | 'ar'>('en');
     
     const loadSettings = useCallback(async () => {
         if (user) {
@@ -83,18 +84,26 @@ const FooterSettingsPanel: React.FC = () => {
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (user && settings) {
+        if (user && settings && settings.footer) {
             setIsSaving(true);
             setSuccessMessage('');
             try {
-                // Filter out empty links before saving
+                // Filter out empty links before saving for both languages
                 const cleanedSettings = {
                     ...settings,
                     footer: {
-                        ...settings.footer!,
-                        platformLinks: settings.footer?.platformLinks.filter(l => l.text.trim() && l.url.trim()) || [],
-                        legalLinks: settings.footer?.legalLinks.filter(l => l.text.trim() && l.url.trim()) || [],
-                        socialLinks: settings.footer?.socialLinks.filter(l => l.text.trim() && l.url.trim()) || [],
+                        en: {
+                            ...settings.footer.en,
+                            platformLinks: settings.footer.en.platformLinks.filter(l => l.text.trim() && l.url.trim()),
+                            legalLinks: settings.footer.en.legalLinks.filter(l => l.text.trim() && l.url.trim()),
+                            socialLinks: settings.footer.en.socialLinks.filter(l => l.text.trim() && l.url.trim()),
+                        },
+                        ar: {
+                            ...settings.footer.ar,
+                            platformLinks: settings.footer.ar.platformLinks.filter(l => l.text.trim() && l.url.trim()),
+                            legalLinks: settings.footer.ar.legalLinks.filter(l => l.text.trim() && l.url.trim()),
+                            socialLinks: settings.footer.ar.socialLinks.filter(l => l.text.trim() && l.url.trim()),
+                        }
                     }
                 };
                 await settingsService.saveSettings(user.id, cleanedSettings);
@@ -109,27 +118,56 @@ const FooterSettingsPanel: React.FC = () => {
         }
     };
     
-    const setFooterSetting = (update: Partial<Settings['footer']>) => {
-        setSettings(prev => prev ? ({ ...prev, footer: { ...(prev.footer!), ...update } }) : prev);
+    const updateFooterLangContent = (update: Partial<FooterContent>) => {
+        setSettings(prev => {
+          if (!prev || !prev.footer) return prev;
+          const currentLangContent = prev.footer[activeLang];
+          return {
+            ...prev,
+            footer: {
+              ...prev.footer,
+              [activeLang]: {
+                ...currentLangContent,
+                ...update,
+              }
+            }
+          };
+        });
     };
 
     if (isLoading || !settings?.footer) {
         return <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-highlight"></div>;
     }
 
-    const { description, copyright, ogImage, platformLinks, legalLinks, socialLinks } = settings.footer;
+    const currentFooterContent = settings.footer[activeLang];
+
+    const getLangTabClass = (lang: 'en' | 'ar') => {
+        return `px-4 py-2 font-medium text-sm rounded-lg transition-colors ${
+            activeLang === lang
+                ? 'bg-highlight text-white'
+                : 'text-text-secondary dark:text-dark-text-secondary hover:bg-accent dark:hover:bg-dark-accent'
+        }`;
+    }
 
     return (
         <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-lg shadow-lg">
-            <h3 className="text-xl font-bold text-text-primary dark:text-dark-text-primary mb-2">{t('settings.footer.title')}</h3>
-            <p className="text-sm text-text-secondary dark:text-dark-text-secondary mb-6">{t('settings.footer.description')}</p>
+            <div className="flex justify-between items-center mb-6">
+                <div>
+                    <h3 className="text-xl font-bold text-text-primary dark:text-dark-text-primary mb-2">{t('settings.footer.title')}</h3>
+                    <p className="text-sm text-text-secondary dark:text-dark-text-secondary">{t('settings.footer.description')}</p>
+                </div>
+                <div className="flex items-center gap-1 bg-accent dark:bg-dark-accent p-1 rounded-lg">
+                    <button type="button" onClick={() => setActiveLang('en')} className={getLangTabClass('en')}>English</button>
+                    <button type="button" onClick={() => setActiveLang('ar')} className={getLangTabClass('ar')}>العربية</button>
+                </div>
+            </div>
             
             <form onSubmit={handleSave} className="space-y-10">
                 <div>
                     <label className="block text-sm font-bold mb-2">{t('settings.footer.siteDescription')}</label>
                     <textarea
-                        value={description}
-                        onChange={(e) => setFooterSetting({ description: e.target.value })}
+                        value={currentFooterContent.description}
+                        onChange={(e) => updateFooterLangContent({ description: e.target.value })}
                         rows={3}
                         placeholder="Enter a brief description of your site..."
                         className="w-full p-2 bg-accent dark:bg-dark-accent rounded-lg focus:outline-none focus:ring-2 focus:ring-highlight"
@@ -139,8 +177,8 @@ const FooterSettingsPanel: React.FC = () => {
                     <label className="block text-sm font-bold mb-2">{t('settings.footer.copyright')}</label>
                     <input
                         type="text"
-                        value={copyright}
-                        onChange={(e) => setFooterSetting({ copyright: e.target.value })}
+                        value={currentFooterContent.copyright}
+                        onChange={(e) => updateFooterLangContent({ copyright: e.target.value })}
                         placeholder="Your Company Name. All rights reserved."
                         className="w-full p-2 bg-accent dark:bg-dark-accent rounded-lg focus:outline-none focus:ring-2 focus:ring-highlight"
                     />
@@ -149,16 +187,16 @@ const FooterSettingsPanel: React.FC = () => {
                     <label className="block text-sm font-bold mb-2">{t('settings.footer.ogImage')}</label>
                     <input
                         type="url"
-                        value={ogImage}
-                        onChange={(e) => setFooterSetting({ ogImage: e.target.value })}
+                        value={currentFooterContent.ogImage}
+                        onChange={(e) => updateFooterLangContent({ ogImage: e.target.value })}
                         placeholder="https://example.com/social-preview.png"
                         className="w-full p-2 bg-accent dark:bg-dark-accent rounded-lg focus:outline-none focus:ring-2 focus:ring-highlight"
                     />
                 </div>
                 
-                <LinkEditor title={t('settings.footer.platformLinks')} links={platformLinks} setLinks={(links) => setFooterSetting({ platformLinks: typeof links === 'function' ? links(platformLinks) : links })} />
-                <LinkEditor title={t('settings.footer.legalLinks')} links={legalLinks} setLinks={(links) => setFooterSetting({ legalLinks: typeof links === 'function' ? links(legalLinks) : links })} />
-                <LinkEditor title={t('settings.footer.socialLinks')} links={socialLinks} setLinks={(links) => setFooterSetting({ socialLinks: typeof links === 'function' ? links(socialLinks) : links })} />
+                <LinkEditor title={t('settings.footer.platformLinks')} links={currentFooterContent.platformLinks} onLinksChange={(links) => updateFooterLangContent({ platformLinks: links })} />
+                <LinkEditor title={t('settings.footer.legalLinks')} links={currentFooterContent.legalLinks} onLinksChange={(links) => updateFooterLangContent({ legalLinks: links })} />
+                <LinkEditor title={t('settings.footer.socialLinks')} links={currentFooterContent.socialLinks} onLinksChange={(links) => updateFooterLangContent({ socialLinks: links })} />
 
                 <div className="mt-10 pt-5 border-t border-accent dark:border-dark-accent">
                     <div className="flex justify-end items-center gap-4">

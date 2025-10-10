@@ -1,7 +1,46 @@
 
 import { supabase } from '../supabaseClient';
-import type { Settings, EditableLink } from '../types';
+import type { Settings, FooterContent } from '../types';
 import { v4 as uuidv4 } from 'uuid';
+
+const defaultFooterContentEn: FooterContent = {
+  description: 'Masmoo transforms your written scripts, articles, or speeches into perfectly prepared content, ready for flawless audio performance.',
+  copyright: 'Masmoo. All rights reserved.',
+  ogImage: '',
+  platformLinks: [
+    { id: uuidv4(), text: 'Features', url: '#features' },
+    { id: uuidv4(), text: 'Pricing', url: '#pricing' },
+  ],
+  legalLinks: [
+    { id: uuidv4(), text: 'Privacy Policy', url: '#' },
+    { id: uuidv4(), text: 'Terms of Service', url: '#' },
+  ],
+  socialLinks: [
+    { id: uuidv4(), text: 'Twitter', url: '#' },
+    { id: uuidv4(), text: 'GitHub', url: '#' },
+    { id: uuidv4(), text: 'LinkedIn', url: '#' },
+  ]
+};
+
+const defaultFooterContentAr: FooterContent = {
+  description: 'يقوم ’مسموع‘ بتحويل نصوصك، مقالاتك، أو خطبك المكتوبة إلى محتوى مُعد بإتقان، وجاهز لأداء صوتي لا تشوبه شائبة.',
+  copyright: 'مسموع. جميع الحقوق محفوظة.',
+  ogImage: '',
+  platformLinks: [
+    { id: uuidv4(), text: 'الميزات', url: '#features' },
+    { id: uuidv4(), text: 'الأسعار', url: '#pricing' },
+  ],
+  legalLinks: [
+    { id: uuidv4(), text: 'سياسة الخصوصية', url: '#' },
+    { id: uuidv4(), text: 'شروط الخدمة', url: '#' },
+  ],
+  socialLinks: [
+    { id: uuidv4(), text: 'Twitter', url: '#' },
+    { id: uuidv4(), text: 'GitHub', url: '#' },
+    { id: uuidv4(), text: 'LinkedIn', url: '#' },
+  ]
+};
+
 
 const defaultSettings: Settings = {
   aiModels: {
@@ -24,26 +63,12 @@ const defaultSettings: Settings = {
     }
   },
   footer: {
-    description: 'Enter site description here.',
-    copyright: 'Enter copyright text here.',
-    ogImage: '',
-    platformLinks: [
-        { id: uuidv4(), text: 'Features', url: '#features' },
-        { id: uuidv4(), text: 'Pricing', url: '#pricing' },
-    ],
-    legalLinks: [
-        { id: uuidv4(), text: 'Privacy Policy', url: '#' },
-        { id: uuidv4(), text: 'Terms of Service', url: '#' },
-    ],
-    socialLinks: [
-      { id: uuidv4(), text: 'Twitter', url: '#' },
-      { id: uuidv4(), text: 'GitHub', url: '#' },
-      { id: uuidv4(), text: 'LinkedIn', url: '#' },
-    ]
+    en: defaultFooterContentEn,
+    ar: defaultFooterContentAr,
   }
 };
 
-let publicSettingsCache: Settings | null = null;
+let publicSettingsCache: Settings['footer'] | null = null;
 let publicSettingsCacheTime: number | null = null;
 
 export const settingsService = {
@@ -91,12 +116,14 @@ export const settingsService = {
                 }
             },
             footer: {
-                ...defaultSettings.footer!,
-                ...(userSettings.footer || {}),
-                ogImage: userSettings.footer?.ogImage ?? defaultSettings.footer!.ogImage,
-                platformLinks: userSettings.footer?.platformLinks || defaultSettings.footer!.platformLinks,
-                legalLinks: userSettings.footer?.legalLinks || defaultSettings.footer!.legalLinks,
-                socialLinks: userSettings.footer?.socialLinks || defaultSettings.footer!.socialLinks
+                en: {
+                    ...defaultSettings.footer!.en,
+                    ...(userSettings.footer?.en || {})
+                },
+                ar: {
+                    ...defaultSettings.footer!.ar,
+                    ...(userSettings.footer?.ar || {})
+                }
             }
         };
     }
@@ -123,11 +150,11 @@ export const settingsService = {
     return (data as any).payload as Settings;
   },
   
-  async getPublicSettings(): Promise<Settings['footer']> {
+  async getPublicSettings(): Promise<Settings['footer'] | null> {
     const now = Date.now();
     // Cache for 5 minutes
     if (publicSettingsCache && publicSettingsCacheTime && (now - publicSettingsCacheTime < 5 * 60 * 1000)) {
-        return publicSettingsCache.footer!;
+        return publicSettingsCache;
     }
 
     // Find the first admin user
@@ -147,7 +174,7 @@ export const settingsService = {
     }
 
     const adminSettings = await this.getSettings(admin.id);
-    publicSettingsCache = adminSettings;
+    publicSettingsCache = adminSettings.footer!;
     publicSettingsCacheTime = now;
 
     return adminSettings.footer!;

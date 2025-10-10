@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { SoundWaveIcon } from './icons/SoundWaveIcon';
 import { TwitterIcon } from './icons/TwitterIcon';
@@ -8,6 +9,7 @@ import { InstagramIcon } from './icons/InstagramIcon';
 import { YouTubeIcon } from './icons/YouTubeIcon';
 import { settingsService } from '../services/settingsService';
 import type { Settings } from '../types';
+import { useI18n } from '../hooks/useI18n';
 
 const FooterSkeleton: React.FC = () => (
     <div className="container mx-auto px-6 py-12 animate-pulse">
@@ -51,6 +53,7 @@ const FooterSkeleton: React.FC = () => (
 const Footer: React.FC = () => {
   const [footerSettings, setFooterSettings] = useState<Settings['footer'] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { language, t } = useI18n();
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -58,15 +61,16 @@ const Footer: React.FC = () => {
             const settings = await settingsService.getPublicSettings();
             setFooterSettings(settings);
 
-            // Update meta tag for social media previews
-            if (settings?.ogImage) {
+            // Update meta tag for social media previews, defaulting to English OG image
+            const ogImage = settings?.en.ogImage || settings?.ar.ogImage;
+            if (ogImage) {
                 let meta = document.querySelector('meta[property="og:image"]');
                 if (!meta) {
                     meta = document.createElement('meta');
                     meta.setAttribute('property', 'og:image');
                     document.getElementsByTagName('head')[0].appendChild(meta);
                 }
-                meta.setAttribute('content', settings.ogImage);
+                meta.setAttribute('content', ogImage);
             }
 
         } catch (e) {
@@ -83,7 +87,9 @@ const Footer: React.FC = () => {
         return <FooterSkeleton />;
     }
 
-    if (!footerSettings) {
+    const content = footerSettings?.[language];
+
+    if (!content) {
         return null; // Or a minimal fallback footer
     }
     
@@ -96,7 +102,7 @@ const Footer: React.FC = () => {
         youtube: <YouTubeIcon />,
     };
 
-    const { description, copyright, platformLinks, legalLinks, socialLinks } = footerSettings;
+    const { description, copyright, platformLinks, legalLinks, socialLinks } = content;
 
     return (
       <div className="container mx-auto px-6 py-12">
@@ -105,7 +111,7 @@ const Footer: React.FC = () => {
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-4">
                 <SoundWaveIcon className="w-8 h-8 text-highlight dark:text-dark-highlight"/>
-                <span className="text-2xl font-bold">مسموع</span>
+                <span className="text-2xl font-bold">{t('header.brand')}</span>
             </div>
             <p className="text-text-secondary dark:text-dark-text-secondary text-sm">
                 {description}
@@ -114,7 +120,7 @@ const Footer: React.FC = () => {
 
           {/* Links Section */}
           <div>
-            <h3 className="text-sm font-semibold text-text-primary dark:text-dark-text-primary uppercase tracking-wider mb-4">المنصة</h3>
+            <h3 className="text-sm font-semibold text-text-primary dark:text-dark-text-primary uppercase tracking-wider mb-4">{t('footer.links.platform')}</h3>
             <ul className="space-y-3">
                 {platformLinks.map(link => (
                     <li key={link.id}><a href={link.url} className="text-sm text-text-secondary dark:text-dark-text-secondary hover:text-highlight transition-colors">{link.text}</a></li>
@@ -124,7 +130,7 @@ const Footer: React.FC = () => {
 
           {/* Legal Section */}
           <div>
-            <h3 className="text-sm font-semibold text-text-primary dark:text-dark-text-primary uppercase tracking-wider mb-4">قانوني</h3>
+            <h3 className="text-sm font-semibold text-text-primary dark:text-dark-text-primary uppercase tracking-wider mb-4">{t('footer.links.legal')}</h3>
             <ul className="space-y-3">
                 {legalLinks.map(link => (
                     <li key={link.id}><a href={link.url} className="text-sm text-text-secondary dark:text-dark-text-secondary hover:text-highlight transition-colors">{link.text}</a></li>
@@ -134,8 +140,8 @@ const Footer: React.FC = () => {
 
           {/* Social Section */}
           <div>
-            <h3 className="text-sm font-semibold text-text-primary dark:text-dark-text-primary uppercase tracking-wider mb-4">التواصل</h3>
-             <div className="flex space-x-4">
+            <h3 className="text-sm font-semibold text-text-primary dark:text-dark-text-primary uppercase tracking-wider mb-4">{t('footer.links.social')}</h3>
+             <div className="flex space-x-4 rtl:space-x-reverse">
               {socialLinks.map(link => {
                 const iconKey = link.text.toLowerCase().trim();
                 const IconComponent = socialIconMap[iconKey];
