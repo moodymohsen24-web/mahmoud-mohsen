@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { RocketLaunchIcon } from '../components/icons/RocketLaunchIcon';
 import { ShieldCheckIcon } from '../components/icons/ShieldCheckIcon';
 import { ServerIcon } from '../components/icons/ServerIcon';
 import { useI18n } from '../hooks/useI18n';
 import { subscriptionService } from '../services/subscriptionService';
 import type { SubscriptionPlan } from '../types';
+import { HeroIllustration } from '../components/HeroIllustration';
+import { SparklesIcon } from '../components/icons/SparklesIcon';
 
 const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; children: React.ReactNode, delay: string }> = ({ icon, title, children, delay }) => (
     <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-xl shadow-card-shadow dark:shadow-card-shadow-dark text-center transform hover:-translate-y-1 transition-transform duration-300 flex flex-col items-center animate-fade-in-up" style={{ animationDelay: delay }}>
@@ -107,31 +108,75 @@ const HomePage: React.FC = () => {
   const { t } = useI18n();
   return (
     <div className="bg-primary dark:bg-dark-primary text-text-primary dark:text-dark-text-primary">
+        <style>{`
+            #showcase ch {
+                background-color: rgba(59, 130, 246, 0.15);
+                color: #1d4ed8;
+                border-radius: 4px;
+                padding: 1px 3px;
+            }
+            .dark #showcase ch {
+                background-color: rgba(96, 165, 250, 0.2);
+                color: #93c5fd;
+            }
+        `}</style>
       {/* Hero Section */}
-      <section className="relative text-center pt-32 pb-24 px-4 overflow-hidden">
+      <section className="relative pt-24 pb-20 px-4 overflow-hidden">
         <div aria-hidden="true" className="absolute inset-0 z-0">
           <div className="absolute circle-1 w-96 h-96 bg-blue-200 dark:bg-blue-900/50 rounded-full -top-20 -left-40 opacity-50 blur-3xl"></div>
           <div className="absolute circle-2 w-96 h-96 bg-purple-200 dark:bg-purple-900/50 rounded-full -bottom-20 -right-40 opacity-50 blur-3xl"></div>
         </div>
         <div className="container mx-auto relative z-10">
-          <h1 className="text-5xl md:text-7xl font-extrabold leading-tight mb-6 animate-fade-in-down bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 text-transparent bg-clip-text" style={{ animationDelay: '200ms' }}>
-            {t('home.hero.title')}
-          </h1>
-          <p className="text-lg md:text-xl text-text-secondary dark:text-dark-text-secondary max-w-3xl mx-auto mb-10 animate-fade-in-down" style={{ animationDelay: '400ms' }}>
-            {t('home.hero.subtitle')}
-          </p>
-          <Link
-            to="/signup"
-            className="bg-highlight text-white font-bold py-4 px-10 rounded-full hover:bg-highlight-hover transition-all duration-300 transform hover:scale-105 text-lg inline-block shadow-lg shadow-highlight/30 animate-fade-in-up active:scale-95"
-             style={{ animationDelay: '600ms' }}
-          >
-            {t('home.hero.cta')}
-          </Link>
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+                <div className="text-center lg:text-start">
+                    <h1 className="text-5xl md:text-7xl font-extrabold leading-tight mb-6 animate-fade-in-down bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 text-transparent bg-clip-text" style={{ animationDelay: '200ms' }}>
+                        {t('home.hero.title')}
+                    </h1>
+                    <p className="text-lg md:text-xl text-text-secondary dark:text-dark-text-secondary max-w-xl mx-auto lg:mx-0 mb-10 animate-fade-in-down" style={{ animationDelay: '400ms' }}>
+                        {t('home.hero.subtitle')}
+                    </p>
+                    <Link
+                        to="/signup"
+                        className="bg-highlight text-white font-bold py-4 px-10 rounded-full hover:bg-highlight-hover transition-all duration-300 transform hover:scale-105 text-lg inline-block shadow-lg shadow-highlight/30 animate-fade-in-up active:scale-95"
+                        style={{ animationDelay: '600ms' }}
+                    >
+                        {t('home.hero.cta')}
+                    </Link>
+                </div>
+                <div className="hidden lg:block animate-fade-in" style={{ animationDelay: '500ms' }}>
+                    <HeroIllustration />
+                </div>
+            </div>
         </div>
       </section>
 
+      {/* Text Showcase Section */}
+      <section id="showcase" className="py-24 bg-secondary dark:bg-dark-secondary border-y border-border dark:border-dark-border">
+        <div className="container mx-auto px-6">
+            <div className="text-center mb-16 animate-fade-in-up">
+                <h2 className="text-4xl font-bold text-text-primary dark:text-dark-text-primary">{t('home.showcase.title')}</h2>
+                <p className="text-lg text-text-secondary dark:text-dark-text-secondary mt-4 max-w-3xl mx-auto">{t('home.showcase.subtitle')}</p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-8 bg-primary dark:bg-dark-primary p-6 sm:p-8 rounded-xl border border-border dark:border-dark-border animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+                <div>
+                     <h3 className="font-bold mb-4 text-lg text-red-500">{t('home.showcase.before')}</h3>
+                     <div className="bg-secondary dark:bg-dark-secondary p-4 rounded-md text-text-secondary dark:text-dark-text-secondary whitespace-pre-wrap font-mono text-sm leading-relaxed h-full">
+                        {t('home.showcase.beforeText')}
+                     </div>
+                </div>
+                <div>
+                     <h3 className="font-bold mb-4 text-lg text-green-500">{t('home.showcase.after')}</h3>
+                     <div className="bg-secondary dark:bg-dark-secondary p-4 rounded-md text-text-primary dark:text-dark-text-primary whitespace-pre-wrap font-mono text-sm leading-relaxed h-full">
+                        <p dangerouslySetInnerHTML={{ __html: t('home.showcase.afterText') }}></p>
+                     </div>
+                </div>
+            </div>
+        </div>
+      </section>
+
+
       {/* Features Section */}
-      <section id="features" className="py-24 bg-secondary dark:bg-dark-secondary border-y border-border dark:border-dark-border">
+      <section id="features" className="py-24 bg-primary dark:bg-dark-primary">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16 animate-fade-in-up">
             <h2 className="text-4xl font-bold text-text-primary dark:text-dark-text-primary">{t('home.features.title')}</h2>
@@ -139,7 +184,7 @@ const HomePage: React.FC = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <FeatureCard
-              icon={<RocketLaunchIcon className="w-10 h-10 text-highlight dark:text-dark-highlight" />}
+              icon={<SparklesIcon className="w-10 h-10 text-highlight dark:text-dark-highlight" />}
               title={t('home.features.card1.title')}
               delay="200ms"
             >
@@ -162,6 +207,40 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* How it Works Section */}
+        <section id="how-it-works" className="py-24 bg-secondary dark:bg-dark-secondary border-y border-border dark:border-dark-border">
+            <div className="container mx-auto px-6">
+                <div className="text-center mb-16 animate-fade-in-up">
+                    <h2 className="text-4xl font-bold text-text-primary dark:text-dark-text-primary">{t('home.howItWorks.title')}</h2>
+                    <p className="text-lg text-text-secondary dark:text-dark-text-secondary mt-4 max-w-2xl mx-auto">{t('home.howItWorks.subtitle')}</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center relative max-w-5xl mx-auto">
+                    {/* Dashed line connector for desktop */}
+                    <div className="hidden md:block absolute top-1/2 left-0 w-full h-px -translate-y-12">
+                        <svg width="100%" height="100%" className="overflow-visible">
+                            <line x1="20%" y1="0" x2="80%" y2="0" strokeWidth="2" stroke="currentColor" className="text-border dark:text-dark-border" strokeDasharray="8 8" />
+                        </svg>
+                    </div>
+
+                    <div className="relative animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+                         <div className="flex items-center justify-center h-20 w-20 mx-auto mb-6 bg-secondary dark:bg-dark-secondary rounded-full border-4 border-highlight/20 dark:border-dark-highlight/20 text-highlight dark:text-dark-highlight font-extrabold text-3xl z-10 relative">1</div>
+                         <h3 className="text-xl font-bold mb-2">{t('home.howItWorks.step1.title')}</h3>
+                         <p className="text-text-secondary dark:text-dark-text-secondary px-4">{t('home.howItWorks.step1.description')}</p>
+                    </div>
+                    <div className="relative animate-fade-in-up" style={{ animationDelay: '350ms' }}>
+                         <div className="flex items-center justify-center h-20 w-20 mx-auto mb-6 bg-secondary dark:bg-dark-secondary rounded-full border-4 border-highlight/20 dark:border-dark-highlight/20 text-highlight dark:text-dark-highlight font-extrabold text-3xl z-10 relative">2</div>
+                         <h3 className="text-xl font-bold mb-2">{t('home.howItWorks.step2.title')}</h3>
+                         <p className="text-text-secondary dark:text-dark-text-secondary px-4">{t('home.howItWorks.step2.description')}</p>
+                    </div>
+                    <div className="relative animate-fade-in-up" style={{ animationDelay: '500ms' }}>
+                         <div className="flex items-center justify-center h-20 w-20 mx-auto mb-6 bg-secondary dark:bg-dark-secondary rounded-full border-4 border-highlight/20 dark:border-dark-highlight/20 text-highlight dark:text-dark-highlight font-extrabold text-3xl z-10 relative">3</div>
+                         <h3 className="text-xl font-bold mb-2">{t('home.howItWorks.step3.title')}</h3>
+                         <p className="text-text-secondary dark:text-dark-text-secondary px-4">{t('home.howItWorks.step3.description')}</p>
+                    </div>
+                </div>
+            </div>
+        </section>
       
       {/* Testimonials Section */}
       <section className="py-24 bg-primary dark:bg-dark-primary">

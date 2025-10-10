@@ -77,14 +77,32 @@ const enTranslations = {
     "home.hero.title": "Make Your Words Heard, Perfectly.",
     "home.hero.subtitle": "Masmoo transforms your written scripts, articles, or speeches into perfectly prepared content, ready for flawless audio performance.",
     "home.hero.cta": "Get Started for Free",
+
+    "home.showcase.title": "See the Transformation",
+    "home.showcase.subtitle": "Witness how our AI corrects, cleans, and diacritizes text in real-time, turning raw content into polished, ready-to-record scripts.",
+    "home.showcase.before": "Before Masmoo",
+    "home.showcase.after": "After Masmoo",
+    "home.showcase.beforeText": "في يوم 10/3, ذهب احمد الي المكتبة. ووجد كتاب عن تاريخ الاندلس. كان الكتاب مثير جدا.",
+    "home.showcase.afterText": "فِي يَوْمِ <ch>الْعَاشِرِ مِنْ مَارِسَ</ch>, <ch>ذَهَبَ أَحْمَدُ إِلَى الْمَكْتَبَةِ</ch>. <ch>وَوَجَدَ كِتَابًا</ch> عَنْ تَارِيخِ <ch>الْأَنْدَلُسِ</ch>. <ch>كَانَ الْكِتَابُ مُثِيرًا جِدًّا</ch>.",
+
     "home.features.title": "An All-in-One Platform",
     "home.features.subtitle": "Everything you need to analyze and perfect your text, efficiently and effectively.",
-    "home.features.card1.title": "Perfect Pronunciation",
-    "home.features.card1.description": "From precise diacritics on complex words to grammatical perfection, we prepare your text for an impeccable audio delivery.",
-    "home.features.card2.title": "Secure & Reliable",
-    "home.features.card2.description": "Your data is safe with us. We use industry-standard security protocols to protect your information around the clock.",
-    "home.features.card3.title": "Customizable Engine",
-    "home.features.card3.description": "Use your own custom dictionary and choose from different AI models to tailor the analysis to your needs.",
+    "home.features.card1.title": "Automatic Diacritization",
+    "home.features.card1.description": "Our AI intelligently adds precise diacritics (Tashkeel) to your Arabic text, ensuring flawless pronunciation and eliminating ambiguity.",
+    "home.features.card2.title": "Advanced Text Cleanup",
+    "home.features.card2.description": "From correcting spelling errors to removing symbols and converting numbers to words, we prepare your text for a professional delivery.",
+    "home.features.card3.title": "Custom Dictionary & AI",
+    "home.features.card3.description": "Fine-tune the analysis by building your own dictionary of word replacements and choosing from leading AI models.",
+    
+    "home.howItWorks.title": "Simple Steps to Perfect Content",
+    "home.howItWorks.subtitle": "Our streamlined process makes text perfection effortless.",
+    "home.howItWorks.step1.title": "Submit Your Text",
+    "home.howItWorks.step1.description": "Paste your text directly or upload a .txt file. Our platform is ready to handle scripts of any length.",
+    "home.howItWorks.step2.title": "AI-Powered Analysis",
+    "home.howItWorks.step2.description": "Our three-step process corrects, diacritizes, and refines your text using advanced AI and your custom rules.",
+    "home.howItWorks.step3.title": "Export & Use",
+    "home.howItWorks.step3.description": "Download your perfected text as a .txt file or send it directly to our Text-to-Speech tool to generate audio.",
+
     "home.testimonials.title": "Trusted by Creators",
     "home.testimonials.subtitle": "Hear what podcasters, educators, and creators are saying about Masmoo.",
     "home.testimonials.card1.quote": "Masmoo has revolutionized how we process our content. The accuracy is invaluable, and the interface is incredibly user-friendly.",
@@ -222,6 +240,7 @@ const enTranslations = {
     "settings.footer.description": "Customize the content of your website's footer.",
     "settings.footer.siteDescription": "Site Description",
     "settings.footer.copyright": "Copyright Text",
+    "settings.footer.ogImage": "Social Media Preview Image URL",
     "settings.footer.platformLinks": "Platform Links",
     "settings.footer.legalLinks": "Legal Links",
     "settings.footer.socialLinks": "Social Media Links",
@@ -229,9 +248,6 @@ const enTranslations = {
     "settings.footer.url": "URL",
     "settings.footer.addLink": "Add Link",
     "settings.footer.remove": "Remove",
-    "settings.footer.twitterUrl": "Twitter URL",
-    "settings.footer.githubUrl": "GitHub URL",
-    "settings.footer.linkedinUrl": "LinkedIn URL",
     "settings.textAnalysis.title": "Text Analysis Models",
     "settings.textAnalysis.description": "Choose the AI model and provide the API key for the text analysis tool.",
     "settings.textAnalysis.model": "AI Model",
@@ -245,7 +261,9 @@ const enTranslations = {
     "settings.payment.description": "Configure your payment provider credentials.",
     "settings.payment.paypal.clientId": "PayPal Client ID",
     "settings.payment.paypal.clientSecret": "PayPal Client Secret",
+
     "quickAccess.title": "Quick Access",
+
     "tts.title": "Text-to-Speech Converter",
     "tts.subtitle": "Convert your text into high-quality audio, segment by segment.",
     "tts.configuration.title": "Configuration",
@@ -353,6 +371,13 @@ const enTranslations = {
     "tts.general.log.logExported": "📁 Log exported.",
     "tts.general.log.logCleared": "🗑️ Log cleared.",
     "tts.general.log.textLoadedFromCheck": "✅ Text loaded successfully from the Text Check tool.",
+
+    "tts.enhance.enhancing": "Enhancing...",
+    "tts.enhance.success": "Text enhanced successfully.",
+    "tts.enhance.error": "Enhancement failed.",
+    "tts.enhance.log.start": "Enhancing text with AI...",
+    "tts.enhance.log.success": "Text enhancement successful.",
+
     "tts.settings.voice": "Voice",
     "tts.settings.model": "Model",
     "tts.settings.outputFormat": "Output Format",
@@ -393,11 +418,7 @@ const enTranslations = {
     "tts.addToDictionary.error": "Failed to add word.",
     "tts.addToDictionary.log": "Added '{{original}}' -> '{{replacement}}' to dictionary.",
     "tts.ssmlGuideLink": "Need more control? Check out our SSML Guide.",
-    "tts.enhance.enhancing": "Enhancing...",
-    "tts.enhance.success": "Text enhanced successfully.",
-    "tts.enhance.error": "Enhancement failed.",
-    "tts.enhance.log.start": "Enhancing text with AI...",
-    "tts.enhance.log.success": "Text enhancement successful.",
+
     "planManagement.title": "Subscription Plan Management",
     "planManagement.subtitle": "Create, edit, and delete subscription plans for your users.",
     "planManagement.addPlan": "Add New Plan",
@@ -421,12 +442,15 @@ const enTranslations = {
     "planManagement.success.delete": "Plan deleted successfully.",
     "planManagement.error.fetch": "Failed to fetch plans.",
     "planManagement.error.mutate": "Failed to save plan.",
+
     "subscriptionPage.title": "Subscription Plans",
     "subscriptionPage.subtitle": "Choose the plan that's right for you.",
     "subscriptionPage.currentPlan": "Current Plan",
+    "subscriptionPage.mostPopular": "Most Popular",
     "subscriptionPage.upgrade": "Upgrade",
     "subscriptionPage.getStarted": "Get Started",
     "subscriptionPage.price.month": "/month",
+
     "checkoutPage.title": "Complete Your Purchase",
     "checkoutPage.orderSummary": "Order Summary",
     "checkoutPage.plan": "Plan",
@@ -434,12 +458,15 @@ const enTranslations = {
     "checkoutPage.payWithPayPal": "Pay with PayPal",
     "checkoutPage.processing": "Processing...",
     "checkoutPage.error": "Failed to create payment order. Please try again.",
+
     "paymentSuccess.title": "Payment Successful!",
     "paymentSuccess.message": "Thank you for your purchase. Your subscription has been upgraded.",
     "paymentSuccess.backToDashboard": "Back to Dashboard",
+
     "paymentCancelled.title": "Payment Cancelled",
     "paymentCancelled.message": "Your payment process was cancelled. You can try again from the subscription page.",
     "paymentCancelled.backToSubscription": "Back to Subscription Plans",
+
     "ssmlGuide.title": "SSML Guide: Professional Voice Control",
     "ssmlGuide.subtitle": "Learn how to use Speech Synthesis Markup Language (SSML) to fine-tune your audio output.",
     "ssmlGuide.whatIs.title": "What is SSML?",
@@ -476,8 +503,10 @@ const arTranslations = {
     "header.loginOrSignUp": "تسجيل الدخول / إنشاء حساب",
     "header.language": "اللغة",
     "header.textCheck": "فحص النص",
+
     "authModal.login": "تسجيل الدخول",
     "authModal.signUp": "إنشاء حساب",
+
     "sidebar.dashboard": "لوحة التحكم",
     "sidebar.projects": "مستنداتي",
     "sidebar.textCheck": "فحص النص",
@@ -485,7 +514,9 @@ const arTranslations = {
     "sidebar.dictionary": "القاموس",
     "sidebar.settings": "الإعدادات",
     "sidebar.subscription": "الاشتراك",
+    
     "experimental.uploadKeys": "تحميل ملف مفاتيح",
+
     "footer.copyright": "مسموع. جميع الحقوق محفوظة.",
     "footer.description": "يقوم 'مسموع' بتحويل نصوصك، مقالاتك، أو خطبك المكتوبة إلى محتوى مُعد بإتقان، وجاهز لأداء صوتي لا تشوبه شائبة.",
     "footer.links.platform": "المنصة",
@@ -493,12 +524,14 @@ const arTranslations = {
     "footer.links.social": "التواصل",
     "footer.links.privacy": "سياسة الخصوصية",
     "footer.links.terms": "شروط الخدمة",
+
     "form.name": "الاسم",
     "form.email": "البريد الإلكتروني",
     "form.password": "كلمة المرور",
     "form.currentPassword": "كلمة المرور الحالية",
     "form.newPassword": "كلمة المرور الجديدة (اختياري)",
     "form.rememberMe": "تذكرني",
+
     "login.title": "سجل الدخول إلى حسابك",
     "login.signingIn": "جارِ تسجيل الدخول...",
     "login.signInButton": "تسجيل الدخول",
@@ -510,6 +543,7 @@ const arTranslations = {
     "login.success": "تم تسجيل الدخول بنجاح.",
     "login.invalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
     "login.emailNotConfirmed": "يرجى تأكيد عنوان بريدك الإلكتروني قبل تسجيل الدخول. تحقق من بريدك الوارد للحصول على رابط التأكيد.",
+
     "signup.title": "أنشئ حسابك الجديد",
     "signup.creatingAccount": "جارِ إنشاء الحساب...",
     "signup.signUpButton": "إنشاء حساب",
@@ -520,6 +554,7 @@ const arTranslations = {
     "signup.success": "تم التسجيل بنجاح! يرجى التحقق من بريدك الإلكتروني لتفعيل حسابك عبر رابط التأكيد.",
     "signup.emailExists": "يوجد حساب مسجل بهذا البريد الإلكتروني بالفعل.",
     "signup.error.weakPassword": "كلمة المرور ضعيفة جداً. يجب أن تتكون من 6 أحرف على الأقل.",
+
     "dashboard.welcome": "أهلاً بعودتك، {{name}}!",
     "dashboard.subtitle": "إليك لمحة سريعة عن نشاطك الشخصي.",
     "dashboard.statCards.checksThisMonth": "عمليات الفحص هذا الشهر",
@@ -529,41 +564,67 @@ const arTranslations = {
     "dashboard.usageChart.title": "استخدام الأداة (آخر 7 أيام)",
     "dashboard.recentActivity.title": "النشاط الأخير",
     "dashboard.recentActivity.empty": "لا يوجد نشاط حديث لعرضه. جرب استخدام أداة فحص النص!",
+
     "dashboard.userManagement.title": "إدارة المستخدمين",
     "dashboard.userManagement.subtitle": "إدارة صلاحيات وأذونات المستخدمين.",
+
     "activity.textAnalysis.step1": "التصحيح والتنظيف: تم تصحيح {{count}} كلمة.",
     "activity.textAnalysis.step2": "التشكيل: تم تشكيل {{count}} كلمة.",
     "activity.textAnalysis.step3": "القاموس: تم استبدال {{count}} كلمة.",
     "activity.textAnalysis.unknown": "تم إجراء تحليل للنص.",
+
     "home.hero.title": "اجعل كلماتك مسموعة، بإتقان.",
     "home.hero.subtitle": "يقوم 'مسموع' بتحويل نصوصك، مقالاتك، أو خطبك المكتوبة إلى محتوى مُعد بإتقان، وجاهز لأداء صوتي لا تشوبه شائبة.",
     "home.hero.cta": "ابدأ الآن مجاناً",
+
+    "home.showcase.title": "شاهد التحول",
+    "home.showcase.subtitle": "لاحظ كيف يقوم الذكاء الاصطناعي بتصحيح النصوص وتنظيفها وتشكيلها في الوقت الفعلي، محولاً المحتوى الخام إلى نصوص مصقولة وجاهزة للتسجيل.",
+    "home.showcase.before": "قبل مسموع",
+    "home.showcase.after": "بعد مسموع",
+    "home.showcase.beforeText": "في يوم 10/3, ذهب احمد الي المكتبة. ووجد كتاب عن تاريخ الاندلس. كان الكتاب مثير جدا.",
+    "home.showcase.afterText": "فِي يَوْمِ <ch>الْعَاشِرِ مِنْ مَارِسَ</ch>، <ch>ذَهَبَ أَحْمَدُ إِلَى الْمَكْتَبَةِ</ch>. <ch>وَوَجَدَ كِتَابًا</ch> عَنْ تَارِيخِ <ch>الْأَنْدَلُسِ</ch>. <ch>كَانَ الْكِتَابُ مُثِيرًا جِدًّا</ch>.",
+
     "home.features.title": "منصة متكاملة",
     "home.features.subtitle": "كل ما تحتاجه لتحليل وإتقان نصوصك بكفاءة وفعالية.",
-    "home.features.card1.title": "نطق متقن",
-    "home.features.card1.description": "بدءاً من التشكيل الدقيق للكلمات المعقدة وصولاً إلى الكمال النحوي، نحن نُعد نصك لتقديم صوتي لا تشوبه شائبة.",
-    "home.features.card2.title": "آمن وموثوق",
-    "home.features.card2.description": "بياناتك في أمان معنا. نستخدم بروتوكولات أمان قياسية لحماية معلوماتك على مدار الساعة.",
-    "home.features.card3.title": "محرك قابل للتخصيص",
-    "home.features.card3.description": "استخدم قاموسك المخصص واختر من بين نماذج الذكاء الاصطناعي المختلفة لتكييف التحليل حسب احتياجاتك.",
+    "home.features.card1.title": "التشكيل التلقائي",
+    "home.features.card1.description": "يضيف الذكاء الاصطناعي لدينا تشكيلاً دقيقاً لنصك العربي، مما يضمن نطقاً خالياً من العيوب ويزيل الغموض.",
+    "home.features.card2.title": "تنظيف متقدم للنصوص",
+    "home.features.card2.description": "من تصحيح الأخطاء الإملائية إلى إزالة الرموز وتحويل الأرقام إلى كلمات، نجهز نصك لتقديم احترافي.",
+    "home.features.card3.title": "قاموس مخصص وذكاء اصطناعي",
+    "home.features.card3.description": "خصص التحليل عبر بناء قاموسك الخاص لاستبدال الكلمات والاختيار من بين نماذج الذكاء الاصطناعي الرائدة.",
+    
+    "home.howItWorks.title": "خطوات بسيطة لمحتوى متقن",
+    "home.howItWorks.subtitle": "عمليتنا المبسطة تجعل إتقان النصوص أمراً سهلاً.",
+    "home.howItWorks.step1.title": "أدخل النص",
+    "home.howItWorks.step1.description": "الصق نصك مباشرة أو قم برفع ملف .txt. منصتنا جاهزة للتعامل مع نصوص بأي طول.",
+    "home.howItWorks.step2.title": "تحليل بالذكاء الاصطناعي",
+    "home.howItWorks.step2.description": "عمليتنا ثلاثية المراحل تصحح، وتُشكل، وتنقي النص باستخدام ذكاء اصطناعي متقدم وقواعدك المخصصة.",
+    "home.howItWorks.step3.title": "صدّر واستخدم",
+    "home.howItWorks.step3.description": "قم بتنزيل النص المتقن كملف .txt أو أرسله مباشرة إلى أداة تحويل النص إلى كلام لإنشاء الصوت.",
+    
     "home.testimonials.title": "موثوق به من قبل المبدعين",
     "home.testimonials.subtitle": "استمع لما يقوله صناع البودكاست والمعلمون والمبدعون عن 'مسموع'.",
     "home.testimonials.card1.quote": "لقد أحدث 'مسموع' ثورة في طريقة معالجتنا للمحتوى. الدقة لا تقدر بثمن، والواجهة سهلة الاستخدام بشكل لا يصدق.",
     "home.testimonials.card1.role": "محرر، المنشورات الرقمية",
     "home.testimonials.card2.quote": "القدرة على استخدام قاموس مخصص وتصحيح التشكيل في الوقت الفعلي منحتنا ميزة تنافسية كبيرة. موصى به بشدة!",
     "home.testimonials.card2.role": "استراتيجي محتوى، الحلول الإبداعية",
+
     "home.pricing.title": "اختر خطتك",
     "home.pricing.subtitle": "ابدأ بخطتنا المجانية السخية أو قم بالترقية لمزيد من القوة والميزات.",
     "home.pricing.cta": "سجل الآن",
+
     "home.cta.title": "هل أنت مستعد ليُسمع صوتك؟",
     "home.cta.subtitle": "انضم إلى آلاف المستخدمين الذين يستخدمون 'مسموع' بالفعل لتحقيق أهدافهم. سجل في دقائق.",
     "home.cta.button": "سجل الآن",
+
     "notFound.title": "الصفحة غير موجودة",
     "notFound.message": "عذراً، الصفحة التي تبحث عنها غير موجودة.",
     "notFound.goHome": "العودة للرئيسية",
+    
     "theme.light": "فاتح",
     "theme.dark": "داكن",
     "theme.system": "النظام",
+
     "profile.title": "ملفي الشخصي",
     "profile.subtitle": "إدارة معلوماتك الشخصية وكلمة المرور.",
     "profile.updateButton": "تحديث الملف الشخصي",
@@ -572,12 +633,14 @@ const arTranslations = {
     "profile.invalidPassword": "كلمة المرور الحالية التي أدخلتها غير صحيحة.",
     "profile.emailExists": "هذا البريد الإلكتروني مستخدم بالفعل من قبل حساب آخر.",
     "profile.userNotFound": "تعذر العثور على بيانات المستخدم.",
+
     "forgotPassword.title": "نسيت كلمة المرور",
     "forgotPassword.subtitle": "أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور الخاصة بك.",
     "forgotPassword.sendButton": "إرسال رابط إعادة التعيين",
     "forgotPassword.sending": "جارِ الإرسال...",
     "forgotPassword.emailSent": "إذا كان هناك حساب بهذا البريد الإلكتروني، فقد تم إرسال رابط إعادة تعيين كلمة المرور.",
     "forgotPassword.backToLogin": "العودة لتسجيل الدخول",
+
     "userManagement.table.name": "الاسم",
     "userManagement.table.email": "البريد الإلكتروني",
     "userManagement.table.role": "الصلاحية",
@@ -596,6 +659,7 @@ const arTranslations = {
     "userManagement.error.cannotDeleteSelf": "لا يمكنك حذف حسابك الخاص.",
     "userManagement.error.cannotChangeSelf": "لا يمكنك تغيير صلاحيتك الخاصة.",
     "auth.unauthorized": "غير مصرح لك بتنفيذ هذا الإجراء.",
+    
     "textCheck.title": "أداة تحليل النصوص",
     "textCheck.subtitle": "حسّن نصوصك عبر عملية من 3 خطوات مدعومة بالذكاء الاصطناعي.",
     "textCheck.step1.title": "1. التصحيح والتنظيف",
@@ -636,6 +700,7 @@ const arTranslations = {
     "textCheck.save.status.unsaved": "تغييرات غير محفوظة",
     "textCheck.save.status.error": "فشل الحفظ",
     "textCheck.processingChunk": "جارِ معالجة المقطع {{current}} من {{total}}...",
+
     "projects.title": "مستنداتي",
     "projects.subtitle": "إدارة مشاريع تحليل النصوص الخاصة بك.",
     "projects.new": "مستند جديد",
@@ -649,6 +714,7 @@ const arTranslations = {
     "projects.deleteConfirm": "هل أنت متأكد من أنك تريد حذف هذا المستند؟ لا يمكن التراجع عن هذا الإجراء.",
     "projects.deleteError": "فشل حذف المستند.",
     "projects.renameError": "فشل إعادة تسمية المستند.",
+
     "dictionary.title": "القاموس المخصص",
     "dictionary.subtitle": "إدارة الكلمات التي سيتم استبدالها تلقائياً في الخطوة الأخيرة من فحص النص.",
     "dictionary.add.title": "إضافة كلمة جديدة",
@@ -669,6 +735,7 @@ const arTranslations = {
     "dictionary.save": "حفظ",
     "dictionary.empty": "قاموسك فارغ. أضف كلمة للبدء.",
     "dictionary.error.alreadyExists": "هذه الكلمة موجودة بالفعل في قاموسك.",
+
     "settings.title": "الإعدادات",
     "settings.subtitle": "إدارة إعدادات التطبيق والإعدادات الإدارية.",
     "settings.save.button": "حفظ التغييرات",
@@ -683,6 +750,7 @@ const arTranslations = {
     "settings.footer.description": "خصص محتوى تذييل موقعك الإلكتروني.",
     "settings.footer.siteDescription": "وصف الموقع",
     "settings.footer.copyright": "نص حقوق النشر",
+    "settings.footer.ogImage": "رابط صورة المعاينة لوسائل التواصل",
     "settings.footer.platformLinks": "روابط المنصة",
     "settings.footer.legalLinks": "روابط قانونية",
     "settings.footer.socialLinks": "روابط التواصل الاجتماعي",
@@ -690,9 +758,6 @@ const arTranslations = {
     "settings.footer.url": "الرابط",
     "settings.footer.addLink": "إضافة رابط",
     "settings.footer.remove": "إزالة",
-    "settings.footer.twitterUrl": "رابط تويتر",
-    "settings.footer.githubUrl": "رابط GitHub",
-    "settings.footer.linkedinUrl": "رابط LinkedIn",
     "settings.textAnalysis.title": "نماذج تحليل النص",
     "settings.textAnalysis.description": "اختر نموذج الذكاء الاصطناعي وقدم مفتاح API لأداة تحليل النص.",
     "settings.textAnalysis.model": "نموذج الذكاء الاصطناعي",
@@ -706,7 +771,9 @@ const arTranslations = {
     "settings.payment.description": "تهيئة بيانات اعتماد مزود الدفع الخاص بك.",
     "settings.payment.paypal.clientId": "معرف العميل (Client ID) لـ PayPal",
     "settings.payment.paypal.clientSecret": "المفتاح السري (Client Secret) لـ PayPal",
+
     "quickAccess.title": "اختصارات الوصول السريع",
+
     "tts.title": "تحويل النص إلى صوت",
     "tts.subtitle": "حوّل نصوصك إلى صوت عالي الجودة، مقطعًا تلو الآخر.",
     "tts.configuration.title": "تهيئة",
@@ -885,6 +952,7 @@ const arTranslations = {
     "subscriptionPage.title": "خطط الاشتراك",
     "subscriptionPage.subtitle": "اختر الخطة المناسبة لك.",
     "subscriptionPage.currentPlan": "الخطة الحالية",
+    "subscriptionPage.mostPopular": "الأكثر شيوعاً",
     "subscriptionPage.upgrade": "ترقية",
     "subscriptionPage.getStarted": "ابدأ الآن",
     "subscriptionPage.price.month": "/شهرياً",
