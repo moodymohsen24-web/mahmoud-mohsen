@@ -8,6 +8,7 @@ import { Cog6ToothIcon } from './icons/Cog6ToothIcon';
 import { CreditCardIcon } from './icons/CreditCardIcon';
 import { SpeakerWaveIcon } from './icons/SpeakerWaveIcon';
 import { FolderIcon } from './icons/FolderIcon';
+import { BeakerIcon } from './icons/BeakerIcon';
 
 const Sidebar: React.FC = () => {
     const { t } = useI18n();
@@ -41,6 +42,10 @@ const Sidebar: React.FC = () => {
                 <NavLink to="/text-to-speech" className={navLinkClasses}>
                     <SpeakerWaveIcon className="w-6 h-6" />
                     <span>{t('sidebar.textToSpeech')}</span>
+                </NavLink>
+                <NavLink to="/experimental-tts" className={navLinkClasses}>
+                    <BeakerIcon className="w-6 h-6" />
+                    <span>{t('sidebar.experimentalTts')}</span>
                 </NavLink>
                  <NavLink to="/subscription" className={navLinkClasses}>
                     <CreditCardIcon className="w-6 h-6" />

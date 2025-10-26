@@ -1,4 +1,5 @@
 
+
 import { supabase } from '../supabaseClient';
 import type { Settings, FooterContent } from '../types';
 import { v4 as uuidv4 } from 'uuid';
@@ -60,7 +61,8 @@ const defaultSettings: Settings = {
   textToSpeech: {
     keys: {
         elevenlabs: []
-    }
+    },
+    customVoices: []
   },
   footer: {
     en: defaultFooterContentEn,
@@ -113,7 +115,8 @@ export const settingsService = {
                 keys: {
                     ...defaultSettings.textToSpeech?.keys,
                     ...(userSettings.textToSpeech?.keys || {})
-                }
+                },
+                customVoices: userSettings.textToSpeech?.customVoices || []
             },
             footer: {
                 en: {
@@ -168,7 +171,7 @@ export const settingsService = {
     if (adminError || !admin) {
         // Gracefully return defaults if no admin exists, without logging an error.
         if (adminError && adminError.code !== 'PGRST116') {
-             console.error("Database error while searching for admin:", adminError);
+             console.error("Database error while searching for admin:", adminError.message || adminError);
         }
         return defaultSettings.footer!;
     }

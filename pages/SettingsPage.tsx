@@ -1,3 +1,5 @@
+
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { useI18n } from '../hooks/useI18n';
 import { useAuth } from '../hooks/useAuth';
@@ -10,6 +12,7 @@ import { settingsService } from '../services/settingsService';
 import { textAnalysisService } from '../services/textAnalysisService';
 import { supabase } from '../supabaseClient';
 import FooterSettingsPanel from '../components/FooterSettingsPanel';
+import VoiceManagementPanel from '../components/VoiceManagementPanel';
 
 const GeneralSettings: React.FC = () => {
     // ... same as before, no changes needed in this sub-component
@@ -307,7 +310,7 @@ const PaymentGatewaySettings: React.FC = () => {
 }
 
 
-type Tab = 'general' | 'users' | 'plans' | 'payment' | 'footer';
+type Tab = 'general' | 'users' | 'plans' | 'payment' | 'footer' | 'voices';
 
 const SettingsPage: React.FC = () => {
     const { t } = useI18n();
@@ -324,6 +327,8 @@ const SettingsPage: React.FC = () => {
                 return <PaymentGatewaySettings />;
             case 'footer':
                 return <FooterSettingsPanel />;
+            case 'voices':
+                return <VoiceManagementPanel />;
             case 'general':
             default:
                 return <div className="bg-secondary dark:bg-dark-secondary p-8 rounded-lg shadow-lg max-w-3xl"><GeneralSettings /></div>;
@@ -355,6 +360,9 @@ const SettingsPage: React.FC = () => {
                             </button>
                             <button onClick={() => setActiveTab('plans')} className={getTabClass('plans')}>
                                 {t('settings.tabs.plans')}
+                            </button>
+                             <button onClick={() => setActiveTab('voices')} className={getTabClass('voices')}>
+                                {t('settings.tabs.voices')}
                             </button>
                             <button onClick={() => setActiveTab('payment')} className={getTabClass('payment')}>
                                 {t('settings.tabs.payment')}

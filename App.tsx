@@ -25,6 +25,7 @@ import PaymentCancelledPage from './pages/PaymentCancelledPage';
 import TextToSpeechPage from './pages/TextToSpeechPage';
 import ProjectsPage from './pages/ProjectsPage';
 import SSMLGuidePage from './pages/SSMLGuidePage';
+import ExperimentalTextToSpeechPage from './pages/ExperimentalTextToSpeechPage';
 
 const App: React.FC = () => {
   return (
@@ -47,6 +48,7 @@ const App: React.FC = () => {
                   <Route path="text-check/:projectId" element={<TextCheckPage />} />
                   <Route path="dictionary" element={<DictionaryPage />} />
                   <Route path="text-to-speech" element={<TextToSpeechPage />} />
+                  <Route path="experimental-tts" element={<ExperimentalTextToSpeechPage />} />
                   <Route path="ssml-guide" element={<SSMLGuidePage />} />
                   <Route path="subscription" element={<SubscriptionPage />} />
                   <Route path="settings" element={<SettingsPage />} />

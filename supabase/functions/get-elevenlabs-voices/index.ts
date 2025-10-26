@@ -1,3 +1,4 @@
+
 // @ts-ignore
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 // @ts-ignore
@@ -49,17 +50,22 @@ serve(async (req: Request) => {
         .eq('id', adminProfile.id)
         .single();
         
-    const ttsKeys = settingsData?.payload?.textToSpeech?.keys?.elevenlabs || [];
-    const activeKey = ttsKeys.find((k: any) => k.status === 'active');
+    const ttsKeysRaw = settingsData?.payload?.textToSpeech?.keys?.elevenlabs || [];
+    // Sanitize keys to handle both string arrays and legacy arrays of objects {key: '...'}
+    const ttsKeys = Array.isArray(ttsKeysRaw) ? ttsKeysRaw.map((k: any) =>
+        (typeof k === 'object' && k !== null && k.key) ? k.key : k
+    ).filter((k: any): k is string => typeof k === 'string' && k.length > 0) : [];
+    
+    const apiKey = ttsKeys.length > 0 ? ttsKeys[0] : null;
 
-    if (settingsError || !activeKey) {
-      throw new Error("No active ElevenLabs API key found in admin settings.");
+    if (settingsError || !apiKey) {
+      throw new Error("No ElevenLabs API key found in admin settings.");
     }
     
     // 4. Fetch voices from ElevenLabs
     const response = await fetch(`${ELEVENLABS_API_BASE}/voices`, {
         headers: {
-            'xi-api-key': activeKey.key
+            'xi-api-key': apiKey
         }
     });
 

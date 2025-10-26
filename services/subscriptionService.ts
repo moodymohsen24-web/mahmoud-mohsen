@@ -11,7 +11,7 @@ export const subscriptionService = {
       .order('price', { ascending: true });
 
     if (error) {
-      console.error('Error fetching subscription plans:', error);
+      console.error('Error fetching subscription plans:', error.message || error);
       throw error;
     }
     return (data as SubscriptionPlan[]) || [];

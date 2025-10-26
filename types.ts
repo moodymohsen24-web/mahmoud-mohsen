@@ -1,5 +1,6 @@
 
 
+
 export type UserRole = 'ADMIN' | 'MODERATOR' | 'MEMBER';
 
 export interface SubscriptionPlan {
@@ -80,6 +81,15 @@ export interface FooterContent {
   socialLinks: EditableLink[];
 }
 
+export interface CustomVoice {
+  id: string; // To uniquely identify the item in the UI list
+  voice_id: string;
+  name: string;
+  languages: string[];
+  accent: string;
+  category: string;
+}
+
 export interface Settings {
     aiModels: {
         selected: AiModel;
@@ -99,6 +109,7 @@ export interface Settings {
         keys?: {
             elevenlabs: string[];
         }
+        customVoices?: CustomVoice[];
     };
     footer?: {
       en: FooterContent;

@@ -1,4 +1,5 @@
 
+
 {
     "header.brand": "مسموع",
     "header.welcome": "أهلاً، {{name}}",
@@ -19,11 +20,13 @@
     "sidebar.projects": "مستنداتي",
     "sidebar.textCheck": "فحص النص",
     "sidebar.textToSpeech": "تحويل النص إلى صوت",
+    "sidebar.experimentalTts": "تجريبي تحويل النص الي صوت",
     "sidebar.dictionary": "القاموس",
     "sidebar.settings": "الإعدادات",
     "sidebar.subscription": "الاشتراك",
     
     "experimental.uploadKeys": "تحميل ملف مفاتيح",
+    "experimentalTts.title": "تجريبي تحويل النص الي صوت",
 
     "footer.copyright": "مسموع. جميع الحقوق محفوظة.",
     "footer.description": "يقوم 'مسموع' بتحويل نصوصك، مقالاتك، أو خطبك المكتوبة إلى محتوى مُعد بإتقان، وجاهز لأداء صوتي لا تشوبه شائبة.",
@@ -237,6 +240,7 @@
     "settings.tabs.users": "إدارة المستخدمين",
     "settings.tabs.plans": "إدارة الخطط",
     "settings.tabs.payment": "بوابات الدفع",
+    "settings.tabs.voices": "إدارة الأصوات",
     "settings.tabs.footer": "التذييل",
     "settings.footer.title": "إدارة محتوى التذييل",
     "settings.footer.description": "خصص محتوى تذييل موقعك الإلكتروني.",
@@ -263,6 +267,29 @@
     "settings.payment.description": "تهيئة بيانات اعتماد مزود الدفع الخاص بك.",
     "settings.payment.paypal.clientId": "معرف العميل (Client ID) لـ PayPal",
     "settings.payment.paypal.clientSecret": "المفتاح السري (Client Secret) لـ PayPal",
+
+    "voiceManagement.title": "إدارة الأصوات",
+    "voiceManagement.subtitle": "إدارة الأصوات المدمجة والمخصصة لتحويل النص إلى كلام.",
+    "voiceManagement.addVoice": "إضافة صوت جديد",
+    "voiceManagement.form.voiceId": "معرف الصوت (Voice ID)",
+    "voiceManagement.form.name": "اسم الصوت",
+    "voiceManagement.form.language": "اللغات",
+    "voiceManagement.form.languagePlaceholder": "اللغات (مثال: الإنجليزية, العربية)",
+    "voiceManagement.form.accent": "اللهجة",
+    "voiceManagement.form.category": "الفئة",
+    "voiceManagement.table.name": "الاسم",
+    "voiceManagement.table.id": "معرف الصوت",
+    "voiceManagement.table.language": "اللغات",
+    "voiceManagement.table.accent": "اللهجة",
+    "voiceManagement.table.category": "الفئة",
+    "voiceManagement.table.actions": "الإجراءات",
+    "voiceManagement.type.default": "للقراءة فقط",
+    "voiceManagement.save": "حفظ",
+    "voiceManagement.cancel": "إلغاء",
+    "voiceManagement.edit": "تعديل",
+    "voiceManagement.delete": "حذف",
+    "voiceManagement.deleteConfirm": "هل أنت متأكد أنك تريد حذف هذا الصوت؟",
+    "voiceManagement.empty": "لم تتم إضافة أي أصوات مخصصة بعد.",
 
     "quickAccess.title": "اختصارات الوصول السريع",
 

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { subscriptionService } from '../services/subscriptionService';
@@ -19,7 +20,7 @@ const SubscriptionPage: React.FC = () => {
                 const fetchedPlans = await subscriptionService.getAllPlans();
                 setPlans(fetchedPlans);
             } catch (err) {
-                setError('Failed to load subscription plans.');
+                setError(err instanceof Error ? err.message : 'Failed to load subscription plans.');
             } finally {
                 setIsLoading(false);
             }

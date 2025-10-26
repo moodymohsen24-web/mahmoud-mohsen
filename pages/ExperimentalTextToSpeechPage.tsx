@@ -17,11 +17,11 @@ import { ClipboardDocumentIcon } from '../components/icons/ClipboardDocumentIcon
 import { ArrowDownTrayIcon } from '../components/icons/ArrowDownTrayIcon';
 import { AdjustmentsHorizontalIcon } from '../components/icons/AdjustmentsHorizontalIcon';
 import { ArchiveBoxArrowDownIcon } from '../components/icons/ArchiveBoxArrowDownIcon';
-import { SpeakerWaveIcon } from '../components/icons/SpeakerWaveIcon';
 import { BookOpenIcon } from '../components/icons/BookOpenIcon';
 import { SparklesIcon } from '../components/icons/SparklesIcon';
 import { PlayIcon } from '../components/icons/PlayIcon';
 import { InformationCircleIcon } from '../components/icons/InformationCircleIcon';
+import { BeakerIcon } from '../components/icons/BeakerIcon';
 
 const DB_NAME = 'masmoo-tts-cache';
 const STORE_NAME = 'audio-chunks';
@@ -102,7 +102,7 @@ type ConvertedChunk = {
 type SettingsTab = 'audio' | 'chunking' | 'keys';
 type ResultsTab = 'chunks' | 'log';
 
-const TextToSpeechPage: React.FC = () => {
+const ExperimentalTextToSpeechPage: React.FC = () => {
   const { t, language } = useI18n();
   const { user } = useAuth();
   const location = useLocation();
@@ -201,7 +201,7 @@ const TextToSpeechPage: React.FC = () => {
             setDbSettings(settingsFromDb);
             setApiKeys(sanitizedKeys);
             if (sanitizedKeys.length > 0) checkBalances(sanitizedKeys, true); // silent check on load
-
+            
             // Combine default and custom voices
             const defaultVoices = [
                 { value: "nPczCjzI2devNBz1zQrb", label: "Brian" },
@@ -213,7 +213,7 @@ const TextToSpeechPage: React.FC = () => {
                 label: `${v.name} [Custom]`
             })) || [];
             setAllVoices([...defaultVoices, ...customVoices]);
-            
+
             // Load session from local storage
             const savedStateJSON = localStorage.getItem(LOCAL_STORAGE_KEY);
             if (savedStateJSON) {
@@ -681,7 +681,7 @@ const TextToSpeechPage: React.FC = () => {
         </div>
       )}
 
-      <h1 className="text-3xl font-bold flex items-center gap-2"> <SpeakerWaveIcon className="w-8 h-8 text-highlight dark:text-dark-highlight" /> <span>{t('tts.title')}</span> </h1>
+      <h1 className="text-3xl font-bold flex items-center gap-2"> <BeakerIcon className="w-8 h-8 text-highlight dark:text-dark-highlight" /> <span>{t('experimentalTts.title')}</span> </h1>
 
       <Card title={t('tts.configuration.title')} headerActions={<button onClick={handleClearSession} className="bg-accent dark:bg-dark-accent text-text-primary dark:text-dark-text-primary font-medium py-2 px-4 text-sm rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">{t('tts.session.clear')}</button>}>
         <div className="space-y-4">
@@ -814,4 +814,4 @@ const TextToSpeechPage: React.FC = () => {
   );
 };
 
-export default TextToSpeechPage;
+export default ExperimentalTextToSpeechPage;

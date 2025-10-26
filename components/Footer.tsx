@@ -93,13 +93,14 @@ const Footer: React.FC = () => {
         return null; // Or a minimal fallback footer
     }
     
-    const socialIconMap: { [key: string]: React.ReactNode } = {
-        twitter: <TwitterIcon />,
-        github: <GithubIcon />,
-        linkedin: <LinkedInIcon />,
-        facebook: <FacebookIcon />,
-        instagram: <InstagramIcon />,
-        youtube: <YouTubeIcon />,
+    // Fix: Storing component types instead of instances to avoid typing issues with React.cloneElement
+    const socialIconMap: { [key: string]: React.FC<{ className?: string }> } = {
+        twitter: TwitterIcon,
+        github: GithubIcon,
+        linkedin: LinkedInIcon,
+        facebook: FacebookIcon,
+        instagram: InstagramIcon,
+        youtube: YouTubeIcon,
     };
 
     const { description, copyright, platformLinks, legalLinks, socialLinks } = content;
@@ -149,7 +150,8 @@ const Footer: React.FC = () => {
 
                 return (
                     <a key={link.id} href={link.url} className="text-text-secondary dark:text-dark-text-secondary hover:text-highlight transition-colors" aria-label={link.text}>
-                        {React.cloneElement(IconComponent as React.ReactElement, { className: "w-6 h-6" })}
+                        {/* Fix: Render the component directly using JSX for better type safety and readability, instead of using React.cloneElement which caused a type error. */}
+                        <IconComponent className="w-6 h-6" />
                     </a>
                 );
               })}
