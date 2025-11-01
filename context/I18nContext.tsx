@@ -1,5 +1,3 @@
-
-
 import React, { createContext, useState, useEffect, useCallback, useMemo } from 'react';
 
 // --- Embedded Translations ---
@@ -21,6 +19,7 @@ const enTranslations = {
     "sidebar.projects": "My Documents",
     "sidebar.textCheck": "Text Check",
     "sidebar.textToSpeech": "Text-to-Speech",
+    "sidebar.imageGenerator": "Image Generator",
     "sidebar.experimentalTts": "Experimental TTS",
     "sidebar.dictionary": "Dictionary",
     "sidebar.settings": "Settings",
@@ -79,14 +78,12 @@ const enTranslations = {
     "home.hero.title": "Make Your Words Heard, Perfectly.",
     "home.hero.subtitle": "Masmoo transforms your written scripts, articles, or speeches into perfectly prepared content, ready for flawless audio performance.",
     "home.hero.cta": "Get Started for Free",
-
     "home.showcase.title": "See the Transformation",
     "home.showcase.subtitle": "Witness how our AI corrects, cleans, and diacritizes text in real-time, turning raw content into polished, ready-to-record scripts.",
     "home.showcase.before": "Before Masmoo",
     "home.showcase.after": "After Masmoo",
-    "home.showcase.beforeText": "في يوم 10/3, ذهب احمد الي المكتبة. ووجد كتاب عن تاريخ الاندلس. كان الكتاب مثير جدا.",
-    "home.showcase.afterText": "فِي يَوْمِ <ch>الْعَاشِرِ مِنْ مَارِسَ</ch>, <ch>ذَهَبَ أَحْمَدُ إِلَى الْمَكْتَبَةِ</ch>. <ch>وَوَجَدَ كِتَابًا</ch> عَنْ تَارِيخِ <ch>الْأَنْدَلُسِ</ch>. <ch>كَانَ الْكِتَابُ مُثِيرًا جِدًّا</ch>.",
-
+    "home.showcase.beforeText": "On 3/10, Ahmed went to the library. He found a book about the history of Andalusia. The book was very interesting.",
+    "home.showcase.afterText": "On <ch>the tenth of March</ch>, <ch>Ahmed went to the library</ch>. <ch>He found a book</ch> about the history of <ch>Al-Andalus</ch>. <ch>The book was very interesting</ch>.",
     "home.features.title": "An All-in-One Platform",
     "home.features.subtitle": "Everything you need to analyze and perfect your text, efficiently and effectively.",
     "home.features.card1.title": "Automatic Diacritization",
@@ -95,7 +92,6 @@ const enTranslations = {
     "home.features.card2.description": "From correcting spelling errors to removing symbols and converting numbers to words, we prepare your text for a professional delivery.",
     "home.features.card3.title": "Custom Dictionary & AI",
     "home.features.card3.description": "Fine-tune the analysis by building your own dictionary of word replacements and choosing from leading AI models.",
-    
     "home.howItWorks.title": "Simple Steps to Perfect Content",
     "home.howItWorks.subtitle": "Our streamlined process makes text perfection effortless.",
     "home.howItWorks.step1.title": "Submit Your Text",
@@ -104,7 +100,6 @@ const enTranslations = {
     "home.howItWorks.step2.description": "Our three-step process corrects, diacritizes, and refines your text using advanced AI and your custom rules.",
     "home.howItWorks.step3.title": "Export & Use",
     "home.howItWorks.step3.description": "Download your perfected text as a .txt file or send it directly to our Text-to-Speech tool to generate audio.",
-
     "home.testimonials.title": "Trusted by Creators",
     "home.testimonials.subtitle": "Hear what podcasters, educators, and creators are saying about Masmoo.",
     "home.testimonials.card1.quote": "Masmoo has revolutionized how we process our content. The accuracy is invaluable, and the interface is incredibly user-friendly.",
@@ -286,9 +281,48 @@ const enTranslations = {
     "voiceManagement.delete": "Delete",
     "voiceManagement.deleteConfirm": "Are you sure you want to delete this voice?",
     "voiceManagement.empty": "No custom voices added yet.",
-
     "quickAccess.title": "Quick Access",
-
+    "imageGenerator.title": "AI Image Generator",
+    "imageGenerator.subtitle": "Turn your ideas into stunning visuals.",
+    "imageGenerator.prompt": "Prompt",
+    "imageGenerator.promptPlaceholder": "e.g., A cat wearing sunglasses, riding a skateboard.",
+    "imageGenerator.imageInput.promptPlaceholderWithImage": "Describe the changes you want, or what to generate based on the image.",
+    "imageGenerator.pinned.promptPlaceholder": "Describe a new scene for the pinned character, e.g., 'at the beach', 'in a cyberpunk city'",
+    "imageGenerator.negativePrompt": "Negative Prompt (optional)",
+    "imageGenerator.negativePromptPlaceholder": "e.g., blurry, low quality, text, watermark",
+    "imageGenerator.settings": "Settings",
+    "imageGenerator.generate": "Generate",
+    "imageGenerator.generating": "Generating",
+    "imageGenerator.results.title": "Results",
+    "imageGenerator.results.placeholderTitle": "Let's create something amazing",
+    "imageGenerator.results.placeholderSubtitle": "Your generated images will appear here.",
+    "imageGenerator.download": "Download",
+    "imageGenerator.error.noApiKey": "Gemini API key is not configured. Please add it in the settings.",
+    "imageGenerator.error.generic": "An error occurred during image generation.",
+    "imageGenerator.styles.title": "Style Presets",
+    "imageGenerator.styles.cinematic": "Cinematic",
+    "imageGenerator.styles.photographic": "Photographic",
+    "imageGenerator.styles.anime": "Anime",
+    "imageGenerator.styles.fantasy": "Fantasy Art",
+    "imageGenerator.styles.cartoon": "Cartoon",
+    "imageGenerator.styles.3d": "3D Model",
+    "imageGenerator.advancedSettings": "Advanced Settings",
+    "imageGenerator.imageInput.title": "Image Input (Optional)",
+    "imageGenerator.imageInput.uploadTab": "Upload",
+    "imageGenerator.imageInput.urlTab": "From URL",
+    "imageGenerator.imageInput.uploadCta": "Click to upload or drag & drop",
+    "imageGenerator.imageInput.urlPlaceholder": "Paste image URL here...",
+    "imageGenerator.imageInput.loadImage": "Load Image",
+    "imageGenerator.imageInput.removeImage": "Remove Image",
+    "imageGenerator.history.clear": "Clear History",
+    "imageGenerator.pin.title": "Pin for consistency",
+    "imageGenerator.pinned.title": "Pinned Image",
+    "imageGenerator.pinned.unpin": "Unpin",
+    "imageGenerator.model.title": "AI Model",
+    "imageGenerator.model.gemini-flash-image": "Gemini Flash Image (for editing & consistency)",
+    "imageGenerator.model.imagen-4": "Imagen 4 (for high quality)",
+    "imageGenerator.model.note": "Note: Image Input and Pinning are disabled when using Imagen 4.",
+    "imageGenerator.numberOfImages": "Number of Images",
     "tts.title": "Text-to-Speech Converter",
     "tts.subtitle": "Convert your text into high-quality audio, segment by segment.",
     "tts.configuration.title": "Configuration",
@@ -304,11 +338,6 @@ const enTranslations = {
     "tts.voice.previewing": "...",
     "tts.error.voicePreviewFailed": "Failed to generate voice preview.",
     "tts.results.title": "Results",
-    "tts.upload.cta": "Upload a file",
-    "tts.upload.dragDrop": "or drag and drop",
-    "tts.upload.description": ".TXT up to 5MB",
-    "tts.inputText": "Enter Text",
-    "tts.inputText.placeholder": "Type or paste your text here...",
     "tts.apiKeyManagement.title": "API Key Management",
     "tts.apiKeyManagement.enterNew": "Enter new API key here...",
     "tts.apiKeyManagement.add": "Add",
@@ -396,13 +425,11 @@ const enTranslations = {
     "tts.general.log.logExported": "📁 Log exported.",
     "tts.general.log.logCleared": "🗑️ Log cleared.",
     "tts.general.log.textLoadedFromCheck": "✅ Text loaded successfully from the Text Check tool.",
-
     "tts.enhance.enhancing": "Enhancing...",
     "tts.enhance.success": "Text enhanced successfully.",
     "tts.enhance.error": "Enhancement failed.",
     "tts.enhance.log.start": "Enhancing text with AI...",
     "tts.enhance.log.success": "Text enhancement successful.",
-
     "tts.settings.voice": "Voice",
     "tts.settings.model": "Model",
     "tts.settings.outputFormat": "Output Format",
@@ -443,7 +470,6 @@ const enTranslations = {
     "tts.addToDictionary.error": "Failed to add word.",
     "tts.addToDictionary.log": "Added '{{original}}' -> '{{replacement}}' to dictionary.",
     "tts.ssmlGuideLink": "Need more control? Check out our SSML Guide.",
-
     "planManagement.title": "Subscription Plan Management",
     "planManagement.subtitle": "Create, edit, and delete subscription plans for your users.",
     "planManagement.addPlan": "Add New Plan",
@@ -467,7 +493,6 @@ const enTranslations = {
     "planManagement.success.delete": "Plan deleted successfully.",
     "planManagement.error.fetch": "Failed to fetch plans.",
     "planManagement.error.mutate": "Failed to save plan.",
-
     "subscriptionPage.title": "Subscription Plans",
     "subscriptionPage.subtitle": "Choose the plan that's right for you.",
     "subscriptionPage.currentPlan": "Current Plan",
@@ -475,7 +500,6 @@ const enTranslations = {
     "subscriptionPage.upgrade": "Upgrade",
     "subscriptionPage.getStarted": "Get Started",
     "subscriptionPage.price.month": "/month",
-
     "checkoutPage.title": "Complete Your Purchase",
     "checkoutPage.orderSummary": "Order Summary",
     "checkoutPage.plan": "Plan",
@@ -483,15 +507,12 @@ const enTranslations = {
     "checkoutPage.payWithPayPal": "Pay with PayPal",
     "checkoutPage.processing": "Processing...",
     "checkoutPage.error": "Failed to create payment order. Please try again.",
-
     "paymentSuccess.title": "Payment Successful!",
     "paymentSuccess.message": "Thank you for your purchase. Your subscription has been upgraded.",
     "paymentSuccess.backToDashboard": "Back to Dashboard",
-
     "paymentCancelled.title": "Payment Cancelled",
     "paymentCancelled.message": "Your payment process was cancelled. You can try again from the subscription page.",
     "paymentCancelled.backToSubscription": "Back to Subscription Plans",
-
     "ssmlGuide.title": "SSML Guide: Professional Voice Control",
     "ssmlGuide.subtitle": "Learn how to use Speech Synthesis Markup Language (SSML) to fine-tune your audio output.",
     "ssmlGuide.whatIs.title": "What is SSML?",
@@ -528,22 +549,19 @@ const arTranslations = {
     "header.loginOrSignUp": "تسجيل الدخول / إنشاء حساب",
     "header.language": "اللغة",
     "header.textCheck": "فحص النص",
-
     "authModal.login": "تسجيل الدخول",
     "authModal.signUp": "إنشاء حساب",
-
     "sidebar.dashboard": "لوحة التحكم",
     "sidebar.projects": "مستنداتي",
     "sidebar.textCheck": "فحص النص",
     "sidebar.textToSpeech": "تحويل النص إلى صوت",
+    "sidebar.imageGenerator": "مولّد الصور",
     "sidebar.experimentalTts": "تجريبي تحويل النص الي صوت",
     "sidebar.dictionary": "القاموس",
     "sidebar.settings": "الإعدادات",
     "sidebar.subscription": "الاشتراك",
-    
     "experimental.uploadKeys": "تحميل ملف مفاتيح",
     "experimentalTts.title": "تجريبي تحويل النص الي صوت",
-
     "footer.copyright": "مسموع. جميع الحقوق محفوظة.",
     "footer.description": "يقوم 'مسموع' بتحويل نصوصك، مقالاتك، أو خطبك المكتوبة إلى محتوى مُعد بإتقان، وجاهز لأداء صوتي لا تشوبه شائبة.",
     "footer.links.platform": "المنصة",
@@ -551,14 +569,12 @@ const arTranslations = {
     "footer.links.social": "التواصل",
     "footer.links.privacy": "سياسة الخصوصية",
     "footer.links.terms": "شروط الخدمة",
-
     "form.name": "الاسم",
     "form.email": "البريد الإلكتروني",
     "form.password": "كلمة المرور",
     "form.currentPassword": "كلمة المرور الحالية",
     "form.newPassword": "كلمة المرور الجديدة (اختياري)",
     "form.rememberMe": "تذكرني",
-
     "login.title": "سجل الدخول إلى حسابك",
     "login.signingIn": "جارِ تسجيل الدخول...",
     "login.signInButton": "تسجيل الدخول",
@@ -570,7 +586,6 @@ const arTranslations = {
     "login.success": "تم تسجيل الدخول بنجاح.",
     "login.invalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
     "login.emailNotConfirmed": "يرجى تأكيد عنوان بريدك الإلكتروني قبل تسجيل الدخول. تحقق من بريدك الوارد للحصول على رابط التأكيد.",
-
     "signup.title": "أنشئ حسابك الجديد",
     "signup.creatingAccount": "جارِ إنشاء الحساب...",
     "signup.signUpButton": "إنشاء حساب",
@@ -581,7 +596,6 @@ const arTranslations = {
     "signup.success": "تم التسجيل بنجاح! يرجى التحقق من بريدك الإلكتروني لتفعيل حسابك عبر رابط التأكيد.",
     "signup.emailExists": "يوجد حساب مسجل بهذا البريد الإلكتروني بالفعل.",
     "signup.error.weakPassword": "كلمة المرور ضعيفة جداً. يجب أن تتكون من 6 أحرف على الأقل.",
-
     "dashboard.welcome": "أهلاً بعودتك، {{name}}!",
     "dashboard.subtitle": "إليك لمحة سريعة عن نشاطك الشخصي.",
     "dashboard.statCards.checksThisMonth": "عمليات الفحص هذا الشهر",
@@ -591,26 +605,21 @@ const arTranslations = {
     "dashboard.usageChart.title": "استخدام الأداة (آخر 7 أيام)",
     "dashboard.recentActivity.title": "النشاط الأخير",
     "dashboard.recentActivity.empty": "لا يوجد نشاط حديث لعرضه. جرب استخدام أداة فحص النص!",
-
     "dashboard.userManagement.title": "إدارة المستخدمين",
     "dashboard.userManagement.subtitle": "إدارة صلاحيات وأذونات المستخدمين.",
-
     "activity.textAnalysis.step1": "التصحيح والتنظيف: تم تصحيح {{count}} كلمة.",
     "activity.textAnalysis.step2": "التشكيل: تم تشكيل {{count}} كلمة.",
     "activity.textAnalysis.step3": "القاموس: تم استبدال {{count}} كلمة.",
     "activity.textAnalysis.unknown": "تم إجراء تحليل للنص.",
-
     "home.hero.title": "اجعل كلماتك مسموعة، بإتقان.",
     "home.hero.subtitle": "يقوم 'مسموع' بتحويل نصوصك، مقالاتك، أو خطبك المكتوبة إلى محتوى مُعد بإتقان، وجاهز لأداء صوتي لا تشوبه شائبة.",
     "home.hero.cta": "ابدأ الآن مجاناً",
-
     "home.showcase.title": "شاهد التحول",
     "home.showcase.subtitle": "لاحظ كيف يقوم الذكاء الاصطناعي بتصحيح النصوص وتنظيفها وتشكيلها في الوقت الفعلي، محولاً المحتوى الخام إلى نصوص مصقولة وجاهزة للتسجيل.",
     "home.showcase.before": "قبل مسموع",
     "home.showcase.after": "بعد مسموع",
     "home.showcase.beforeText": "في يوم 10/3, ذهب احمد الي المكتبة. ووجد كتاب عن تاريخ الاندلس. كان الكتاب مثير جدا.",
     "home.showcase.afterText": "فِي يَوْمِ <ch>الْعَاشِرِ مِنْ مَارِسَ</ch>، <ch>ذَهَبَ أَحْمَدُ إِلَى الْمَكْتَبَةِ</ch>۔ <ch>وَوَجَدَ كِتَابًا</ch> عَنْ تَارِيخِ <ch>الْأَنْدَلُسِ</ch>۔ <ch>كَانَ الْكِتَابُ مُثِيرًا جِدًّا</ch>۔",
-
     "home.features.title": "منصة متكاملة",
     "home.features.subtitle": "كل ما تحتاجه لتحليل وإتقان نصوصك بكفاءة وفعالية.",
     "home.features.card1.title": "التشكيل التلقائي",
@@ -619,7 +628,6 @@ const arTranslations = {
     "home.features.card2.description": "من تصحيح الأخطاء الإملائية إلى إزالة الرموز وتحويل الأرقام إلى كلمات، نجهز نصك لتقديم احترافي.",
     "home.features.card3.title": "قاموس مخصص وذكاء اصطناعي",
     "home.features.card3.description": "خصص التحليل عبر بناء قاموسك الخاص لاستبدال الكلمات والاختيار من بين نماذج الذكاء الاصطناعي الرائدة.",
-    
     "home.howItWorks.title": "خطوات بسيطة لمحتوى متقن",
     "home.howItWorks.subtitle": "عمليتنا المبسطة تجعل إتقان النصوص أمراً سهلاً.",
     "home.howItWorks.step1.title": "أدخل النص",
@@ -628,30 +636,24 @@ const arTranslations = {
     "home.howItWorks.step2.description": "عمليتنا ثلاثية المراحل تصحح، وتُشكل، وتنقي النص باستخدام ذكاء اصطناعي متقدم وقواعدك المخصصة.",
     "home.howItWorks.step3.title": "صدّر واستخدم",
     "home.howItWorks.step3.description": "قم بتنزيل النص المتقن كملف .txt أو أرسله مباشرة إلى أداة تحويل النص إلى كلام لإنشاء الصوت.",
-    
     "home.testimonials.title": "موثوق به من قبل المبدعين",
     "home.testimonials.subtitle": "استمع لما يقوله صناع البودكاست والمعلمون والمبدعون عن 'مسموع'.",
     "home.testimonials.card1.quote": "لقد أحدث 'مسموع' ثورة في طريقة معالجتنا للمحتوى. الدقة لا تقدر بثمن، والواجهة سهلة الاستخدام بشكل لا يصدق.",
     "home.testimonials.card1.role": "محرر، المنشورات الرقمية",
     "home.testimonials.card2.quote": "القدرة على استخدام قاموس مخصص وتصحيح التشكيل في الوقت الفعلي منحتنا ميزة تنافسية كبيرة. موصى به بشدة!",
     "home.testimonials.card2.role": "استراتيجي محتوى، الحلول الإبداعية",
-
     "home.pricing.title": "اختر خطتك",
     "home.pricing.subtitle": "ابدأ بخطتنا المجانية السخية أو قم بالترقية لمزيد من القوة والميزات.",
     "home.pricing.cta": "سجل الآن",
-
     "home.cta.title": "هل أنت مستعد ليُسمع صوتك؟",
     "home.cta.subtitle": "انضم إلى آلاف المستخدمين الذين يستخدمون 'مسموع' بالفعل لتحقيق أهدافهم. سجل في دقائق.",
     "home.cta.button": "سجل الآن",
-
     "notFound.title": "الصفحة غير موجودة",
     "notFound.message": "عذراً، الصفحة التي تبحث عنها غير موجودة.",
     "notFound.goHome": "العودة للرئيسية",
-    
     "theme.light": "فاتح",
     "theme.dark": "داكن",
     "theme.system": "النظام",
-
     "profile.title": "ملفي الشخصي",
     "profile.subtitle": "إدارة معلوماتك الشخصية وكلمة المرور.",
     "profile.updateButton": "تحديث الملف الشخصي",
@@ -660,14 +662,12 @@ const arTranslations = {
     "profile.invalidPassword": "كلمة المرور الحالية التي أدخلتها غير صحيحة.",
     "profile.emailExists": "هذا البريد الإلكتروني مستخدم بالفعل من قبل حساب آخر.",
     "profile.userNotFound": "تعذر العثور على بيانات المستخدم.",
-
     "forgotPassword.title": "نسيت كلمة المرور",
     "forgotPassword.subtitle": "أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور الخاصة بك.",
     "forgotPassword.sendButton": "إرسال رابط إعادة التعيين",
     "forgotPassword.sending": "جارِ الإرسال...",
     "forgotPassword.emailSent": "إذا كان هناك حساب بهذا البريد الإلكتروني، فقد تم إرسال رابط إعادة تعيين كلمة المرور.",
     "forgotPassword.backToLogin": "العودة لتسجيل الدخول",
-
     "userManagement.table.name": "الاسم",
     "userManagement.table.email": "البريد الإلكتروني",
     "userManagement.table.role": "الصلاحية",
@@ -686,7 +686,6 @@ const arTranslations = {
     "userManagement.error.cannotDeleteSelf": "لا يمكنك حذف حسابك الخاص.",
     "userManagement.error.cannotChangeSelf": "لا يمكنك تغيير صلاحيتك الخاصة.",
     "auth.unauthorized": "غير مصرح لك بتنفيذ هذا الإجراء.",
-    
     "textCheck.title": "أداة تحليل النصوص",
     "textCheck.subtitle": "حسّن نصوصك عبر عملية من 3 خطوات مدعومة بالذكاء الاصطناعي.",
     "textCheck.step1.title": "1. التصحيح والتنظيف",
@@ -727,7 +726,6 @@ const arTranslations = {
     "textCheck.save.status.unsaved": "تغييرات غير محفوظة",
     "textCheck.save.status.error": "فشل الحفظ",
     "textCheck.processingChunk": "جارِ معالجة المقطع {{current}} من {{total}}...",
-
     "projects.title": "مستنداتي",
     "projects.subtitle": "إدارة مشاريع تحليل النصوص الخاصة بك.",
     "projects.new": "مستند جديد",
@@ -741,7 +739,6 @@ const arTranslations = {
     "projects.deleteConfirm": "هل أنت متأكد من أنك تريد حذف هذا المستند؟ لا يمكن التراجع عن هذا الإجراء.",
     "projects.deleteError": "فشل حذف المستند.",
     "projects.renameError": "فشل إعادة تسمية المستند.",
-
     "dictionary.title": "القاموس المخصص",
     "dictionary.subtitle": "إدارة الكلمات التي سيتم استبدالها تلقائياً في الخطوة الأخيرة من فحص النص.",
     "dictionary.add.title": "إضافة كلمة جديدة",
@@ -762,7 +759,6 @@ const arTranslations = {
     "dictionary.save": "حفظ",
     "dictionary.empty": "قاموسك فارغ. أضف كلمة للبدء.",
     "dictionary.error.alreadyExists": "هذه الكلمة موجودة بالفعل في قاموسك.",
-
     "settings.title": "الإعدادات",
     "settings.subtitle": "إدارة إعدادات التطبيق والإعدادات الإدارية.",
     "settings.save.button": "حفظ التغييرات",
@@ -821,9 +817,48 @@ const arTranslations = {
     "voiceManagement.delete": "حذف",
     "voiceManagement.deleteConfirm": "هل أنت متأكد أنك تريد حذف هذا الصوت؟",
     "voiceManagement.empty": "لم تتم إضافة أي أصوات مخصصة بعد.",
-
     "quickAccess.title": "اختصارات الوصول السريع",
-
+    "imageGenerator.title": "مولّد الصور بالذكاء الاصطناعي",
+    "imageGenerator.subtitle": "حوّل أفكارك إلى صور مذهلة.",
+    "imageGenerator.prompt": "الوصف",
+    "imageGenerator.promptPlaceholder": "مثال: قط يرتدي نظارة شمسية ويتزلج على لوح تزلج.",
+    "imageGenerator.imageInput.promptPlaceholderWithImage": "صف التغييرات التي تريدها، أو ما تريد إنشاؤه بناءً على الصورة.",
+    "imageGenerator.negativePrompt": "الوصف السلبي (اختياري)",
+    "imageGenerator.negativePromptPlaceholder": "مثال: ضبابي، جودة منخفضة، نص، علامة مائية",
+    "imageGenerator.settings": "الإعدادات",
+    "imageGenerator.generate": "توليد",
+    "imageGenerator.generating": "جارِ التوليد",
+    "imageGenerator.results.title": "النتائج",
+    "imageGenerator.results.placeholderTitle": "لنصنع شيئًا مذهلاً",
+    "imageGenerator.results.placeholderSubtitle": "ستظهر صورك المولّدة هنا.",
+    "imageGenerator.download": "تحميل",
+    "imageGenerator.error.noApiKey": "مفتاح Gemini API غير مهيأ. يرجى إضافته في الإعدادات.",
+    "imageGenerator.error.generic": "حدث خطأ أثناء توليد الصورة.",
+    "imageGenerator.styles.title": "أنماط محددة مسبقًا",
+    "imageGenerator.styles.cinematic": "سينمائي",
+    "imageGenerator.styles.photographic": "فوتوغرافي",
+    "imageGenerator.styles.anime": "أنمي",
+    "imageGenerator.styles.fantasy": "فن خيالي",
+    "imageGenerator.styles.cartoon": "كرتون",
+    "imageGenerator.styles.3d": "نموذج ثلاثي الأبعاد",
+    "imageGenerator.advancedSettings": "إعدادات متقدمة",
+    "imageGenerator.imageInput.title": "إدخال صورة (اختياري)",
+    "imageGenerator.imageInput.uploadTab": "رفع صورة",
+    "imageGenerator.imageInput.urlTab": "من رابط",
+    "imageGenerator.imageInput.uploadCta": "انقر للرفع أو قم بالسحب والإفلات",
+    "imageGenerator.imageInput.urlPlaceholder": "الصق رابط الصورة هنا...",
+    "imageGenerator.imageInput.loadImage": "تحميل الصورة",
+    "imageGenerator.imageInput.removeImage": "إزالة الصورة",
+    "imageGenerator.history.clear": "مسح السجل",
+    "imageGenerator.pin.title": "تثبيت للتطابق",
+    "imageGenerator.pinned.title": "الصورة المثبتة",
+    "imageGenerator.pinned.unpin": "إلغاء التثبيت",
+    "imageGenerator.pinned.promptPlaceholder": "صف مشهدًا جديدًا للشخصية المثبتة، مثال: 'على الشاطئ'، 'في مدينة سايبربانك'",
+    "imageGenerator.model.title": "نموذج الذكاء الاصطناعي",
+    "imageGenerator.model.gemini-flash-image": "Gemini Flash Image (للتعديل والتطابق)",
+    "imageGenerator.model.imagen-4": "Imagen 4 (لجودة عالية)",
+    "imageGenerator.model.note": "ملاحظة: يتم تعطيل إدخال الصورة والتثبيت عند استخدام Imagen 4.",
+    "imageGenerator.numberOfImages": "عدد الصور",
     "tts.title": "تحويل النص إلى صوت",
     "tts.subtitle": "حوّل نصوصك إلى صوت عالي الجودة، مقطعًا تلو الآخر.",
     "tts.configuration.title": "تهيئة",
@@ -926,19 +961,16 @@ const arTranslations = {
     "tts.general.log.logExported": "📁 تم تصدير السجل.",
     "tts.general.log.logCleared": "🗑️ تم مسح السجل.",
     "tts.general.log.textLoadedFromCheck": "✅ تم تحميل النص بنجاح من أداة فحص النص.",
-    
     "tts.enhance.enhancing": "جارِ التحسين...",
     "tts.enhance.success": "تم تحسين النص بنجاح.",
     "tts.enhance.error": "فشل تحسين النص.",
     "tts.enhance.log.start": "جارِ تحسين النص بالذكاء الاصطناعي...",
     "tts.enhance.log.success": "نجح تحسين النص.",
-
     "tts.addToDictionary.button": "إضافة إلى القاموس",
     "tts.addToDictionary.title": "إضافة كلمة إلى القاموس",
     "tts.addToDictionary.success": "تمت إضافة الكلمة إلى القاموس.",
     "tts.addToDictionary.error": "فشل في إضافة الكلمة.",
     "tts.addToDictionary.log": "تمت إضافة '{{original}}' -> '{{replacement}}' إلى القاموس.",
-
     "tts.settings.voice": "الصوت",
     "tts.settings.model": "موديل",
     "tts.settings.outputFormat": "تنسيق الإخراج",
@@ -974,7 +1006,6 @@ const arTranslations = {
     "tts.error.segmentEmpty": "لا يمكن إنشاء الصوت: المقطع المحسوب فارغ.",
     "tts.error.minCharsTailOverride": "تم تجاوز التحقق من الحد الأدنى للأحرف للمقطع الأخير.",
     "tts.ssmlGuideLink": "هل تحتاج إلى مزيد من التحكم؟ تحقق من دليل SSML الخاص بنا.",
-
     "planManagement.title": "إدارة خطط الاشتراك",
     "planManagement.subtitle": "إنشاء وتعديل وحذف خطط الاشتراك لمستخدميك.",
     "planManagement.addPlan": "إضافة خطة جديدة",
@@ -998,7 +1029,6 @@ const arTranslations = {
     "planManagement.success.delete": "تم حذف الخطة بنجاح.",
     "planManagement.error.fetch": "فشل في جلب الخطط.",
     "planManagement.error.mutate": "فشل في حفظ الخطة.",
-
     "subscriptionPage.title": "خطط الاشتراك",
     "subscriptionPage.subtitle": "اختر الخطة المناسبة لك.",
     "subscriptionPage.currentPlan": "الخطة الحالية",
@@ -1006,7 +1036,6 @@ const arTranslations = {
     "subscriptionPage.upgrade": "ترقية",
     "subscriptionPage.getStarted": "ابدأ الآن",
     "subscriptionPage.price.month": "/شهرياً",
-
     "checkoutPage.title": "أكمل عملية الشراء",
     "checkoutPage.orderSummary": "ملخص الطلب",
     "checkoutPage.plan": "الخطة",
@@ -1014,15 +1043,12 @@ const arTranslations = {
     "checkoutPage.payWithPayPal": "الدفع بواسطة PayPal",
     "checkoutPage.processing": "جارِ المعالجة...",
     "checkoutPage.error": "فشل في إنشاء طلب الدفع. يرجى المحاولة مرة أخرى.",
-
     "paymentSuccess.title": "تم الدفع بنجاح!",
     "paymentSuccess.message": "شكراً لشرائك. تم ترقية اشتراكك.",
     "paymentSuccess.backToDashboard": "العودة إلى لوحة التحكم",
-
     "paymentCancelled.title": "تم إلغاء الدفع",
     "paymentCancelled.message": "تم إلغاء عملية الدفع الخاصة بك. يمكنك المحاولة مرة أخرى من صفحة الاشتراكات.",
     "paymentCancelled.backToSubscription": "العودة إلى خطط الاشتراك",
-
     "ssmlGuide.title": "دليل SSML: التحكم الصوتي الاحترافي",
     "ssmlGuide.subtitle": "تعلم كيفية استخدام لغة توصيف تركيب الكلام (SSML) لضبط إخراج الصوت بدقة.",
     "ssmlGuide.whatIs.title": "ما هي SSML؟",
@@ -1046,52 +1072,61 @@ const arTranslations = {
     "ssmlGuide.prosody.description": "وسم <prosody> قوي جدًا. يتيح لك التحكم في 'rate' (السرعة)، 'pitch' (طبقة الصوت)، و 'volume' (مستوى الصوت) للكلام.",
     "ssmlGuide.prosody.plain": "يمكن قراءة هذه الجملة بطرق مختلفة.",
     "ssmlGuide.prosody.ssml": "<prosody rate=\"slow\" pitch=\"-10%\">يمكن قراءة هذه الجملة ببطء وبطبقة صوت منخفضة.</prosody> <prosody rate=\"120%\" volume=\"loud\">أو يمكن أن تكون سريعة وبصوت عالٍ!</prosody>"
-};
+}
+// --- Type Definitions ---
+type Language = 'en' | 'ar';
+
+type Translations = typeof enTranslations;
 
 interface I18nContextType {
-  language: 'en' | 'ar';
-  setLanguage: (lang: 'en' | 'ar') => void;
-  t: (key: string, replacements?: Record<string, string | number>) => string;
+  language: Language;
+  setLanguage: (language: Language) => void;
+  t: (key: keyof Translations, replacements?: Record<string, string | number>) => string;
 }
 
+// --- Context and Provider ---
 export const I18nContext = createContext<I18nContextType | null>(null);
 
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguageState] = useState<'en' | 'ar'>(() => {
+  const [language, setLanguageState] = useState<Language>(() => {
     const savedLang = localStorage.getItem('language');
     if (savedLang === 'en' || savedLang === 'ar') {
       return savedLang;
     }
-    return navigator.language.startsWith('ar') ? 'ar' : 'en';
+    // Default to browser language or 'en'
+    const browserLang = navigator.language.split('-')[0];
+    return browserLang === 'ar' ? 'ar' : 'en';
   });
 
+  const translations = useMemo(() => ({
+    en: enTranslations,
+    ar: arTranslations,
+  }), []);
+
   useEffect(() => {
+    localStorage.setItem('language', language);
     document.documentElement.lang = language;
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
-    localStorage.setItem('language', language);
   }, [language]);
 
-  const setLanguage = (lang: 'en' | 'ar') => {
+  const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);
-  };
+  }, []);
 
-  const translations = useMemo(() => (language === 'ar' ? arTranslations : enTranslations), [language]);
-
-  const t = useCallback((key: string, replacements?: Record<string, string | number>): string => {
-    let translation = (translations as any)[key] || key;
+  const t = useCallback((key: keyof Translations, replacements?: Record<string, string | number>): string => {
+    // FIX: Use direct key lookup for flat JSON structure. Fallback to English, then to the key itself.
+    let translation = translations[language][key] || translations['en'][key] || key;
+    
     if (replacements) {
       Object.keys(replacements).forEach(placeholder => {
-        translation = translation.replace(`{{${placeholder}}}`, String(replacements[placeholder]));
+        const regex = new RegExp(`{{${placeholder}}}`, 'g');
+        translation = translation.replace(regex, String(replacements[placeholder]));
       });
     }
     return translation;
-  }, [translations]);
-  
-  const value = useMemo(() => ({ language, setLanguage, t }), [language, t]);
+  }, [language, translations]);
 
-  return (
-    <I18nContext.Provider value={value}>
-      {children}
-    </I18nContext.Provider>
-  );
+  const value = useMemo(() => ({ language, setLanguage, t }), [language, setLanguage, t]);
+
+  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 };

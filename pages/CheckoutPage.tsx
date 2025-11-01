@@ -50,7 +50,13 @@ const CheckoutPage: React.FC = () => {
         setError('');
 
         try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                throw new Error("User not authenticated.");
+            }
+
             const { data, error: invokeError } = await supabase.functions.invoke('create-paypal-order', {
+                headers: { 'Authorization': `Bearer ${session.access_token}` },
                 body: { plan_id: planId },
             });
             

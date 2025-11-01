@@ -226,7 +226,15 @@ const PaymentGatewaySettings: React.FC = () => {
         setTestStatus({ testing: true, result: null });
         const { clientId, clientSecret } = settings.paymentGateways.paypal;
 
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            console.error("Not authenticated");
+            setTestStatus({ testing: false, result: 'error' });
+            return;
+        }
+
         const { data, error } = await supabase.functions.invoke('test-paypal-credentials', {
+            headers: { 'Authorization': `Bearer ${session.access_token}` },
             body: { client_id: clientId, client_secret: clientSecret },
         });
 

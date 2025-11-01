@@ -45,7 +45,11 @@ export const textToSpeechService = {
     }
 
     try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) throw new Error("User not authenticated for function call.");
+
         const { data, error } = await supabase.functions.invoke('validate-elevenlabs-key', {
+            headers: { 'Authorization': `Bearer ${session.access_token}` },
             body: { api_key: apiKey },
         });
 
@@ -69,7 +73,12 @@ export const textToSpeechService = {
    * to avoid exposing the API key on the client-side.
    */
   async getAvailableVoices(): Promise<ElevenLabsVoice[]> {
-    const { data, error } = await supabase.functions.invoke('get-elevenlabs-voices');
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error("User not authenticated for function call.");
+
+    const { data, error } = await supabase.functions.invoke('get-elevenlabs-voices', {
+      headers: { 'Authorization': `Bearer ${session.access_token}` },
+    });
     if (error) {
         console.error('Error fetching voices:', error);
         throw error;
@@ -84,7 +93,11 @@ export const textToSpeechService = {
    * Converts a text chunk to speech using a secure Supabase Edge Function.
    */
   async synthesizeSpeech(apiKey: string, text: string, voiceId: string, modelId: string, outputFormat: string, voiceSettings: TTSGenerationSettings): Promise<Blob> {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error("User not authenticated for function call.");
+
     const { data, error } = await supabase.functions.invoke('synthesize-elevenlabs-speech', {
+        headers: { 'Authorization': `Bearer ${session.access_token}` },
         body: { 
             api_key: apiKey, 
             text, 
