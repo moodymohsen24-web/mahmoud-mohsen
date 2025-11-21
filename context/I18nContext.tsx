@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect, useCallback, useMemo } from 'react';
 
 // --- Embedded Translations ---
@@ -20,6 +21,7 @@ const enTranslations = {
     "sidebar.textCheck": "Text Check",
     "sidebar.textToSpeech": "Text-to-Speech",
     "sidebar.imageGenerator": "Image Generator",
+    "sidebar.imageGallery": "Image Gallery",
     "sidebar.experimentalTts": "Experimental TTS",
     "sidebar.dictionary": "Dictionary",
     "sidebar.settings": "Settings",
@@ -299,6 +301,7 @@ const enTranslations = {
     "imageGenerator.download": "Download",
     "imageGenerator.error.noApiKey": "Gemini API key is not configured. Please add it in the settings.",
     "imageGenerator.error.generic": "An error occurred during image generation.",
+    "imageGenerator.error.bucketNotFound": "Storage setup needed. In your Supabase project: 1) Go to Storage. 2) Click 'New bucket'. 3) Name it 'generated_images'. 4) Enable 'Public bucket'. 5) Click 'Create bucket'.",
     "imageGenerator.styles.title": "Style Presets",
     "imageGenerator.styles.cinematic": "Cinematic",
     "imageGenerator.styles.photographic": "Photographic",
@@ -323,6 +326,18 @@ const enTranslations = {
     "imageGenerator.model.imagen-4": "Imagen 4 (for high quality)",
     "imageGenerator.model.note": "Note: Image Input and Pinning are disabled when using Imagen 4.",
     "imageGenerator.numberOfImages": "Number of Images",
+    "imageGallery.title": "Image Gallery",
+    "imageGallery.subtitle": "Browse all your previously generated images.",
+    "imageGallery.error.load": "Failed to load your image gallery.",
+    "imageGallery.empty.title": "Your gallery is empty",
+    "imageGallery.empty.subtitle": "Images you create with the AI Image Generator will appear here.",
+    "imageGallery.view": "View",
+    "imageGallery.copyPrompt": "Copy Prompt",
+    "imageGallery.modal.prompt": "Prompt",
+    "imageGallery.modal.model": "Model",
+    "imageGallery.modal.createdAt": "Created At",
+    "imageGallery.modal.copyPrompt": "Copy Prompt",
+    "imageGallery.modal.copySuccess": "Copied!",
     "tts.title": "Text-to-Speech Converter",
     "tts.subtitle": "Convert your text into high-quality audio, segment by segment.",
     "tts.configuration.title": "Configuration",
@@ -556,6 +571,7 @@ const arTranslations = {
     "sidebar.textCheck": "فحص النص",
     "sidebar.textToSpeech": "تحويل النص إلى صوت",
     "sidebar.imageGenerator": "مولّد الصور",
+    "sidebar.imageGallery": "معرض الصور",
     "sidebar.experimentalTts": "تجريبي تحويل النص الي صوت",
     "sidebar.dictionary": "القاموس",
     "sidebar.settings": "الإعدادات",
@@ -834,6 +850,7 @@ const arTranslations = {
     "imageGenerator.download": "تحميل",
     "imageGenerator.error.noApiKey": "مفتاح Gemini API غير مهيأ. يرجى إضافته في الإعدادات.",
     "imageGenerator.error.generic": "حدث خطأ أثناء توليد الصورة.",
+    "imageGenerator.error.bucketNotFound": "إعدادات التخزين مطلوبة. في مشروع Supabase الخاص بك: ١) اذهب إلى 'Storage'. ٢) انقر على 'New bucket'. ٣) قم بتسميته 'generated_images'. ٤) فعّل خيار 'Public bucket'. ٥) انقر على 'Create bucket'.",
     "imageGenerator.styles.title": "أنماط محددة مسبقًا",
     "imageGenerator.styles.cinematic": "سينمائي",
     "imageGenerator.styles.photographic": "فوتوغرافي",
@@ -859,6 +876,18 @@ const arTranslations = {
     "imageGenerator.model.imagen-4": "Imagen 4 (لجودة عالية)",
     "imageGenerator.model.note": "ملاحظة: يتم تعطيل إدخال الصورة والتثبيت عند استخدام Imagen 4.",
     "imageGenerator.numberOfImages": "عدد الصور",
+    "imageGallery.title": "معرض الصور",
+    "imageGallery.subtitle": "تصفح جميع الصور التي أنشأتها سابقًا.",
+    "imageGallery.error.load": "فشل تحميل معرض الصور الخاص بك.",
+    "imageGallery.empty.title": "معرضك فارغ",
+    "imageGallery.empty.subtitle": "الصور التي تنشئها باستخدام مولّد الصور ستظهر هنا.",
+    "imageGallery.view": "عرض",
+    "imageGallery.copyPrompt": "نسخ الوصف",
+    "imageGallery.modal.prompt": "الوصف",
+    "imageGallery.modal.model": "النموذج",
+    "imageGallery.modal.createdAt": "تاريخ الإنشاء",
+    "imageGallery.modal.copyPrompt": "نسخ الوصف",
+    "imageGallery.modal.copySuccess": "تم النسخ!",
     "tts.title": "تحويل النص إلى صوت",
     "tts.subtitle": "حوّل نصوصك إلى صوت عالي الجودة، مقطعًا تلو الآخر.",
     "tts.configuration.title": "تهيئة",
@@ -1072,7 +1101,7 @@ const arTranslations = {
     "ssmlGuide.prosody.description": "وسم <prosody> قوي جدًا. يتيح لك التحكم في 'rate' (السرعة)، 'pitch' (طبقة الصوت)، و 'volume' (مستوى الصوت) للكلام.",
     "ssmlGuide.prosody.plain": "يمكن قراءة هذه الجملة بطرق مختلفة.",
     "ssmlGuide.prosody.ssml": "<prosody rate=\"slow\" pitch=\"-10%\">يمكن قراءة هذه الجملة ببطء وبطبقة صوت منخفضة.</prosody> <prosody rate=\"120%\" volume=\"loud\">أو يمكن أن تكون سريعة وبصوت عالٍ!</prosody>"
-}
+};
 // --- Type Definitions ---
 type Language = 'en' | 'ar';
 

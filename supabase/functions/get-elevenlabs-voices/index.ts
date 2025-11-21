@@ -1,7 +1,5 @@
 
 // @ts-ignore
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-// @ts-ignore
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 // @ts-ignore
 import { corsHeaders } from "../_shared/cors.ts";
@@ -10,7 +8,7 @@ declare const Deno: any;
 
 const ELEVENLABS_API_BASE = 'https://api.elevenlabs.io/v1';
 
-serve(async (req: Request) => {
+Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }

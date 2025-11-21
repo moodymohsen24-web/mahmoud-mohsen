@@ -1,6 +1,6 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI, Modality } from '@google/genai';
-import { v4 as uuidv4 } from 'uuid';
 import { useI18n } from '../hooks/useI18n';
 import { useAuth } from '../hooks/useAuth';
 import { settingsService } from '../services/settingsService';
@@ -13,16 +13,15 @@ import { EyeIcon } from '../components/icons/EyeIcon';
 import { ChevronDownIcon } from '../components/icons/ChevronDownIcon';
 import { PinIcon } from '../components/icons/PinIcon';
 import GeneratingAnimation from '../components/GeneratingAnimation';
+import { imageHistoryService, type HistoryImageRecord } from '../services/imageHistoryService';
+import { ImageGalleryModal } from '../components/ImageGalleryModal';
+import { ClipboardDocumentIcon } from '../components/icons/ClipboardDocumentIcon';
+import { CheckIcon } from '../components/icons/CheckIcon';
 
 type ImageInput = {
     base64: string;
     mimeType: string;
     previewUrl: string;
-};
-
-type HistoryImage = {
-    id: string;
-    url: string; // data URL
 };
 
 const fileToBase64 = (file: File): Promise<{ base64: string; mimeType: string; previewUrl: string }> =>
@@ -53,16 +52,16 @@ const ImageGeneratorPage: React.FC = () => {
     const [imageInputMode, setImageInputMode] = useState<'upload' | 'url'>('upload');
     const [imageUrl, setImageUrl] = useState('');
 
-    const [imageHistory, setImageHistory] = useState<HistoryImage[]>([]);
-    const [pinnedImage, setPinnedImage] = useState<HistoryImage | null>(null);
+    const [imageHistory, setImageHistory] = useState<HistoryImageRecord[]>([]);
+    const [pinnedImage, setPinnedImage] = useState<HistoryImageRecord | null>(null);
     
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [settings, setSettings] = useState<Settings | null>(null);
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [modalState, setModalState] = useState<{ isOpen: boolean; index: number | null }>({ isOpen: false, index: null });
     const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+    const [copySuccessId, setCopySuccessId] = useState<string | null>(null);
 
     const [generationProgress, setGenerationProgress] = useState(0);
     const progressIntervalRef = useRef<number | null>(null);
@@ -70,49 +69,23 @@ const ImageGeneratorPage: React.FC = () => {
     const [selectedModel, setSelectedModel] = useState<'gemini-2.5-flash-image' | 'imagen-4.0-generate-001'>('gemini-2.5-flash-image');
     const [numberOfImages, setNumberOfImages] = useState(1);
     
-    const HISTORY_LIMIT = 20; // Keep the last 20 images to prevent storage issues
-    const HISTORY_STORAGE_KEY = `image-generator-history-${user?.id}`;
-    const PINNED_STORAGE_KEY = `image-generator-pinned-${user?.id}`;
+    const openModal = (imageIndex: number) => setModalState({ isOpen: true, index: imageIndex });
+    const closeModal = () => setModalState({ isOpen: false, index: null });
 
     useEffect(() => {
         if (user) {
-            try {
-                const savedHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
-                if (savedHistory) setImageHistory(JSON.parse(savedHistory));
-                const savedPinned = localStorage.getItem(PINNED_STORAGE_KEY);
-                if (savedPinned) setPinnedImage(JSON.parse(savedPinned));
-            } catch (e) {
-                console.error("Could not save image history. Storage might be full.", e);
-                localStorage.removeItem(HISTORY_STORAGE_KEY);
-                localStorage.removeItem(PINNED_STORAGE_KEY);
-            }
-        }
-    }, [user, HISTORY_STORAGE_KEY, PINNED_STORAGE_KEY]);
-
-    useEffect(() => {
-        if (user) {
-            try {
-                localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(imageHistory));
-            } catch (e) {
-                console.error("Could not save image history. Storage might be full.", e);
-                setError("Could not save image history. Storage might be full.");
-            }
-        }
-    }, [imageHistory, user, HISTORY_STORAGE_KEY]);
-
-    useEffect(() => {
-        if (user) {
-            try {
-                if (pinnedImage) {
-                    localStorage.setItem(PINNED_STORAGE_KEY, JSON.stringify(pinnedImage));
-                } else {
-                    localStorage.removeItem(PINNED_STORAGE_KEY);
+            const fetchHistory = async () => {
+                try {
+                    const history = await imageHistoryService.getHistory(user.id);
+                    setImageHistory(history);
+                } catch (e: any) {
+                    console.error("Failed to load image history:", e);
+                    setError(`Failed to load image history: ${e.message || 'An unknown error occurred.'}`);
                 }
-            } catch (e) {
-                console.error("Could not save pinned image. Storage might be full.", e);
-            }
+            };
+            fetchHistory();
         }
-    }, [pinnedImage, user, PINNED_STORAGE_KEY]);
+    }, [user]);
 
     useEffect(() => {
         // When switching to a model that doesn't support image inputs, clear them.
@@ -185,15 +158,32 @@ const ImageGeneratorPage: React.FC = () => {
         setImageUrl('');
     };
     
-    const handlePin = (image: HistoryImage) => {
+    const handlePin = (image: HistoryImageRecord) => {
         setPinnedImage(prev => prev?.id === image.id ? null : image);
     };
     
-    const handleClearHistory = () => {
-        if (window.confirm('Are you sure you want to clear the entire image history? This cannot be undone.')) {
-            setImageHistory([]);
-            setPinnedImage(null);
+    const handleClearHistory = async () => {
+        if (user && window.confirm('Are you sure you want to clear the entire image history? This cannot be undone.')) {
+             try {
+                await imageHistoryService.clearHistory(user.id);
+                setImageHistory([]);
+                setPinnedImage(null);
+            } catch (e: any) {
+                console.error("Failed to clear history:", e);
+                let message = e.message || "Failed to clear history.";
+                if (message.includes('Bucket not found')) {
+                    message = t('imageGenerator.error.bucketNotFound');
+                }
+                setError(message);
+            }
         }
+    };
+    
+    const handleCopyPrompt = (promptToCopy: string | null, imageId: string) => {
+        if (!promptToCopy) return;
+        navigator.clipboard.writeText(promptToCopy);
+        setCopySuccessId(imageId);
+        setTimeout(() => setCopySuccessId(null), 2000);
     };
 
     const handleGenerate = async () => {
@@ -225,11 +215,17 @@ const ImageGeneratorPage: React.FC = () => {
             
             const stylePrompt = Array.from(activeStyles).join(', ');
             let basePrompt = [prompt.trim(), stylePrompt].filter(Boolean).join(', ');
+            
+            // Logic to handle pinned image + empty prompt case
+            if (selectedModel === 'gemini-2.5-flash-image' && pinnedImage && !basePrompt) {
+                 basePrompt = "Redraw this character with slight variations, maintaining the same style.";
+            }
+
             const fullPrompt = negativePrompt.trim()
                 ? `${basePrompt}. Negative prompt: ${negativePrompt.trim()}`
                 : basePrompt;
 
-            const newImages: HistoryImage[] = [];
+            const newImagesDataUrls: string[] = [];
 
             if (selectedModel === 'imagen-4.0-generate-001') {
                  const response = await ai.models.generateImages({
@@ -247,25 +243,25 @@ const ImageGeneratorPage: React.FC = () => {
                 for (const generatedImage of response.generatedImages) {
                     const base64ImageBytes: string = generatedImage.image.imageBytes;
                     const imageUrl = `data:image/png;base64,${base64ImageBytes}`;
-                    newImages.push({ id: uuidv4(), url: imageUrl });
+                    newImagesDataUrls.push(imageUrl);
                 }
             } else { // gemini-2.5-flash-image
-                if (pinnedImage && !prompt.trim()) {
-                    basePrompt = "Redraw this character with slight variations, maintaining the same style.";
-                }
-
                 const parts = [];
                 if (pinnedImage) {
-                    const urlParts = pinnedImage.url.split(',');
-                    const dataPart = urlParts[1];
-                    const mimeType = urlParts[0].match(/:(.*?);/)?.[1] || 'image/png';
-                    // Robust check for valid data URL
-                    if (dataPart && mimeType.startsWith('image/')) {
-                         parts.push({ inlineData: { mimeType, data: dataPart } });
-                    } else {
-                        console.error("Pinned image data URL is invalid.", pinnedImage.url.substring(0, 100));
-                        throw new Error("The pinned image is corrupted and cannot be used. Please unpin it.");
-                    }
+                    const response = await fetch(pinnedImage.image_url);
+                    if (!response.ok) throw new Error(`Failed to fetch pinned image.`);
+                    const blob = await response.blob();
+                    
+                    const dataUrl = await new Promise<string>((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result as string);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(blob);
+                    });
+                    
+                    const mimeType = blob.type;
+                    const base64Data = dataUrl.split(',')[1];
+                    parts.push({ inlineData: { mimeType, data: base64Data } });
                 }
                 if (imageInput) {
                     parts.push({ inlineData: { mimeType: imageInput.mimeType, data: imageInput.base64 } });
@@ -283,23 +279,47 @@ const ImageGeneratorPage: React.FC = () => {
                     config: { responseModalities: [Modality.IMAGE] },
                 });
                 
+                if (response.promptFeedback?.blockReason) {
+                    let reason = `Generation blocked due to ${response.promptFeedback.blockReason}.`;
+                    if (response.promptFeedback.blockReasonMessage) {
+                        reason += ` Message: ${response.promptFeedback.blockReasonMessage}`;
+                    }
+                    throw new Error(reason);
+                }
+
                 for (const part of response.candidates?.[0]?.content?.parts || []) {
                     if (part.inlineData) {
                         const base64ImageBytes: string = part.inlineData.data;
                         const imageUrl = `data:image/png;base64,${base64ImageBytes}`;
-                        newImages.push({ id: uuidv4(), url: imageUrl });
+                        newImagesDataUrls.push(imageUrl);
                     }
                 }
             }
 
-            if (newImages.length === 0) {
+            if (newImagesDataUrls.length === 0) {
                 throw new Error("The model did not return an image. Please try adjusting your prompt.");
             }
-            setImageHistory(prev => [...newImages, ...prev].slice(0, HISTORY_LIMIT));
 
-        } catch (err) {
+            if (user) {
+                const savedImageRecordsPromises = newImagesDataUrls.map(dataUrl => 
+                    imageHistoryService.saveImage(
+                        user.id,
+                        dataUrl,
+                        fullPrompt,
+                        negativePrompt,
+                        selectedModel
+                    )
+                );
+                const newRecords = await Promise.all(savedImageRecordsPromises);
+                setImageHistory(prev => [...newRecords, ...prev]);
+            }
+
+        } catch (err: any) {
             console.error("Image generation failed:", err);
-            const message = err instanceof Error ? err.message : t('imageGenerator.error.generic');
+            let message = err.message || t('imageGenerator.error.generic');
+            if (message.includes('Bucket not found')) {
+                message = t('imageGenerator.error.bucketNotFound');
+            }
             setError(message);
         } finally {
             if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
@@ -310,9 +330,6 @@ const ImageGeneratorPage: React.FC = () => {
             }, 500);
         }
     };
-    
-    const openModal = (imageUrl: string) => { setSelectedImage(imageUrl); setIsModalOpen(true); };
-    const closeModal = () => { setIsModalOpen(false); setSelectedImage(null); };
 
     const promptPlaceholder = pinnedImage
         ? t('imageGenerator.pinned.promptPlaceholder')
@@ -322,20 +339,17 @@ const ImageGeneratorPage: React.FC = () => {
 
     return (
         <div className="container mx-auto space-y-8">
-             <style>{`
+            <style>{`
                 details > summary { list-style: none; }
                 details > summary::-webkit-details-marker { display: none; }
                 details[open] > summary svg { transform: rotate(180deg); }
             `}</style>
-            {isModalOpen && selectedImage && (
-                <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 animate-fade-in" onClick={closeModal}>
-                    <div className="relative" onClick={e => e.stopPropagation()}>
-                        <img src={selectedImage} alt="Generated image preview" className="max-w-[90vw] max-h-[90vh] rounded-lg shadow-2xl" />
-                        <button onClick={closeModal} className="absolute -top-4 -right-4 bg-white text-black rounded-full p-1 hover:scale-110 transition-transform">
-                            <XMarkIcon className="w-6 h-6" />
-                        </button>
-                    </div>
-                </div>
+            {modalState.isOpen && modalState.index !== null && (
+                <ImageGalleryModal
+                    images={imageHistory}
+                    initialIndex={modalState.index}
+                    onClose={closeModal}
+                />
             )}
             <div className="animate-fade-in-down">
                 <h1 className="text-3xl font-bold text-text-primary dark:text-dark-text-primary mb-2">{t('imageGenerator.title')}</h1>
@@ -369,7 +383,7 @@ const ImageGeneratorPage: React.FC = () => {
                                     <div>
                                         <h3 className="text-lg font-bold text-text-primary dark:text-dark-text-primary mb-3">{t('imageGenerator.pinned.title')}</h3>
                                         <div className="relative w-32 h-32 rounded-lg overflow-hidden group">
-                                            <img src={pinnedImage.url} alt="Pinned image preview" className="w-full h-full object-cover" />
+                                            <img src={pinnedImage.image_url} alt="Pinned image preview" className="w-full h-full object-cover" />
                                             <button onClick={() => setPinnedImage(null)} className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity" title={t('imageGenerator.pinned.unpin')}>
                                                 <XMarkIcon className="w-4 h-4"/>
                                             </button>
@@ -472,20 +486,20 @@ const ImageGeneratorPage: React.FC = () => {
                 <Card title={t('imageGenerator.results.title')} headerActions={imageHistory.length > 0 && <button onClick={handleClearHistory} className="text-sm font-medium text-red-500 hover:bg-red-500/10 px-3 py-1.5 rounded-md transition-colors">{t('imageGenerator.history.clear')}</button>} className="min-h-[500px] flex flex-col">
                     {error && <p className="text-center text-red-500 bg-red-500/10 p-4 rounded-lg">{error}</p>}
                     
-                    {isLoading ? (
-                         <GeneratingAnimation progress={generationProgress} />
-                    ) : imageHistory.length > 0 ? (
-                        <div className={`grid ${imageHistory.length > 2 ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2'} gap-4`}>
-                            {imageHistory.map((image) => (
+                    {isLoading && <GeneratingAnimation progress={generationProgress} />}
+                    
+                    {imageHistory.length > 0 ? (
+                        <div className={`grid ${imageHistory.length > 2 ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2'} gap-4 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
+                            {imageHistory.map((image, index) => (
                                 <div key={image.id} className="relative group rounded-lg overflow-hidden aspect-square">
-                                    <img src={image.url} alt={`Generated image ${image.id}`} className="w-full h-full object-cover"/>
-                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                                        <button onClick={() => openModal(image.url)} className="bg-white/20 text-white p-3 rounded-full hover:bg-white/30 backdrop-blur-sm" title="Preview">
+                                    <img src={image.image_url} alt={image.prompt || `Generated image ${image.id}`} className="w-full h-full object-cover"/>
+                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 sm:gap-4">
+                                        <button onClick={() => openModal(index)} className="bg-white/20 text-white p-3 rounded-full hover:bg-white/30 backdrop-blur-sm" title={t('imageGallery.view')}>
                                             <EyeIcon className="w-6 h-6" />
                                         </button>
-                                        <a href={image.url} download={`masmoo-image-${image.id}.png`} className="bg-white/20 text-white p-3 rounded-full hover:bg-white/30 backdrop-blur-sm" title={t('imageGenerator.download')}>
-                                            <ArrowDownTrayIcon className="w-6 h-6" />
-                                        </a>
+                                        <button onClick={() => handleCopyPrompt(image.prompt, image.id)} className="bg-white/20 text-white p-3 rounded-full hover:bg-white/30 backdrop-blur-sm" title={t('imageGallery.copyPrompt')}>
+                                            {copySuccessId === image.id ? <CheckIcon className="w-6 h-6"/> : <ClipboardDocumentIcon className="w-6 h-6" />}
+                                        </button>
                                         {selectedModel === 'gemini-2.5-flash-image' && (
                                             <button onClick={() => handlePin(image)} className={`p-3 rounded-full backdrop-blur-sm transition-colors ${pinnedImage?.id === image.id ? 'bg-highlight/80 text-white' : 'bg-white/20 text-white hover:bg-white/30'}`} title={t('imageGenerator.pin.title')}>
                                                 <PinIcon className="w-6 h-6" filled={pinnedImage?.id === image.id} />
@@ -495,24 +509,17 @@ const ImageGeneratorPage: React.FC = () => {
                                 </div>
                             ))}
                         </div>
-                    ) : (
+                    ) : !isLoading ? (
                         <div className="flex flex-col items-center justify-center text-center flex-grow text-text-secondary dark:text-dark-text-secondary">
                             <PhotoIcon className="w-24 h-24 opacity-20 mb-4"/>
                             <h3 className="text-xl font-bold text-text-primary dark:text-dark-text-primary">{t('imageGenerator.results.placeholderTitle')}</h3>
                             <p>{t('imageGenerator.results.placeholderSubtitle')}</p>
                         </div>
-                    )}
+                    ) : null}
                 </Card>
             </div>
         </div>
     );
 };
-
-const EyeIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-    </svg>
-);
 
 export default ImageGeneratorPage;

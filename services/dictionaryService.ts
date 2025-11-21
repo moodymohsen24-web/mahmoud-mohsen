@@ -1,4 +1,3 @@
-
 import { supabase } from '../supabaseClient';
 type Dictionary = Record<string, string>;
 
@@ -11,6 +10,9 @@ export const dictionaryService = {
 
     if (error) {
       console.error('Error fetching dictionary:', error);
+      if (error.message.includes('violates row-level security policy')) {
+          throw new Error("Security policy error: Permission denied to view the dictionary.");
+      }
       return {};
     }
     
@@ -25,7 +27,12 @@ export const dictionaryService = {
       .from('dictionaries')
       .upsert({ user_id: userId, original_word: originalWord, replacement_word: replacementWord } as any, { onConflict: 'user_id, original_word' });
 
-    if (error) throw error;
+    if (error) {
+        if (error.message.includes('violates row-level security policy')) {
+            throw new Error("Security policy error: Permission denied to add a word to the dictionary.");
+        }
+        throw error;
+    }
   },
 
   async bulkAddWords(userId: string, words: Dictionary): Promise<void> {
@@ -41,7 +48,12 @@ export const dictionaryService = {
       .from('dictionaries')
       .upsert(wordsToInsert as any, { onConflict: 'user_id, original_word' });
       
-    if (error) throw error;
+    if (error) {
+        if (error.message.includes('violates row-level security policy')) {
+            throw new Error("Security policy error: Permission denied to import words to the dictionary.");
+        }
+        throw error;
+    }
   },
 
   async deleteWord(userId: string, originalWord: string): Promise<void> {
@@ -50,6 +62,11 @@ export const dictionaryService = {
       .delete()
       .match({ user_id: userId, original_word: originalWord });
       
-    if (error) throw error;
+    if (error) {
+        if (error.message.includes('violates row-level security policy')) {
+            throw new Error("Security policy error: Permission denied to delete a word from the dictionary.");
+        }
+        throw error;
+    }
   },
 };

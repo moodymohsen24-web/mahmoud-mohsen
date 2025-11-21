@@ -53,12 +53,17 @@
             'fade-in-up': {
                 '0%': { opacity: '0', transform: 'translateY(10px)' },
                 '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            'wave-scale': {
+              '0%, 100%': { transform: 'scaleY(1)' },
+              '50%': { transform: 'scaleY(2.5)' },
             }
           },
           animation: {
             'fade-in': 'fade-in 0.5s ease-out',
             'fade-in-down': 'fade-in-down 0.5s ease-out',
             'fade-in-up': 'fade-in-up 0.5s ease-out',
+            'wave-scale': 'wave-scale 1.2s infinite ease-in-out',
           },
         },
       },

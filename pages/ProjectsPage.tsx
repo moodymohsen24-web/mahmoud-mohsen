@@ -27,7 +27,19 @@ const ProjectsPage: React.FC = () => {
         const userProjects = await projectService.getProjectsForUser(user.id);
         setProjects(userProjects);
       } catch (err: any) {
-        const message = err.message || 'An unexpected error occurred while fetching your documents.';
+        // Properly extract error message
+        let message = 'An unexpected error occurred while fetching your documents.';
+        if (typeof err === 'string') {
+            message = err;
+        } else if (err instanceof Error) {
+            message = err.message;
+        } else if (err && typeof err === 'object') {
+            message = JSON.stringify(err, null, 2);
+            // Clean up Supabase error objects which might be verbose
+            if (message.includes('relation "public.projects" does not exist')) {
+                message = "The database table 'projects' is missing. Please run the database migrations.";
+            }
+        }
         console.error("Failed to fetch projects:", err);
         setError(message);
       } finally {
@@ -84,13 +96,15 @@ const ProjectsPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="text-center py-20 bg-secondary dark:bg-dark-secondary rounded-lg">
+      <div className="text-center py-20 bg-secondary dark:bg-dark-secondary rounded-lg m-4 shadow-lg border border-red-100 dark:border-red-900/30">
         <XCircleIcon className="w-16 h-16 mx-auto text-red-500 mb-4" />
         <h2 className="text-xl font-semibold text-red-500">Error Loading Projects</h2>
-        <p className="text-text-secondary dark:text-dark-text-secondary mt-2 max-w-lg mx-auto">{error}</p>
+        <pre className="text-text-secondary dark:text-dark-text-secondary mt-4 max-w-lg mx-auto whitespace-pre-wrap text-sm bg-red-50 dark:bg-red-900/10 p-4 rounded text-left overflow-auto">
+            {error}
+        </pre>
         <button 
           onClick={fetchProjects} 
-          className="mt-6 bg-highlight text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors active:scale-95"
+          className="mt-6 bg-highlight text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors active:scale-95 shadow-md"
         >
           Retry
         </button>
@@ -105,21 +119,21 @@ const ProjectsPage: React.FC = () => {
           <h1 className="text-3xl font-bold text-text-primary dark:text-dark-text-primary mb-2">{t('projects.title')}</h1>
           <p className="text-text-secondary dark:text-dark-text-secondary">{t('projects.subtitle')}</p>
         </div>
-        <Link to="/text-check" className="bg-highlight text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors active:scale-95">
+        <Link to="/text-check" className="bg-highlight text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors active:scale-95 shadow-lg shadow-highlight/20">
           {t('projects.new')}
         </Link>
       </div>
 
       {projects.length === 0 ? (
-        <div className="text-center py-20 bg-secondary dark:bg-dark-secondary rounded-lg animate-fade-in-up">
+        <div className="text-center py-20 bg-secondary dark:bg-dark-secondary rounded-lg animate-fade-in-up shadow-lg border border-border dark:border-dark-border">
           <FolderIcon className="w-16 h-16 mx-auto text-text-secondary dark:text-dark-text-secondary opacity-50 mb-4" />
           <h2 className="text-xl font-semibold text-text-primary dark:text-dark-text-primary">{t('projects.empty.title')}</h2>
           <p className="text-text-secondary dark:text-dark-text-secondary mt-2">{t('projects.empty.description')}</p>
         </div>
       ) : (
-        <div className="overflow-x-auto bg-secondary dark:bg-dark-secondary rounded-lg shadow-lg">
+        <div className="overflow-x-auto bg-secondary dark:bg-dark-secondary rounded-lg shadow-lg border border-border dark:border-dark-border">
           <table className="min-w-full text-sm text-left">
-            <thead className="text-xs text-text-primary dark:text-dark-text-primary uppercase bg-accent dark:bg-dark-accent">
+            <thead className="text-xs text-text-primary dark:text-dark-text-primary uppercase bg-accent dark:bg-dark-accent border-b border-border dark:border-dark-border">
               <tr>
                 <th className="px-6 py-3">{t('projects.table.name')}</th>
                 <th className="px-6 py-3">{t('projects.table.lastModified')}</th>
@@ -130,7 +144,7 @@ const ProjectsPage: React.FC = () => {
               {projects.map((project, index) => (
                 <tr 
                   key={project.id} 
-                  className="border-b border-accent dark:border-dark-accent hover:bg-accent dark:hover:bg-dark-accent/50 animate-fade-in"
+                  className="border-b border-border dark:border-dark-border hover:bg-accent dark:hover:bg-dark-accent/50 animate-fade-in transition-colors"
                   style={{ animationDelay: `${index * 50}ms`, animationDuration: '300ms' }}
                 >
                   <td className="px-6 py-4 font-medium">
@@ -141,11 +155,12 @@ const ProjectsPage: React.FC = () => {
                             onChange={(e) => setRenameValue(e.target.value)}
                             onBlur={() => handleRename(project.id)}
                             onKeyDown={(e) => e.key === 'Enter' && handleRename(project.id)}
-                            className="bg-primary dark:bg-dark-primary p-1 rounded-md"
+                            className="bg-primary dark:bg-dark-primary p-2 rounded-md border border-highlight w-full focus:outline-none focus:ring-2 focus:ring-highlight"
                             autoFocus
                         />
                     ) : (
-                        <Link to={`/text-check/${project.id}`} className="hover:underline text-highlight">
+                        <Link to={`/text-check/${project.id}`} className="hover:underline text-highlight font-semibold flex items-center gap-2">
+                            <FolderIcon className="w-5 h-5 inline-block opacity-70" />
                             {project.name}
                         </Link>
                     )}

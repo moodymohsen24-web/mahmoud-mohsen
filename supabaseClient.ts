@@ -4,6 +4,34 @@ import type { UserRole, Settings, SubscriptionPlan, AnalysisResponse } from './t
 export interface Database {
   public: {
     Tables: {
+      generated_images: {
+        Row: {
+          id: string;
+          user_id: string;
+          image_url: string;
+          prompt: string | null;
+          negative_prompt: string | null;
+          model_used: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          image_url: string;
+          prompt?: string | null;
+          negative_prompt?: string | null;
+          model_used?: string | null;
+        };
+        Update: {};
+        Relationships: [
+          {
+            foreignKeyName: "generated_images_user_id_fkey",
+            columns: ["user_id"],
+            referencedRelation: "users",
+            referencedColumns: ["id"]
+          }
+        ]
+      };
       projects: {
         Row: {
           id: string;

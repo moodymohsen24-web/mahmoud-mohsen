@@ -1,5 +1,3 @@
-
-
 import { supabase } from '../supabaseClient';
 import type { Settings, FooterContent } from '../types';
 import { v4 as uuidv4 } from 'uuid';
@@ -141,7 +139,12 @@ export const settingsService = {
         .select()
         .single();
     
-    if (error) throw error;
+    if (error) {
+      if (error.message.includes('violates row-level security policy')) {
+        throw new Error("Security policy error: You do not have permission to save settings.");
+      }
+      throw error;
+    }
     
     // Invalidate public cache if admin saves settings
     const { data: userProfile } = await supabase.from('profiles').select('role').eq('id', userId).single();

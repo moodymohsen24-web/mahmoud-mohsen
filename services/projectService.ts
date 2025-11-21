@@ -20,6 +20,9 @@ export const projectService = {
 
     if (error) {
       console.error('Error fetching projects:', error.message);
+      if (error.message.includes('violates row-level security policy')) {
+        throw new Error("Security policy error: You do not have permission to view projects.");
+      }
       throw error;
     }
     return data as Project[];
@@ -36,6 +39,9 @@ export const projectService = {
       console.error('Error fetching project:', error);
       // It's okay if a single record is not found, so don't throw for 'PGRST116'
       if (error.code === 'PGRST116') return null;
+       if (error.message.includes('violates row-level security policy')) {
+        throw new Error("Security policy error: You do not have permission to view this project.");
+      }
       throw error;
     }
     return data as Project;
@@ -62,6 +68,9 @@ export const projectService = {
 
         if (error) {
             console.error("Error creating project:", error);
+            if (error.message.includes('violates row-level security policy')) {
+                throw new Error("Security policy error: Permission denied to create a new document.");
+            }
             throw error;
         }
         return data as Project;
@@ -77,6 +86,9 @@ export const projectService = {
 
     if (error) {
       console.error('Error updating project:', error);
+       if (error.message.includes('violates row-level security policy')) {
+        throw new Error("Security policy error: Permission denied to update this document.");
+      }
       throw error;
     }
     return data as Project;
@@ -90,6 +102,9 @@ export const projectService = {
 
     if (error) {
       console.error('Error deleting project:', error);
+      if (error.message.includes('violates row-level security policy')) {
+        throw new Error("Security policy error: Permission denied to delete this document.");
+      }
       throw error;
     }
   }

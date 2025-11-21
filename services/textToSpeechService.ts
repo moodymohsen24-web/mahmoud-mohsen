@@ -18,6 +18,7 @@ export interface KeyValidationResult {
     message?: string;
 }
 
+const ELEVENLABS_API_BASE = 'https://api.elevenlabs.io/v1';
 
 export const textToSpeechService = {
   
@@ -44,88 +45,164 @@ export const textToSpeechService = {
         return { success: false, status: 'invalid', message: 'API key is missing.' };
     }
 
+    // 1. Try Supabase Edge Function first (Secure Proxy)
     try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session) throw new Error("User not authenticated for function call.");
+        // If no session, skip directly to fallback to allow non-logged in testing if needed, or just fail.
+        if (session) {
+            const { data, error } = await supabase.functions.invoke('validate-elevenlabs-key', {
+                headers: { 'Authorization': `Bearer ${session.access_token}` },
+                body: { api_key: apiKey },
+            });
 
-        const { data, error } = await supabase.functions.invoke('validate-elevenlabs-key', {
-            headers: { 'Authorization': `Bearer ${session.access_token}` },
-            body: { api_key: apiKey },
+            if (!error) {
+                return data as KeyValidationResult;
+            }
+            console.warn("Edge Function validation failed, falling back to direct API:", error);
+        }
+    } catch (error) {
+        console.warn("Edge Function validation crashed, falling back to direct API:", error);
+    }
+
+    // 2. Fallback: Direct Client-Side Call
+    try {
+        const response = await fetch(`${ELEVENLABS_API_BASE}/user`, {
+            method: 'GET',
+            headers: { 'xi-api-key': apiKey }
         });
 
-        if (error) {
-            // This error is for failures in invoking the function itself (e.g., network, function not found)
-            throw new Error(`Failed to invoke validation function: ${error.message}`);
+        if (response.status === 401) {
+            const data = await response.json();
+            return { success: false, status: 'invalid', message: data.detail?.message || "Invalid API Key." };
         }
 
-        // The edge function is designed to always return a JSON object with the validation result.
-        // We can directly return this data, as its structure matches KeyValidationResult.
-        return data as KeyValidationResult;
+        if (!response.ok) {
+            const data = await response.json();
+            return { success: false, status: 'error', message: data.detail?.message || `API Error ${response.status}` };
+        }
+
+        const data = await response.json();
+        const sub = data?.subscription;
+        
+        if (sub && typeof sub.character_limit === 'number' && typeof sub.character_count === 'number') {
+            const balance = {
+                character_count: sub.character_count,
+                character_limit: sub.character_limit,
+            };
+            const isDepleted = balance.character_count >= balance.character_limit;
+            return { success: true, status: isDepleted ? 'depleted' : 'active', data: balance };
+        }
+
+        return { success: true, status: 'active', data: null };
 
     } catch (error: any) {
-        console.error("Critical error in validateKey:", error);
-        return { success: false, status: 'error', message: error.message || 'An unexpected error occurred.' };
+        console.error("Client-side validation failed:", error);
+        return { success: false, status: 'error', message: error.message || 'Network error during validation.' };
     }
   },
 
   /**
-   * Fetches available voices for the ElevenLabs API via a secure Supabase Edge Function
-   * to avoid exposing the API key on the client-side.
+   * Fetches available voices for the ElevenLabs API.
    */
   async getAvailableVoices(): Promise<ElevenLabsVoice[]> {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error("User not authenticated for function call.");
+    // 1. Try Edge Function
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+            const { data, error } = await supabase.functions.invoke('get-elevenlabs-voices', {
+                headers: { 'Authorization': `Bearer ${session.access_token}` },
+            });
+            if (!error && data?.voices) {
+                return data.voices;
+            }
+        }
+    } catch (e) {
+        console.warn("Edge Function voices fetch failed:", e);
+    }
 
-    const { data, error } = await supabase.functions.invoke('get-elevenlabs-voices', {
-      headers: { 'Authorization': `Bearer ${session.access_token}` },
-    });
-    if (error) {
-        console.error('Error fetching voices:', error);
-        throw error;
-    }
-    if (!data || !data.voices) {
-        throw new Error('Invalid response from voice fetch function.');
-    }
-    return data.voices;
+    // Note: We can't easily fallback for voices without an API key provided by the caller.
+    // The edge function uses the admin's key. If the user has provided their own key in UI, 
+    // we could use that, but this method signature doesn't take a key.
+    // For now, we just throw if the edge function fails.
+    throw new Error("Failed to fetch voices from server.");
   },
   
   /**
-   * Converts a text chunk to speech using a secure Supabase Edge Function.
+   * Converts a text chunk to speech. Tries Edge Function first, then direct API.
    */
   async synthesizeSpeech(apiKey: string, text: string, voiceId: string, modelId: string, outputFormat: string, voiceSettings: TTSGenerationSettings): Promise<Blob> {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error("User not authenticated for function call.");
+    
+    // 1. Try Edge Function
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+            const { data, error } = await supabase.functions.invoke('synthesize-elevenlabs-speech', {
+                headers: { 'Authorization': `Bearer ${session.access_token}` },
+                body: { 
+                    api_key: apiKey, 
+                    text, 
+                    voice_id: voiceId,
+                    model_id: modelId,
+                    output_format: outputFormat,
+                    voice_settings: voiceSettings,
+                }
+            });
 
-    const { data, error } = await supabase.functions.invoke('synthesize-elevenlabs-speech', {
-        headers: { 'Authorization': `Bearer ${session.access_token}` },
-        body: { 
-            api_key: apiKey, 
-            text, 
-            voice_id: voiceId,
-            model_id: modelId,
-            output_format: outputFormat,
-            voice_settings: voiceSettings,
-        }
-    });
-
-    if (error) {
-        // @ts-ignore
-        if (error.context && typeof error.context.json === 'function') {
+            if (!error && data instanceof Blob) {
+                return data;
+            }
+            // Specific handling for quota errors passed from EF
             // @ts-ignore
-            const errorJson = await error.context.json();
-            if (errorJson.detail?.status === 'quota_exceeded') {
+            if (error && error.context && typeof error.context.json === 'function') {
+                 // @ts-ignore
+                 const errorJson = await error.context.json();
+                 if (errorJson.detail?.status === 'quota_exceeded') throw new Error('quota');
+            }
+            console.warn("Edge Function synthesis failed, falling back to direct API.");
+        }
+    } catch (error: any) {
+        if (error.message === 'quota') throw error; // Rethrow quota errors immediately
+        console.warn("Edge Function synthesis crashed:", error);
+    }
+
+    // 2. Fallback: Direct Client-Side Call
+    try {
+        const url = `${ELEVENLABS_API_BASE}/text-to-speech/${voiceId}${outputFormat ? `?output_format=${outputFormat}` : ''}`;
+        const finalVoiceSettings = {
+            stability: voiceSettings?.stability ?? 0.5,
+            similarity_boost: voiceSettings?.similarity_boost ?? 0.75,
+            style: voiceSettings?.style ?? 0.0,
+            use_speaker_boost: voiceSettings?.use_speaker_boost ?? true,
+        };
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'xi-api-key': apiKey,
+                'Accept': 'audio/mpeg',
+            },
+            body: JSON.stringify({
+                text: text,
+                model_id: modelId || 'eleven_multilingual_v2',
+                voice_settings: finalVoiceSettings,
+            }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            if (errorData.detail?.status === 'quota_exceeded') {
                 throw new Error('quota');
             }
-            throw new Error(errorJson.detail?.message || errorJson.error || 'Synthesis failed');
+            throw new Error(errorData.detail?.message || `API request failed with status ${response.status}`);
         }
+
+        return await response.blob();
+
+    } catch (error) {
+        console.error("Client-side synthesis failed:", error);
         throw error;
     }
-
-    if (!(data instanceof Blob)) {
-        throw new Error('Unexpected response format from synthesis function.');
-    }
-    
-    return data;
   },
 
   /**
@@ -144,7 +221,6 @@ export const textToSpeechService = {
 
       if (error) {
           console.error('Failed to log TTS usage:', error);
-          // This is a non-critical background task, so we don't throw to the user.
       }
   }
 };

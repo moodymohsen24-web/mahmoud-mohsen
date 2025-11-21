@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { useI18n } from '../hooks/useI18n';
@@ -5,6 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import { settingsService } from '../services/settingsService';
 import { textAnalysisService } from '../services/textAnalysisService';
 import { dictionaryService } from '../services/dictionaryService';
+import { textToSpeechService } from '../services/textToSpeechService';
 import type { Settings } from '../types';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
@@ -342,23 +344,27 @@ const TextToSpeechPage: React.FC = () => {
 
   const checkBalanceForKey = async (apiKey: string, silent = false) => {
     try {
-      const response = await fetch('https://api.elevenlabs.io/v1/user', { headers: { 'xi-api-key': apiKey, 'Content-Type': 'application/json' } });
-      if (response.ok) {
-        const data = await response.json();
-        const balance = (data.subscription?.character_limit || 0) - (data.subscription?.character_count || 0);
+      // Use the service to validate key via Edge Function (avoids CORS and exposes less logic)
+      const result = await textToSpeechService.validateKey(apiKey);
+      
+      if (result.success && result.data) {
+        const balance = result.data.character_limit - result.data.character_count;
         setApiKeyBalance(prev => ({ ...prev, [apiKey]: balance }));
-        setApiKeyStatus(prev => ({ ...prev, [apiKey]: balance > 0 ? t('tts.apiKeyManagement.status.active') : t('tts.apiKeyManagement.status.inactive') }));
+        setApiKeyStatus(prev => ({ ...prev, [apiKey]: result.status === 'active' ? t('tts.apiKeyManagement.status.active') : t('tts.apiKeyManagement.status.inactive') }));
         if (!silent) log(t('tts.apiKeyManagement.log.validKey', { key: apiKey.substring(0, 4), balance: balance.toLocaleString() }), 'success');
       } else {
-        const errorMsg = analyzeApiError(response, apiKey);
+        const errorMsg = result.message || 'Unknown validation error';
         if (!silent) log(t('tts.apiKeyManagement.log.balanceCheckFailed', { error: errorMsg }), 'error');
         setApiKeyStatus(prev => ({ ...prev, [apiKey]: t('tts.apiKeyManagement.status.error') }));
-        if(response.status === 401) {
+        if(result.status === 'invalid') {
              setApiKeyBalance(prev => ({ ...prev, [apiKey]: 0 }));
              setApiKeyStatus(prev => ({ ...prev, [apiKey]: t('tts.apiKeyManagement.status.inactive') }));
         }
       }
-    } catch (error) { if (!silent) log(t('tts.apiKeyManagement.log.balanceCheckFailed', { error }), 'error'); setApiKeyStatus(prev => ({ ...prev, [apiKey]: t('tts.apiKeyManagement.status.error') })); }
+    } catch (error) { 
+        if (!silent) log(t('tts.apiKeyManagement.log.balanceCheckFailed', { error }), 'error'); 
+        setApiKeyStatus(prev => ({ ...prev, [apiKey]: t('tts.apiKeyManagement.status.error') })); 
+    }
   };
   
   const checkBalances = async (keys: string[], silent = false) => {
@@ -368,20 +374,10 @@ const TextToSpeechPage: React.FC = () => {
     if (!silent) log(t('tts.apiKeyManagement.log.checkingBalances'), 'info');
     for (const key of keys) {
       await checkBalanceForKey(key, silent);
-      await new Promise(resolve => setTimeout(resolve, 1100));
+      await new Promise(resolve => setTimeout(resolve, 500)); // Reduced delay since edge function is faster
     }
     setIsCheckingBalances(false);
   };
-
-  const analyzeApiError = (response: Response, apiKey: string): string => {
-      const keyInfo = `Key: ${apiKey.substring(0, 4)}...`;
-      switch (response.status) {
-        case 401: return `Invalid API key. ${keyInfo}`;
-        case 429: return `Rate limit exceeded. ${keyInfo}`;
-        case 400: return `Invalid request data. ${keyInfo}`;
-        default: return `API Error (${response.status}) - ${keyInfo}`;
-      }
-    };
 
   const loadKeysFromFile = (file: File) => {
     const reader = new FileReader();
@@ -493,33 +489,52 @@ const TextToSpeechPage: React.FC = () => {
         if (!runningRef.current && !voiceIdOverride) return { success: false };
         try {
             if (!voiceIdOverride) log(t('tts.general.log.tryingKey', { key: key.substring(0, 4), balance: (apiKeyBalance[key] || 0).toLocaleString() }), 'info');
-            const requestBody: any = { text, model_id: uiSettings.modelId, };
-            if (uiSettings.modelId === 'eleven_multilingual_v2') { requestBody.voice_settings = { stability: uiSettings.stability, similarity_boost: uiSettings.similarityBoost }; }
-            if (uiSettings.modelId === 'eleven_multilingual_v3') { requestBody.speed = uiSettings.speed; }
-
-            const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceIdOverride || uiSettings.voiceId}`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json', 'xi-api-key': key, 'Accept': 'audio/mpeg' },
-                body: JSON.stringify(requestBody)
-            });
             
-            if (response.ok) {
-                const audioBlob = await response.blob();
-                const audioUrl = URL.createObjectURL(audioBlob);
-                if (!voiceIdOverride) {
-                  const newBalance = Math.max(0, (apiKeyBalance[key] || 0) - text.length);
-                  setApiKeyBalance(prev => ({ ...prev, [key]: newBalance }));
-                  if(newBalance <= 0) setApiKeyStatus(prev => ({ ...prev, [key]: t('tts.apiKeyManagement.status.inactive') }));
-                }
-                return { success: true, audioUrl, audioBlob };
-            } else {
-                const errorMessage = analyzeApiError(response, key);
-                if (!voiceIdOverride) log(t('tts.general.log.apiFail', { error: errorMessage }), 'error');
-                if (response.status === 401) {
-                    setInvalidKeys(prev => new Set(prev).add(key));
-                    if (!voiceIdOverride) log(t('tts.general.log.keyMarkedInvalid', { key: key.substring(0, 4) }), 'warning');
+            const voiceSettings = {
+                stability: uiSettings.stability,
+                similarity_boost: uiSettings.similarityBoost,
+                style: 0.0,
+                use_speaker_boost: true
+            };
+
+            // Use the service which calls the Edge Function (secure proxy)
+            const audioBlob = await textToSpeechService.synthesizeSpeech(
+                key,
+                text,
+                voiceIdOverride || uiSettings.voiceId,
+                uiSettings.modelId,
+                'mp3_44100_128', // Default standard format
+                voiceSettings
+            );
+            
+            const audioUrl = URL.createObjectURL(audioBlob);
+            
+            if (!voiceIdOverride) {
+                const newBalance = Math.max(0, (apiKeyBalance[key] || 0) - text.length);
+                setApiKeyBalance(prev => ({ ...prev, [key]: newBalance }));
+                if(newBalance <= 0) setApiKeyStatus(prev => ({ ...prev, [key]: t('tts.apiKeyManagement.status.inactive') }));
+                
+                // Log usage to DB if possible (fire and forget)
+                if (user) {
+                    textToSpeechService.logUsage({
+                        api_key_used_suffix: key.substring(key.length - 4),
+                        characters_converted: text.length,
+                        voice_id_used: voiceIdOverride || uiSettings.voiceId,
+                        model_id_used: uiSettings.modelId
+                    }, user.id);
                 }
             }
-        } catch (error) { if (!voiceIdOverride) log(t('tts.general.log.networkError', { error }), 'error'); }
+            return { success: true, audioUrl, audioBlob };
+
+        } catch (error: any) { 
+            const errorMessage = error.message || String(error);
+            if (!voiceIdOverride) log(t('tts.general.log.apiFail', { error: errorMessage }), 'error');
+            
+            if (errorMessage.includes('quota') || errorMessage.includes('401') || errorMessage.includes('429')) {
+                setInvalidKeys(prev => new Set(prev).add(key));
+                if (!voiceIdOverride) log(t('tts.general.log.keyMarkedInvalid', { key: key.substring(0, 4) }), 'warning');
+            }
+        }
     }
     return { success: false };
   };

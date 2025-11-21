@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from '@google/genai';
 import type { AnalysisResponse, AiModel } from '../types';
 import { dictionaryService } from './dictionaryService';
@@ -32,8 +33,18 @@ const processWithGemini = async (prompt: string, apiKey: string): Promise<Analys
       });
 
       const jsonString = response.text.trim();
-      // The model sometimes wraps the JSON in markdown, so we must clean it.
-      const cleanedJsonString = jsonString.replace(/^```json\s*|```\s*$/g, '');
+      // Robust JSON extraction:
+      // 1. Remove markdown code blocks if present.
+      let cleanedJsonString = jsonString.replace(/^```json\s*|```\s*$/g, '');
+      
+      // 2. Find the first '{' and last '}' to ignore any conversational filler text.
+      const firstBrace = cleanedJsonString.indexOf('{');
+      const lastBrace = cleanedJsonString.lastIndexOf('}');
+      
+      if (firstBrace !== -1 && lastBrace !== -1) {
+          cleanedJsonString = cleanedJsonString.substring(firstBrace, lastBrace + 1);
+      }
+
       return JSON.parse(cleanedJsonString) as AnalysisResponse;
 
     } catch (error) {

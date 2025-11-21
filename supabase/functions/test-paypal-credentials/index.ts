@@ -1,6 +1,3 @@
-
-// @ts-ignore
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 // @ts-ignore
 import { corsHeaders } from "../_shared/cors.ts";
 // @ts-ignore
@@ -8,7 +5,7 @@ import { getPayPalAccessToken } from "../_shared/paypal-api.ts";
 
 declare const Deno: any;
 
-serve(async (req: Request) => {
+Deno.serve(async (req: Request) => {
   // Handle CORS preflight request
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
