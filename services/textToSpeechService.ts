@@ -1,3 +1,4 @@
+
 import { supabase } from '../supabaseClient';
 import type { TTSGenerationSettings, Settings } from '../types';
 import { settingsService } from './settingsService';
@@ -48,20 +49,18 @@ export const textToSpeechService = {
     // 1. Try Supabase Edge Function first (Secure Proxy)
     try {
         const { data: { session } } = await supabase.auth.getSession();
-        // If no session, skip directly to fallback to allow non-logged in testing if needed, or just fail.
         if (session) {
             const { data, error } = await supabase.functions.invoke('validate-elevenlabs-key', {
                 headers: { 'Authorization': `Bearer ${session.access_token}` },
                 body: { api_key: apiKey },
             });
 
-            if (!error) {
-                return data as KeyValidationResult;
-            }
-            console.warn("Edge Function validation failed, falling back to direct API:", error);
+            if (error) throw error;
+            if (data) return data as KeyValidationResult;
         }
     } catch (error) {
-        console.warn("Edge Function validation crashed, falling back to direct API:", error);
+        // Silently fail to fallback
+        // console.debug("Edge Function validation skipped:", error);
     }
 
     // 2. Fallback: Direct Client-Side Call
@@ -101,9 +100,6 @@ export const textToSpeechService = {
     }
   },
 
-  /**
-   * Fetches available voices for the ElevenLabs API.
-   */
   async getAvailableVoices(): Promise<ElevenLabsVoice[]> {
     // 1. Try Edge Function
     try {
@@ -117,19 +113,15 @@ export const textToSpeechService = {
             }
         }
     } catch (e) {
-        console.warn("Edge Function voices fetch failed:", e);
+        // console.debug("Edge Function voices fetch failed:", e);
     }
 
-    // Note: We can't easily fallback for voices without an API key provided by the caller.
-    // The edge function uses the admin's key. If the user has provided their own key in UI, 
-    // we could use that, but this method signature doesn't take a key.
-    // For now, we just throw if the edge function fails.
+    // If Edge function fails, we just throw or return empty, as we can't easily list voices client-side without an admin key (usually).
+    // However, for the user's OWN key, we could try.
+    // For now, we'll assume the predefined list in the UI is the fallback.
     throw new Error("Failed to fetch voices from server.");
   },
   
-  /**
-   * Converts a text chunk to speech. Tries Edge Function first, then direct API.
-   */
   async synthesizeSpeech(apiKey: string, text: string, voiceId: string, modelId: string, outputFormat: string, voiceSettings: TTSGenerationSettings): Promise<Blob> {
     
     // 1. Try Edge Function
@@ -148,21 +140,29 @@ export const textToSpeechService = {
                 }
             });
 
-            if (!error && data instanceof Blob) {
+            if (error) {
+                 // Try to extract JSON error body if possible
+                 try {
+                     // @ts-ignore
+                     if(error.context && typeof error.context.json === 'function') {
+                         // @ts-ignore
+                         const errBody = await error.context.json();
+                         if(errBody && errBody.detail && errBody.detail.status === 'quota_exceeded') {
+                             throw new Error('quota');
+                         }
+                     }
+                 } catch(e) { /* ignore */ }
+                 throw error; 
+            }
+
+            if (data instanceof Blob) {
                 return data;
             }
-            // Specific handling for quota errors passed from EF
-            // @ts-ignore
-            if (error && error.context && typeof error.context.json === 'function') {
-                 // @ts-ignore
-                 const errorJson = await error.context.json();
-                 if (errorJson.detail?.status === 'quota_exceeded') throw new Error('quota');
-            }
-            console.warn("Edge Function synthesis failed, falling back to direct API.");
+            throw new Error("Invalid data received from Edge Function");
         }
     } catch (error: any) {
-        if (error.message === 'quota') throw error; // Rethrow quota errors immediately
-        console.warn("Edge Function synthesis crashed:", error);
+        if (error.message === 'quota') throw error;
+        // console.debug("Edge Function synthesis skipped, using fallback:", error);
     }
 
     // 2. Fallback: Direct Client-Side Call
@@ -205,9 +205,6 @@ export const textToSpeechService = {
     }
   },
 
-  /**
-   * Logs a successful TTS conversion event to the database.
-   */
   async logUsage(logData: {
       api_key_used_suffix: string;
       characters_converted: number;

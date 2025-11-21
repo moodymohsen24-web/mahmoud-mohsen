@@ -1,3 +1,4 @@
+
 import { supabase } from '../supabaseClient';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -31,19 +32,25 @@ function dataURLtoBlob(dataurl: string): Blob {
 
 export const imageHistoryService = {
     async getHistory(userId: string): Promise<HistoryImageRecord[]> {
-        // Fallback to direct DB query instead of Edge Function to avoid "Failed to send request" errors
-        const { data, error } = await supabase
-            .from('generated_images')
-            .select('*')
-            .eq('user_id', userId)
-            .order('created_at', { ascending: false });
+        // Explicitly use direct DB query. Do NOT use Edge Functions here to avoid deployment/cors issues.
+        try {
+            const { data, error } = await supabase
+                .from('generated_images')
+                .select('*')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false });
 
-        if (error) {
-            console.error("Error fetching image history:", error);
-            throw error;
+            if (error) {
+                console.error("Error fetching image history from DB:", error);
+                throw error;
+            }
+
+            return data || [];
+        } catch (e) {
+            console.error("Critical error in imageHistoryService.getHistory:", e);
+            // Rethrow meaningful error
+            throw e;
         }
-
-        return data || [];
     },
     
     async saveImage(

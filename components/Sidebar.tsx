@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useI18n } from '../hooks/useI18n';
@@ -15,26 +16,27 @@ const Sidebar: React.FC = () => {
     const { t } = useI18n();
 
     const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
-        `flex items-center gap-4 px-4 py-3 rounded-lg font-semibold transition-all duration-200 text-base relative group ${
+        `flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200 text-sm relative group overflow-hidden ${
         isActive
-            ? 'bg-highlight text-white shadow-lg shadow-highlight/30'
+            ? 'bg-highlight text-white shadow-md shadow-highlight/20'
             : 'text-text-secondary dark:text-dark-text-secondary hover:bg-accent dark:hover:bg-dark-accent hover:text-text-primary dark:hover:text-dark-text-primary'
         }`;
 
+    const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+        <div className="px-4 py-2 mt-4 mb-1 text-[11px] font-bold text-text-secondary/70 dark:text-dark-text-secondary/70 uppercase tracking-widest">
+            {children}
+        </div>
+    );
+
     return (
-        <div className="bg-secondary dark:bg-dark-secondary p-4 rounded-2xl shadow-card-shadow dark:shadow-card-shadow-dark h-full flex flex-col border border-border dark:border-dark-border">
-            <nav className="flex flex-col gap-2">
-                <div className="px-4 py-2 text-xs font-bold text-text-secondary dark:text-dark-text-secondary uppercase tracking-wider opacity-70">
-                    {t('sidebar.dashboard')}
-                </div>
+        <div className="bg-secondary dark:bg-dark-secondary p-4 rounded-2xl shadow-sm border border-border dark:border-dark-border h-full flex flex-col">
+            <nav className="flex flex-col space-y-1">
                 <NavLink to="/dashboard" className={navLinkClasses} end>
                     <ChartBarIcon className="w-5 h-5" />
                     <span>{t('sidebar.dashboard')}</span>
                 </NavLink>
                 
-                <div className="mt-4 px-4 py-2 text-xs font-bold text-text-secondary dark:text-dark-text-secondary uppercase tracking-wider opacity-70">
-                    Tools
-                </div>
+                <SectionLabel>Tools</SectionLabel>
                 <NavLink to="/projects" className={navLinkClasses}>
                     <FolderIcon className="w-5 h-5" />
                     <span>{t('sidebar.projects')}</span>
@@ -52,9 +54,7 @@ const Sidebar: React.FC = () => {
                     <span>{t('sidebar.imageGenerator')}</span>
                 </NavLink>
                 
-                <div className="mt-4 px-4 py-2 text-xs font-bold text-text-secondary dark:text-dark-text-secondary uppercase tracking-wider opacity-70">
-                    Library
-                </div>
+                <SectionLabel>Library</SectionLabel>
                 <NavLink to="/image-gallery" className={navLinkClasses}>
                     <RectangleStackIcon className="w-5 h-5" />
                     <span>{t('sidebar.imageGallery')}</span>
@@ -64,9 +64,7 @@ const Sidebar: React.FC = () => {
                     <span>{t('sidebar.dictionary')}</span>
                 </NavLink>
 
-                <div className="mt-4 px-4 py-2 text-xs font-bold text-text-secondary dark:text-dark-text-secondary uppercase tracking-wider opacity-70">
-                    Account
-                </div>
+                <SectionLabel>Account</SectionLabel>
                  <NavLink to="/subscription" className={navLinkClasses}>
                     <CreditCardIcon className="w-5 h-5" />
                     <span>{t('sidebar.subscription')}</span>

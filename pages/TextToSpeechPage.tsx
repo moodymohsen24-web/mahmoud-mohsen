@@ -17,12 +17,10 @@ import { StopCircleIcon } from '../components/icons/StopCircleIcon';
 import { TrashIcon } from '../components/icons/TrashIcon';
 import { ClipboardDocumentIcon } from '../components/icons/ClipboardDocumentIcon';
 import { ArrowDownTrayIcon } from '../components/icons/ArrowDownTrayIcon';
-import { AdjustmentsHorizontalIcon } from '../components/icons/AdjustmentsHorizontalIcon';
 import { ArchiveBoxArrowDownIcon } from '../components/icons/ArchiveBoxArrowDownIcon';
 import { SpeakerWaveIcon } from '../components/icons/SpeakerWaveIcon';
 import { BookOpenIcon } from '../components/icons/BookOpenIcon';
 import { SparklesIcon } from '../components/icons/SparklesIcon';
-import { PlayIcon } from '../components/icons/PlayIcon';
 import { InformationCircleIcon } from '../components/icons/InformationCircleIcon';
 
 const DB_NAME = 'masmoo-tts-cache';
@@ -165,8 +163,6 @@ const TextToSpeechPage: React.FC = () => {
   const runningRef = useRef(isRunning);
   const isUserScrolledUp = useRef(false);
 
-  // --- Core Logic & Lifecycle ---
-
   useEffect(() => { isDictModalOpenRef.current = isDictModalOpen; }, [isDictModalOpen]);
   useEffect(() => { runningRef.current = isRunning; }, [isRunning]);
 
@@ -189,22 +185,19 @@ const TextToSpeechPage: React.FC = () => {
 
   const LOCAL_STORAGE_KEY = `tts-session-${user?.id}`;
   
-  // Load data from DB and LocalStorage on mount
   useEffect(() => {
     const loadData = async () => {
         if(user) {
             setIsLoading(true);
             let settingsFromDb = await settingsService.getSettings(user.id);
 
-            // Sanitize API keys on load
             const rawKeys = settingsFromDb.textToSpeech?.keys?.elevenlabs || [];
             const sanitizedKeys = [...new Set(rawKeys.map((k: any) => (typeof k === 'object' && k !== null && 'key' in k ? k.key : k)).filter((k: any): k is string => typeof k === 'string' && k.trim().length > 0).map(k => k.trim()))];
             
             setDbSettings(settingsFromDb);
             setApiKeys(sanitizedKeys);
-            if (sanitizedKeys.length > 0) checkBalances(sanitizedKeys, true); // silent check on load
+            if (sanitizedKeys.length > 0) checkBalances(sanitizedKeys, true);
 
-            // Combine default and custom voices
             const defaultVoices = [
                 { value: "nPczCjzI2devNBz1zQrb", label: "Brian" },
                 { value: "NFG5qt843uXKj4pFvR7C", label: "Adam Stone" },
@@ -216,7 +209,6 @@ const TextToSpeechPage: React.FC = () => {
             })) || [];
             setAllVoices([...defaultVoices, ...customVoices]);
             
-            // Load session from local storage
             const savedStateJSON = localStorage.getItem(LOCAL_STORAGE_KEY);
             if (savedStateJSON) {
                 try {
@@ -248,7 +240,6 @@ const TextToSpeechPage: React.FC = () => {
     loadData();
   }, [user, LOCAL_STORAGE_KEY]);
 
-  // Save session to local storage on changes
   useEffect(() => {
       if (user && !isLoading) {
           const stateToSave = {
@@ -274,24 +265,17 @@ const TextToSpeechPage: React.FC = () => {
     showToast(t('tts.session.cleared'));
   }, [user, t, LOCAL_STORAGE_KEY]);
 
-  // This is the fix: handle incoming text from TextCheckPage
   useEffect(() => {
     const textToLoad = location.state?.textToConvert;
     if (textToLoad && user) {
-      // Manually clear the session state EXCEPT for the text input itself,
-      // to prepare for the new text.
       localStorage.removeItem(LOCAL_STORAGE_KEY);
       clearAllUserChunksFromDb(user.id);
       setLogMessages([]);
       setConvertedChunks([]);
       setProgress(0);
       setCurrentProcess(0);
-      
-      // Now, set the new text from the location state.
       setFullText(textToLoad);
       log(t('tts.general.log.textLoadedFromCheck'), 'success');
-      
-      // Clean up location state to prevent re-loading on refresh.
       window.history.replaceState({}, document.title);
     }
   }, [location.state, user, log, t, LOCAL_STORAGE_KEY]);
@@ -299,9 +283,6 @@ const TextToSpeechPage: React.FC = () => {
   useEffect(() => {
     setShowMultilingualWarning(!uiSettings.modelId.includes('multilingual'));
   }, [uiSettings.modelId]);
-
-
-  // --- API Key Management ---
 
   const updateAndSaveKeys = async (newKeys: string[]) => {
       if (!user || !dbSettings) return;
@@ -344,7 +325,6 @@ const TextToSpeechPage: React.FC = () => {
 
   const checkBalanceForKey = async (apiKey: string, silent = false) => {
     try {
-      // Use the service to validate key via Edge Function (avoids CORS and exposes less logic)
       const result = await textToSpeechService.validateKey(apiKey);
       
       if (result.success && result.data) {
@@ -361,8 +341,8 @@ const TextToSpeechPage: React.FC = () => {
              setApiKeyStatus(prev => ({ ...prev, [apiKey]: t('tts.apiKeyManagement.status.inactive') }));
         }
       }
-    } catch (error) { 
-        if (!silent) log(t('tts.apiKeyManagement.log.balanceCheckFailed', { error }), 'error'); 
+    } catch (error: any) { 
+        if (!silent) log(t('tts.apiKeyManagement.log.balanceCheckFailed', { error: error.message }), 'error'); 
         setApiKeyStatus(prev => ({ ...prev, [apiKey]: t('tts.apiKeyManagement.status.error') })); 
     }
   };
@@ -374,7 +354,7 @@ const TextToSpeechPage: React.FC = () => {
     if (!silent) log(t('tts.apiKeyManagement.log.checkingBalances'), 'info');
     for (const key of keys) {
       await checkBalanceForKey(key, silent);
-      await new Promise(resolve => setTimeout(resolve, 500)); // Reduced delay since edge function is faster
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
     setIsCheckingBalances(false);
   };
@@ -392,8 +372,6 @@ const TextToSpeechPage: React.FC = () => {
     reader.readAsText(file);
   };
   
-  // --- Text & Chunking Logic ---
-
   const splitText = (text: string): string[] => {
     const min = parseInt(String(uiSettings.chunkMin)) || 450;
     const max = parseInt(String(uiSettings.chunkMax)) || 500;
@@ -477,8 +455,6 @@ const TextToSpeechPage: React.FC = () => {
     }
   };
   
-  // --- TTS Core & Conversion Flow ---
-
   const textToSpeech = async (text: string, voiceIdOverride?: string): Promise<{ success: boolean; audioUrl?: string; audioBlob?: Blob }> => {
     const sortedKeys = [...apiKeys].sort((a, b) => (apiKeyBalance[b] || 0) - (apiKeyBalance[a] || 0));
     const availableKeys = sortedKeys.filter(key => (apiKeyBalance[key] || 0) > 0 && !invalidKeys.has(key));
@@ -497,13 +473,12 @@ const TextToSpeechPage: React.FC = () => {
                 use_speaker_boost: true
             };
 
-            // Use the service which calls the Edge Function (secure proxy)
             const audioBlob = await textToSpeechService.synthesizeSpeech(
                 key,
                 text,
                 voiceIdOverride || uiSettings.voiceId,
                 uiSettings.modelId,
-                'mp3_44100_128', // Default standard format
+                'mp3_44100_128',
                 voiceSettings
             );
             
@@ -514,7 +489,6 @@ const TextToSpeechPage: React.FC = () => {
                 setApiKeyBalance(prev => ({ ...prev, [key]: newBalance }));
                 if(newBalance <= 0) setApiKeyStatus(prev => ({ ...prev, [key]: t('tts.apiKeyManagement.status.inactive') }));
                 
-                // Log usage to DB if possible (fire and forget)
                 if (user) {
                     textToSpeechService.logUsage({
                         api_key_used_suffix: key.substring(key.length - 4),
@@ -610,8 +584,6 @@ const TextToSpeechPage: React.FC = () => {
     }
   };
   
-  // --- UI Handlers & Helpers ---
-  
   const handleLogScroll = () => {
     const node = logContainerRef.current;
     if (node) { isUserScrolledUp.current = !(node.scrollHeight - node.scrollTop - node.clientHeight < 10); }
@@ -640,8 +612,6 @@ const TextToSpeechPage: React.FC = () => {
     } catch (e) { log(t('tts.addToDictionary.error') + `: ${(e as Error).message}`, 'error'); showToast(t('tts.addToDictionary.error'), 'error'); }
   };
 
-  // --- Merging Logic ---
-  
   const handleMergeAndDownload = async () => {
     const blobsToMerge = convertedChunks.filter(c => selectedForMerge.has(c.id) && c.blob).sort((a, b) => a.id - b.id).map(c => c.blob!);
     if (blobsToMerge.length < 1) return showToast(t('tts.toast.selectToMerge'), "warning");
@@ -659,9 +629,7 @@ const TextToSpeechPage: React.FC = () => {
     } catch(e: any) { log(t('tts.general.log.mergeFail', { error: e.toString() }), 'error'); }
     setIsMerging(false);
   };
-  const audioBufferToWav = (buffer: AudioBuffer): Blob => { /* ... (implementation unchanged) ... */ const numOfChan = buffer.numberOfChannels, len = buffer.length * numOfChan * 2 + 44, abuffer = new ArrayBuffer(len), view = new DataView(abuffer), channels = [], sampleRate = buffer.sampleRate; let offset = 0, pos = 0; const setUint16 = (data: number) => { view.setUint16(pos, data, true); pos += 2; }; const setUint32 = (data: number) => { view.setUint32(pos, data, true); pos += 4; }; setUint32(0x46464952); setUint32(len - 8); setUint32(0x45564157); setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan); setUint32(sampleRate); setUint32(sampleRate * 2 * numOfChan); setUint16(numOfChan * 2); setUint16(16); setUint32(0x61746164); setUint32(len - pos - 4); for (let i = 0; i < buffer.numberOfChannels; i++) channels.push(buffer.getChannelData(i)); while (pos < len) { for (let i = 0; i < numOfChan; i++) { let sample = Math.max(-1, Math.min(1, channels[i][offset])); sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0; view.setInt16(pos, sample, true); pos += 2; } offset++; } return new Blob([view], { type: 'audio/wav' }); };
-
-  // --- Render-related calculations ---
+  const audioBufferToWav = (buffer: AudioBuffer): Blob => { const numOfChan = buffer.numberOfChannels, len = buffer.length * numOfChan * 2 + 44, abuffer = new ArrayBuffer(len), view = new DataView(abuffer), channels = [], sampleRate = buffer.sampleRate; let offset = 0, pos = 0; const setUint16 = (data: number) => { view.setUint16(pos, data, true); pos += 2; }; const setUint32 = (data: number) => { view.setUint32(pos, data, true); pos += 4; }; setUint32(0x46464952); setUint32(len - 8); setUint32(0x45564157); setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan); setUint32(sampleRate); setUint32(sampleRate * 2 * numOfChan); setUint16(numOfChan * 2); setUint16(16); setUint32(0x61746164); setUint32(len - pos - 4); for (let i = 0; i < buffer.numberOfChannels; i++) channels.push(buffer.getChannelData(i)); while (pos < len) { for (let i = 0; i < numOfChan; i++) { let sample = Math.max(-1, Math.min(1, channels[i][offset])); sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0; view.setInt16(pos, sample, true); pos += 2; } offset++; } return new Blob([view], { type: 'audio/wav' }); };
 
   const totalBalance = Object.values(apiKeyBalance).reduce((sum: number, bal: number) => {
     const numericBal = Number(bal);

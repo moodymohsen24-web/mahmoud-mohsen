@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useI18n } from '../hooks/useI18n';
@@ -29,17 +30,32 @@ const ProjectsPage: React.FC = () => {
       } catch (err: any) {
         // Properly extract error message
         let message = 'An unexpected error occurred while fetching your documents.';
+        
         if (typeof err === 'string') {
             message = err;
         } else if (err instanceof Error) {
             message = err.message;
-        } else if (err && typeof err === 'object') {
-            message = JSON.stringify(err, null, 2);
-            // Clean up Supabase error objects which might be verbose
-            if (message.includes('relation "public.projects" does not exist')) {
-                message = "The database table 'projects' is missing. Please run the database migrations.";
+        } else if (typeof err === 'object' && err !== null) {
+            // Handle Supabase/Postgrest error objects safely
+            if ('message' in err) {
+                message = err.message;
+                if ('details' in err && err.details) {
+                    message += ` (${err.details})`;
+                }
+            } else {
+                try {
+                    message = JSON.stringify(err, null, 2);
+                } catch (e) {
+                    message = "Unknown error occurred (could not parse error object).";
+                }
             }
         }
+
+        // User-friendly message for missing table
+        if (message.includes("Could not find the table") || message.includes('relation "public.projects" does not exist')) {
+            message = "Database Error: The 'projects' table was not found. Please ensure your database migrations have been run.";
+        }
+
         console.error("Failed to fetch projects:", err);
         setError(message);
       } finally {
