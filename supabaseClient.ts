@@ -236,8 +236,8 @@ export interface Database {
   };
 }
 
-const supabaseUrl = 'https://hfhfjtpcmcqobbytjldj.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmaGZqdHBjbWNxb2JieXRqbGRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyNDkxNjcsImV4cCI6MjA3MDgyNTE2N30.U-WWzGQi2qzi3TJJnrWOk_KcByDtXgo2NCdbO7nbipQ';
+const supabaseUrl = 'https://qaslrglvxoqvptmshaeg.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhc2xyZ2x2eG9xdnB0bXNoYWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyODYzNzQsImV4cCI6MjA4MDg2MjM3NH0.gA_02kGd_-qQQf5nUOAam3zUTDFZuwJaTb-MVFXLEy8';
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   db: {
