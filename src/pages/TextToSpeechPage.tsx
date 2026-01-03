@@ -313,6 +313,8 @@ const TextToSpeechPage: React.FC = () => {
     reader.readAsText(file);
   };
   
+  // --- Text & Chunking Logic ---
+
   useEffect(() => {
     const min = parseInt(String(uiSettings.chunkMin)) || 450;
     const max = parseInt(String(uiSettings.chunkMax)) || 500;
@@ -359,7 +361,7 @@ const TextToSpeechPage: React.FC = () => {
     }
 
     try {
-        const enhancedText = await textAnalysisService.enhanceText(fullText, apiKey);
+        const enhancedText = await textAnalysisService.enhanceText(fullText);
         setFullText(enhancedText);
         log(t('tts.enhance.log.success'), 'success');
         showToast(t('tts.enhance.success'), 'success');
@@ -372,6 +374,8 @@ const TextToSpeechPage: React.FC = () => {
     }
   };
   
+  // --- TTS Core & Conversion Flow ---
+
   const textToSpeech = async (text: string, voiceIdOverride?: string): Promise<{ success: boolean; audioUrl?: string; audioBlob?: Blob }> => {
     const sortedKeys = [...apiKeys].sort((a, b) => (apiKeyBalance[b] || 0) - (apiKeyBalance[a] || 0));
     const availableKeys = sortedKeys.filter(key => (apiKeyBalance[key] || 0) > 0 && !invalidKeys.has(key));
@@ -501,6 +505,8 @@ const TextToSpeechPage: React.FC = () => {
     }
   };
   
+  // --- UI Handlers & Helpers ---
+  
   const handleLogScroll = () => {
     const node = logContainerRef.current;
     if (node) { isUserScrolledUp.current = !(node.scrollHeight - node.scrollTop - node.clientHeight < 10); }
@@ -529,6 +535,8 @@ const TextToSpeechPage: React.FC = () => {
     } catch (e) { log(t('tts.addToDictionary.error') + `: ${(e as Error).message}`, 'error'); showToast(t('tts.addToDictionary.error'), 'error'); }
   };
 
+  // --- Merging Logic ---
+  
   const handleMergeAndDownload = async () => {
     const blobsToMerge = convertedChunks.filter(c => selectedForMerge.has(c.id) && c.blob).sort((a, b) => a.id - b.id).map(c => c.blob!);
     if (blobsToMerge.length < 1) return showToast(t('tts.toast.selectToMerge'), "warning");
