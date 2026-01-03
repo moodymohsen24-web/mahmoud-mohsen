@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { useI18n } from '../hooks/useI18n';
@@ -267,7 +266,6 @@ const TextToSpeechPage: React.FC = () => {
 
   const checkBalanceForKey = async (apiKey: string, silent = false) => {
     try {
-      // Use Service Layer instead of inline fetch
       const result = await textToSpeechService.validateKey(apiKey);
       
       if (result.success && result.data) {
@@ -550,6 +548,16 @@ const TextToSpeechPage: React.FC = () => {
   };
   const audioBufferToWav = (buffer: AudioBuffer): Blob => { const numOfChan = buffer.numberOfChannels, len = buffer.length * numOfChan * 2 + 44, abuffer = new ArrayBuffer(len), view = new DataView(abuffer), channels = [], sampleRate = buffer.sampleRate; let offset = 0, pos = 0; const setUint16 = (data: number) => { view.setUint16(pos, data, true); pos += 2; }; const setUint32 = (data: number) => { view.setUint32(pos, data, true); pos += 4; }; setUint32(0x46464952); setUint32(len - 8); setUint32(0x45564157); setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan); setUint32(sampleRate); setUint32(sampleRate * 2 * numOfChan); setUint16(numOfChan * 2); setUint16(16); setUint32(0x61746164); setUint32(len - pos - 4); for (let i = 0; i < buffer.numberOfChannels; i++) channels.push(buffer.getChannelData(i)); while (pos < len) { for (let i = 0; i < numOfChan; i++) { let sample = Math.max(-1, Math.min(1, channels[i][offset])); sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0; view.setInt16(pos, sample, true); pos += 2; } offset++; } return new Blob([view], { type: 'audio/wav' }); };
 
+  // Helper variables for render
+  const totalBalance = (Object.values(apiKeyBalance) as number[]).reduce((sum: number, bal: number) => {
+    return sum + (Number(bal) || 0);
+  }, 0);
+  const successfulChunks = convertedChunks.filter(c => c.status === 'success');
+  const isSelectAllForMergeChecked = successfulChunks.length > 0 && selectedForMerge.size === successfulChunks.length;
+  const handleSelectAllForMerge = (e: React.ChangeEvent<HTMLInputElement>) => setSelectedForMerge(e.target.checked ? new Set(successfulChunks.map(c => c.id)) : new Set());
+  const areVoiceSettingsSupported = uiSettings.modelId === 'eleven_multilingual_v2';
+  const getTabClass = (tabName: SettingsTab | ResultsTab, activeTab: SettingsTab | ResultsTab) => `px-4 py-2 font-medium text-sm rounded-t-lg transition-colors border-b-2 ${activeTab === tabName ? 'border-highlight text-highlight' : 'border-transparent text-text-secondary dark:text-dark-text-secondary hover:text-text-primary dark:hover:text-dark-text-primary'}`;
+  
   if (isLoading) {
     return <div className="flex justify-center items-center h-[calc(100vh-200px)]"><div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-highlight dark:border-dark-highlight"></div></div>;
   }
@@ -615,7 +623,7 @@ const TextToSpeechPage: React.FC = () => {
                             <div><dt className="text-sm text-text-secondary">{t('tts.statsAndSettings.totalChars')}</dt><dd className="text-lg font-bold">{fullText.length.toLocaleString()}</dd></div>
                             <div><dt className="text-sm text-text-secondary">{t('tts.statsAndSettings.chunkCount')}</dt><dd className="text-lg font-bold">{textChunks.length.toLocaleString()}</dd></div>
                             <div><dt className="text-sm text-text-secondary">{t('tts.statsAndSettings.totalKeys')}</dt><dd className="text-lg font-bold">{apiKeys.length}</dd></div>
-                            <div><dt className="text-sm text-text-secondary">{t('tts.statsAndSettings.totalBalance')}</dt><dd className="text-lg font-bold">{Object.values(apiKeyBalance).reduce((sum, bal) => sum + (Number(bal) || 0), 0).toLocaleString()}</dd></div>
+                            <div><dt className="text-sm text-text-secondary">{t('tts.statsAndSettings.totalBalance')}</dt><dd className="text-lg font-bold">{totalBalance.toLocaleString()}</dd></div>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-accent dark:border-dark-accent pt-4">
                             <Input label={t('tts.statsAndSettings.chunkMin')} type="number" value={uiSettings.chunkMin} onChange={e => handleChunkSizeChange('min', e.target.value)} onBlur={() => handleChunkSizeBlur('min')}/>

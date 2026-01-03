@@ -1,6 +1,6 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
-import { GoogleGenAI, Modality } from 'https://esm.sh/@google/genai@0.1.1';
+import { GoogleGenAI, Modality } from 'https://esm.sh/@google/genai@0.2.1';
 
 declare const Deno: any;
 
